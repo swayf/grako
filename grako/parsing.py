@@ -228,28 +228,3 @@ class RuleParser(NamedParser):
                 if len(v) == 1:
                     result[k] = v[0]
             return result, ctx.buf.pos
-
-
-class Grammar(object):
-    def __init__(self, start, rules):
-        super(Grammar, self).__init__()
-        self.rules = rules
-        self.start = start
-
-    def parse(self, buf):
-        log.info('enter grammar')
-        try:
-            tree, _p = self.start.parse(Context(self.rules, buf), 0)
-            return tree
-        except:
-            log.info('failed grammar')
-            raise
-        else:
-            log.info('exit grammar')
-
-    def _resolve(self, rules):
-        for r in rules.values():
-            r.resolve(rules)
-
-    def __str__(self):
-        return '\n\n'.join('%s = %s' % (name, expre) for name, expre in self.rules.iteritems())

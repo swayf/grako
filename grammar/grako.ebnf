@@ -1,0 +1,34 @@
+
+grammar = {rule} .
+
+rule = name:word '=' expre:expre '.' ;
+
+expre = expre:option ;
+
+option = opts:sequence {'|' opts:sequence } ;
+
+sequence = terms:named { [','] terms:named } ;
+
+named = [ name:word ] term:term ;
+
+term = exp:(subexp | repeat | optional | special | token | word | pattern) ;
+
+subexp = '(' expre ')' ;
+
+repeat = '{' expt:expre '}' plus:['-'|'+'] ;
+
+optional = '[' exp:expre ']' ;
+
+special = '?' exp:?/.*/? '?' ;
+
+token = 
+    (
+    '"' ?/([^"]|\")*/?  '"' 
+    | 
+    "'" ?/([^']|\')*/?  "'" 
+    ) 
+    ;
+
+word = ?/[-_A-Za-z0-9]/? ;
+
+pattern = '?/' ?/.*/?   '/?' ;

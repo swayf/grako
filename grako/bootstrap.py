@@ -1,90 +1,177 @@
-# coding: utf-8
-from collections import OrderedDict
-from shortcuts import * #@UnusedWildImport
+from grammar import * #@UnusedWildImport
 
-__all__ = ['WHITESPACE', 'grako_parser']
+class GrakoGrammar(Grammar):
+    def __init__(self):
+        super(GrakoGrammar, self).__init__(' \n\r')
 
-WHITESPACE = u' \t\v\f\u00a0\r\n\u2028\u2029'
+    def token(self):
+        try:
+            self._token('"')
+            self._pattern(r"(?:[^']|\')*?")
+            self._token('"')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            self._token("'")
+            self._pattern(r'(?:[^"]|\")*?')
+            self._token("'")
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        raise FailedMatch(self._buffer, '<"> or' + "<'>")
 
-def grako_parser():
-    word = rule_('word', pat_(r'[A-Za-z0-9_]+'))
-    token = rule_('token', pat_(r'(?:' + r"'(?:[^']|\')*?'" + '|' + r'"(?:[^"]|\")*?"' + ')'))
-    pattern = rule_('pattern', pat_(r"/(?:(?!/)|\/)*?/"))
-    cut = rule_('cut', tok_('!'))
+    def word(self):
+        self._pattern(r'[A-Za-z0-9_]+', 'exp')
 
-    subexpre = rule_('subexpre', seq_(tok_('('), cut_, ref_('expre'), tok_(')'), cut_))
+    def pattern(self):
+        self._token('?/')
+        self._pattern(r'(?!/\?)*', 'exp')
+        self._token('/?')
 
-    atom = or_(
-               ref_('subexpre'),
-               ref_('cut'),
-               ref_('word'),
-               ref_('token'),
-               ref_('pattern')
-               )
+    def cut(self):
+        self._token('!', 'exp')
 
-    varname = seq_(seq_(var_('id', ref_('word')), tok_(':'), cut_))
-    named = rule_('named',
-                or_(
-                    var_('named',
-                         seq_(varname,
-                              var_('value', ref_('atom'))
-                              )
-                         ),
-                    ref_('atom')
-                    )
-                )
+    def subexp(self):
+        self._token('(')
+        self._rule('expre', 'exp')
+        self._token(')')
 
-    star = rule_('star', seq_(var_('star', ref_('named')), tok_('*'), cut_))
-    plus = rule_('plus', seq_(var_('plus', ref_('named')), tok_('+'), cut_))
-    opt = rule_('opt', seq_(var_('opt', ref_('named')), tok_('?'), cut_))
+    def optional(self):
+        self._token('[')
+        self._rule('expre')
+        self._token(']')
 
-    element = rule_('element', or_(ref_('star'), ref_('plus'), ref_('opt'), ref_('named')))
+    def repeat(self):
+        self._token('{')
+        self._rule('expre')
+        self._token('}')
+        if not self._try('-'):
+            self._try('+')
 
-    sequence = rule_('sequence', star_(ref_('element')))
-    choice_tail = plus_(seq_(tok_('|'), cut_, ref_('sequence')))
-
-    choice = or_(
-                 var_('or',
-                      seq_(
-                           ref_('sequence'),
-                           choice_tail
-                           )
-                      ),
-                 ref_('sequence')
-                 )
+    def special(self):
+        self._token('?')
+        while self._buffer.next() != '?':
+            if self._eof():
+                raise FailedParse(self._buffer, '?')
 
 
-    expre = rule_('choice', choice)
+    def term(self):
+        try:
+            return self._rule('subexp', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('repeat', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('optional', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('special', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('token', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('word', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('pattern', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        raise FailedParse(self._buffer, 'atom')
 
-    baserule = seq_(
-                    var_('name',
-                         ref_('word')
-                         ),
-                    tok_('='),
-                    var_('expre', ref_('expre'))
-                    )
-    rule = rule_('rule',
-                  seq_(
-                       opt_(varname),
-                       baserule,
-                       tok_('¶')
-                    )
-                 )
-    grammar = plus_(rule)
+    def named(self):
+        try:
+            self._rule('word', 'name')
+            self._token(':')
+            self._rule('term', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('atom', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        raise FailedParse(self._buffer, 'atom')
 
-    rules = OrderedDict()
-    rules.update(rule=rule)
-    rules.update(expre=expre)
-    rules.update(sequence=sequence)
-    rules.update(element=element)
-    rules.update(star=star)
-    rules.update(plus=plus)
-    rules.update(opt=opt)
-    rules.update(named=named)
-    rules.update(atom=atom)
-    rules.update(subexpre=subexpre)
-    rules.update(cut=cut)
-    rules.update(word=word)
-    rules.update(token=token)
-    rules.update(pattern=pattern)
-    return grammar_(grammar, rules)
+    def term(self):
+        try:
+            return self._rule('repeat', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        raise FailedParse(self._buffer, 'term')
+
+    def sequence(self):
+        seq = []
+        while True:
+            p = self._pos()
+            try:
+                if not self._try('!'):
+                    seq.append(self._rule('term', 'terms'))
+                    self._try(',')
+                else:
+                    try:
+                        # insert cut node here
+                        seq.append(self._rule('sequence', 'terms'))
+                    except FailedParse as e:
+                        raise FailedCut(self._buffer, e)
+            except FailedCut:
+                self._goto(p)
+                raise
+            except FailedParse:
+                self._goto(p)
+                break
+        return seq
+
+
+    def option(self):
+        self._rule('sequence', 'exp')
+        while self._try('|'):
+            self._rule('sequence', 'exp')
+
+    def expre(self):
+        return self.option()
+
+    def rule(self):
+        self._rule('word', 'name')
+        self._token('=')
+        self._rule('expre', 'exp')
+        if not self._try('.'):
+            self._try(';')
+
+    def grammar(self):
+        self._rule('rule', 'rules')
+        while True:
+            try:
+                self._rule('rule', 'rules')
+            except FailedParse:
+                break
+        self._eof()
