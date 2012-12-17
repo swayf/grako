@@ -1,6 +1,6 @@
-from collections import defaultdict
 from .buffering import Buffer
 from .exceptions import * #@UnusedWildImport
+from .util import AttributeDict
 
 class Grammar(object):
     def __init__(self, whitespace, comments_re=None):
@@ -44,7 +44,7 @@ class Grammar(object):
         self._eatcomments()
         self._eatwhitespace()
 
-    def _invoke_rule(self, name, node_name=None):
+    def _rule(self, name, node_name=None):
         rule = self._find_rule(name)
         p = self.pos()
         self._push_ast()
@@ -60,9 +60,6 @@ class Grammar(object):
         self._add_ast_node(node_name, node)
         self._add_ast_node('$', result)
         return result
-
-    def _(self, name, node_name=None):
-        return self._invoke_rule(name, node_name)
 
     def _token(self, token, node_name=None):
         self._next_token()
@@ -90,7 +87,7 @@ class Grammar(object):
         return rule
 
     def _push_ast(self):
-        self._result_stack.append(defaultdict(list))
+        self._result_stack.append(AttributeDict())
 
     def _pop_ast(self):
         return self._result_stack.pop()
@@ -118,30 +115,30 @@ class GrakoGrammar(Grammar):
 
     def subexp(self):
         self._token('(')
-        self._('expre', 'exp')
+        self._rule('expre', 'exp')
         self._token(')')
 
     def atom(self):
         try:
-            return self._('subexp', 'exp')
+            return self._rule('subexp', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         try:
-            return self._('token', 'exp')
+            return self._rule('token', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         try:
-            return self._('word', 'exp')
+            return self._rule('word', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         try:
-            return self._('pattern', 'exp')
+            return self._rule('pattern', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
@@ -150,15 +147,15 @@ class GrakoGrammar(Grammar):
 
     def named(self):
         try:
-            self._('word', 'name')
+            self._rule('word', 'name')
             self._token(':')
-            self._('atom', 'exp')
+            self._rule('atom', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         try:
-            return self._('atom', 'exp')
+            return self._rule('atom', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
@@ -166,28 +163,28 @@ class GrakoGrammar(Grammar):
         raise FailedParse(self._buffer, 'atom')
 
     def star(self):
-        self._('named')
+        self._rule('named')
         self._token('*')
 
     def plus(self):
-        self._('atom')
+        self._rule('atom')
         self._token('+')
 
     def term(self):
         try:
-            return self._('star', 'exp')
+            return self._rule('star', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         try:
-            return self._('plus', 'exp')
+            return self._rule('plus', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         try:
-            return self._('star', 'exp')
+            return self._rule('star', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
@@ -200,11 +197,11 @@ class GrakoGrammar(Grammar):
             p = self._pos()
             try:
                 if not self._try('!'):
-                    seq.append(_('term', 'seq'))
+                    seq.append(_rule('term', 'seq'))
                 else:
                     try:
                         # insert cut node here
-                        seq.append(_('sequence', 'seq'))
+                        seq.append(_rule('sequence', 'seq'))
                     except FailedParse as e:
                         raise FailedCut(self._buffer, e)
             except FailedCut:
@@ -217,24 +214,24 @@ class GrakoGrammar(Grammar):
 
 
     def option(self):
-        self._('sequence', 'exp')
+        self._rule('sequence', 'exp')
         while self._try('|'):
-            self._('sequence', 'exp')
+            self._rule('sequence', 'exp')
 
     def expre(self):
         return self.option()
 
     def rule(self):
-        self._('word', 'name')
+        self._rule('word', 'name')
         self._token('=')
-        self._('expre', 'exp')
+        self._rule('expre', 'exp')
         self._token('.')
 
     def grammar(self):
-        self._('rule', 'rules')
+        self._rule('rule', 'rules')
         while True:
             try:
-                self._('rule', 'rules')
+                self._rule('rule', 'rules')
             except FailedParse:
                 break
         self._eof()

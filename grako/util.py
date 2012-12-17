@@ -1,4 +1,16 @@
 import functools
+from collections import OrderedDict
+
+class AttributeDict(OrderedDict):
+    def __missing__(self, name):
+        return list()
+
+    def __getattribute__(self, name):
+        if name in self:
+            return self[name]
+        else:
+            return object.__getattribute__(self, name)
+
 
 def memoize(func):
     func.cache = {}
