@@ -1,5 +1,7 @@
 from grammar import * #@UnusedWildImport
 
+__all__ = ['GrakoGrammar']
+
 class GrakoGrammar(Grammar):
     def __init__(self):
         super(GrakoGrammar, self).__init__(' ')

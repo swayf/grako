@@ -201,18 +201,18 @@ class NamedParser(_DecoratorParser):
 class RuleParser(NamedParser):
     def parse(self, ctx, pos):
         ctx.buf.goto(pos)
-        log.info('enter %s %d %s', self.name, pos, ctx.buf.lookahead())
+        log.debug('enter %s %d %s', self.name, pos, ctx.buf.lookahead())
         try:
             tree, pos = self.exp.parse(ctx, pos)
-            log.info('exit %s', self.name)
+            log.debug('exit %s', self.name)
         except FailedPattern:
-            log.info('failed %s', self.name)
+            log.debug('failed %s', self.name)
             raise FailedParse(ctx.buf, self.name)
         except FailedParse as e:
-            log.info('failed %s', self.name)
+            log.debug('failed %s', self.name)
             raise FailedMatch(ctx.buf, self.name, e.item)
         except:
-            log.info('failed %s', self.name)
+            log.debug('failed %s', self.name)
             raise
 
         if not isinstance(tree, list):

@@ -1,6 +1,8 @@
 from .buffering import Buffer
 from .exceptions import * #@UnusedWildImport
 from .util import AttributeDict
+import logging
+log = logging.getLogger('grako.grammar')
 
 class Grammar(object):
     def __init__(self, whitespace, comments_re=None):
@@ -45,6 +47,7 @@ class Grammar(object):
         self._eatwhitespace()
 
     def _rule(self, name, node_name=None):
+        log.debug('enter %s %s', name, self._buffer.lookahead())
         rule = self._find_rule(name)
         p = self.pos()
         self._push_ast()
@@ -53,12 +56,14 @@ class Grammar(object):
             result = rule()
             node = self.ast()
         except FailedParse:
+            log.debug('failed %s', name)
             self._goto(p)
             raise
         finally:
             self._pop_ast()
         self._add_ast_node(node_name, node)
         self._add_ast_node('$', result)
+        log.debug('exit %s %s', name, self._buffer.lookahead())
         return result
 
     def _token(self, token, node_name=None):
