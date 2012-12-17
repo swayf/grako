@@ -225,6 +225,8 @@ class GrakoGrammar(Grammar):
         return self.option()
 
     def rule(self):
+        self._('word', 'name')
+        self._token('=')
         self._('expre', 'exp')
         self._token('.')
 
