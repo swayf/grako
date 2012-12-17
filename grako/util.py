@@ -21,9 +21,16 @@ def memoize(func):
             key = args
         cache = func.cache
         if key in cache:
-            return cache[key]
-        else:
-            cache[key] = result = func(*args, **kw)
+            result = cache[key]
+            if isinstance(result, Exception):
+                raise result
             return result
+        else:
+            try:
+                cache[key] = result = func(*args, **kw)
+                return result
+            except Exception as e:
+                cache[key] = e
+                raise
     return functools.update_wrapper(memoize, func)
 

@@ -1,6 +1,6 @@
 from .buffering import Buffer
 from .exceptions import * #@UnusedWildImport
-from .util import AttributeDict
+from .util import AttributeDict, memoize
 import logging
 log = logging.getLogger('grako.grammar')
 
@@ -53,27 +53,32 @@ class Grammar(object):
     def _rule(self, name, node_name=None):
         self._rule_stack.append(name)
         try:
-            rule = self._find_rule(name)
-            p = self._pos()
-            self._push_ast()
-            try:
-                self._next_token()
-                log.info('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
-                result = rule()
-                node = self.ast()
-#                log.info('%s >>\n\t%s', self.rulestack(), self._buffer.lookahead())
-                log.info('SUCCESS %s', self.rulestack())
-            except FailedParse:
-                log.info('FAILED %s', self.rulestack())
-                self._goto(p)
-                raise
-            finally:
-                self._pop_ast()
+            log.info('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
+            self._next_token()
+            pos = self._pos()
+            result, node, newpos = self._invoke_rule(name, pos)
+            self._goto(newpos)
             self._add_ast_node(node_name, node)
-            self._add_ast_node('$', result)
             return result
+        except FailedParse:
+            log.info('FAILED %s', self.rulestack())
+            self._goto(pos)
+            raise
         finally:
             self._rule_stack.pop()
+
+    @memoize
+    def _invoke_rule(self, name, pos):
+        rule = self._find_rule(name)
+        self._push_ast()
+        try:
+            result = rule()
+            node = self.ast()
+            log.info('SUCCESS %s', self.rulestack())
+        finally:
+            self._pop_ast()
+        self._add_ast_node('$', result)
+        return (result, node, self._pos())
 
     def _token(self, token, node_name=None):
         self._next_token()
