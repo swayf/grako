@@ -11,9 +11,9 @@ sequence = terms:named { [','] terms:named } ;
 
 named = [ name:word ] term:term ;
 
-term = exp:(subexp | repeat | optional | special | token | word | pattern) ;
+term = exp:(subexp | repeat | optional | special | atom) ; 
 
-subexp = '(' expre ')' ;
+subexp = '(' exp:expre ')' ;
 
 repeat = '{' expt:expre '}' plus:['-'|'+'] ;
 
@@ -21,14 +21,16 @@ optional = '[' exp:expre ']' ;
 
 special = '?' exp:?/.*/? '?' ;
 
+atom = exp:(token | word | pattern) ;
+
 token = 
     (
-    '"' ?/([^"]|\")*/?  '"' 
+    '"' exp:?/([^"]|\")*/?  '"' 
     | 
     "'" ?/([^']|\')*/?  "'" 
     ) 
     ;
 
-word = ?/[-_A-Za-z0-9]/? ;
+word = exp:?/[-_A-Za-z0-9]/? ;
 
-pattern = '?/' ?/.*/?   '/?' ;
+pattern = '?/' exp:?/.*/?   '/?' ;

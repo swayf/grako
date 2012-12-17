@@ -2,7 +2,7 @@ from grammar import * #@UnusedWildImport
 
 class GrakoGrammar(Grammar):
     def __init__(self):
-        super(GrakoGrammar, self).__init__(' \n\r')
+        super(GrakoGrammar, self).__init__(' ')
 
     def token(self):
         try:
@@ -57,6 +57,27 @@ class GrakoGrammar(Grammar):
             if self._eof():
                 raise FailedParse(self._buffer, '?')
 
+    def atom(self):
+        try:
+            return self._rule('token', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('word', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        try:
+            return self._rule('pattern', 'exp')
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        raise FailedParse(self._buffer, 'atom')
+
 
     def term(self):
         try:
@@ -84,24 +105,12 @@ class GrakoGrammar(Grammar):
         except FailedParse:
             pass
         try:
-            return self._rule('token', 'exp')
+            return self._rule('atom', 'exp')
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
-        try:
-            return self._rule('word', 'exp')
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        try:
-            return self._rule('pattern', 'exp')
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        raise FailedParse(self._buffer, 'atom')
+        raise FailedParse(self._buffer, 'term')
 
     def named(self):
         try:
@@ -119,15 +128,6 @@ class GrakoGrammar(Grammar):
         except FailedParse:
             pass
         raise FailedParse(self._buffer, 'atom')
-
-    def term(self):
-        try:
-            return self._rule('repeat', 'exp')
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        raise FailedParse(self._buffer, 'term')
 
     def sequence(self):
         seq = []
