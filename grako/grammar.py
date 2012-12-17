@@ -10,17 +10,21 @@ class Grammar(object):
         self.comments_re = comments_re
         self._buffer = None
         self._ast_stack = []
+        self._rule_stack = []
 
     def parse(self, rule_name, text):
-        self._push_ast()
         self._buffer = Buffer(text)
-        return self._invoke_rule(rule_name)
+        self._push_ast()
+        return self._rule(rule_name)
 
     def ast(self):
         return self._ast_stack[-1]
 
     def result(self):
         return self.ast()['$'][0]
+
+    def rulestack(self):
+        return '.'.join(self._rule_stack)
 
     def _pos(self):
         return self._buffer.pos
@@ -47,41 +51,51 @@ class Grammar(object):
         self._eatwhitespace()
 
     def _rule(self, name, node_name=None):
-        log.debug('enter %s %s', name, self._buffer.lookahead())
-        rule = self._find_rule(name)
-        p = self.pos()
-        self._push_ast()
+        self._rule_stack.append(name)
         try:
-            self._next_token()
-            result = rule()
-            node = self.ast()
-        except FailedParse:
-            log.debug('failed %s', name)
-            self._goto(p)
-            raise
+            rule = self._find_rule(name)
+            p = self._pos()
+            self._push_ast()
+            try:
+                self._next_token()
+                log.info('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
+                result = rule()
+                node = self.ast()
+#                log.info('%s >>\n\t%s', self.rulestack(), self._buffer.lookahead())
+                log.info('SUCCESS %s', self.rulestack())
+            except FailedParse:
+                log.info('FAILED %s', self.rulestack())
+                self._goto(p)
+                raise
+            finally:
+                self._pop_ast()
+            self._add_ast_node(node_name, node)
+            self._add_ast_node('$', result)
+            return result
         finally:
-            self._pop_ast()
-        self._add_ast_node(node_name, node)
-        self._add_ast_node('$', result)
-        log.debug('exit %s %s', name, self._buffer.lookahead())
-        return result
+            self._rule_stack.pop()
 
     def _token(self, token, node_name=None):
         self._next_token()
-        if self._buffer.match(self.token) is not None:
+        log.debug('match <%s> \n\t%s', token, self._buffer.lookahead())
+        if self._buffer.match(token) is None:
+            log.debug('failed <%s>', token)
             raise FailedToken(self._buffer, token)
         self._add_ast_node(node_name, token)
         return token
 
     def _try(self, token, node_name=None):
         self._next_token()
-        return self._buffer.match(self.token) is not None
+        log.debug('try <%s> \n\t%s', token, self._buffer.lookahead())
+        return self._buffer.match(token) is not None
 
     def _pattern(self, pattern, node_name=None):
         self._next_token()
-        token = self._buffer.matchre(self.re)
+        log.debug('match %s\n\t%s', pattern, self._buffer.lookahead())
+        token = self._buffer.matchre(pattern)
         if token is None:
-            raise FailedPattern(self._buffer, node_name or pattern)
+            log.debug('failed %s', pattern)
+            raise FailedPattern(self._buffer, pattern)
         self._add_ast_node(node_name, token)
         return token
 
@@ -92,10 +106,10 @@ class Grammar(object):
         return rule
 
     def _push_ast(self):
-        self._result_stack.append(AttributeDict())
+        self._ast_stack.append(AttributeDict())
 
     def _pop_ast(self):
-        return self._result_stack.pop()
+        return self._ast_stack.pop()
 
     def _add_ast_node(self, name, node):
         if name is not None:

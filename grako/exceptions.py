@@ -9,7 +9,7 @@ class FailedParse(Exception):
     @property
     def message(self):
         info = self.buf.line_info(self.pos)
-        template = "{}:{} failed, expecting '{}'\n{}"
+        template = "{}:{} failed, expecting '{}':\n{}"
         return template.format(info.line, info.col, self.item, info.text)
 
     def __str__(self):

@@ -1,11 +1,11 @@
 #FIXME: There could be a file buffer using random access
-import re
+import re as regexp
 from bisect import bisect
 from collections import namedtuple
 import logging
 log = logging.getLogger('grako.buffering')
 
-RE = type(re.compile('.'))
+RE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['pos', 'line', 'col', 'text'])
@@ -31,9 +31,10 @@ class Buffer(object):
     def lookahead(self):
         if self.atend():
             return ''
-        p = bisect(self.linecache, PosLine(self.pos, 0))
-        start, _line = self.linecache[p]
-        return self.text[self.pos:start]
+        return self.text[self.pos:self.pos + 20].encode('string-escape') + '...'
+#        p = bisect(self.linecache, PosLine(self.pos, 0))
+#        start, _line = self.linecache[p]
+#        return self.text[self.pos:start]
 
     def next(self):
         if self.atend():
@@ -65,7 +66,9 @@ class Buffer(object):
 
     def match(self, token):
         if self.atend():
-            return token is None
+            if token is None:
+                return True
+            return None
 
         p = self.pos
         if all(c == self.next() for c in token):
@@ -74,8 +77,12 @@ class Buffer(object):
         else:
             self.goto(p)
 
-    def matchre(self, re):
-        log.debug("matching'%s' at %d - %s", re.pattern, self.pos, self.lookahead())
+    def matchre(self, pattern):
+        log.debug("matching'%s' at %d - %s", str(pattern), self.pos, self.lookahead())
+        if isinstance(pattern, basestring):
+            re = regexp.compile(pattern)
+        else:
+            re = pattern
         matched = re.match(self.text, self.pos)
         if matched:
             token = matched.group()
