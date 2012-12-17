@@ -8,7 +8,7 @@ WHITESPACE = u' \t\v\f\u00a0\r\n\u2028\u2029'
 
 def grako_parser():
     word = rule_('word', pat_(r'[A-Za-z0-9_]+'))
-    token = rule_('token', pat_('(?:' + r"'(?:[^']|\')*?'" + '|' + r'"(?:[^"]|\")*?"' + ')'))
+    token = rule_('token', pat_(r'(?:' + r"'(?:[^']|\')*?'" + '|' + r'"(?:[^"]|\")*?"' + ')'))
     pattern = rule_('pattern', pat_(r"/(?:(?!/)|\/)*?/"))
     cut = rule_('cut', tok_('!'))
 

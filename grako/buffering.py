@@ -11,15 +11,17 @@ PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['pos', 'line', 'col', 'text'])
 
 class Buffer(object):
-    def __init__(self, text, whitespace=None):
+    def __init__(self, text):
         self.text = text
         self.pos = 0
         self.marks = []
-        self.whitespace = set(whitespace) if whitespace else []
         self.linecache = self._build_line_cache()
 
     def atend(self):
         return self.pos >= len(self.text)
+
+    def ateol(self):
+        return self.atend() or self.current() in '\r\n'
 
     def current(self):
         if self.atend():
@@ -46,9 +48,6 @@ class Buffer(object):
     def move(self, n):
         self.goto(self.pos + n)
 
-    def eatwhites(self):
-        while self.current() in self.whitespace:
-            self.next()
 
     def mark(self):
         self.marks.push(self.pos)
@@ -65,7 +64,6 @@ class Buffer(object):
             del self.marks[i:]
 
     def match(self, token):
-        self.eatwhites()
         if self.atend():
             return token is None
 
@@ -77,7 +75,6 @@ class Buffer(object):
             self.goto(p)
 
     def matchre(self, re):
-        self.eatwhites()
         log.debug("matching'%s' at %d - %s", re.pattern, self.pos, self.lookahead())
         matched = re.match(self.text, self.pos)
         if matched:

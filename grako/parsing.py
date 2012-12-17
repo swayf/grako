@@ -127,6 +127,7 @@ class StarParser(_DecoratorParser):
                 tree, pos = self.exp.parse(ctx, pos)
                 result.append(tree)
             except FailedCut:
+                ctx.buf.goto(p)
                 raise
             except FailedParse:
                 ctx.buf.goto(p)
