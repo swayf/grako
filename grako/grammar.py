@@ -52,11 +52,12 @@ class Grammar(object):
 
     def _rule(self, name, node_name=None):
         self._rule_stack.append(name)
+        self._next_token()
+        pos = self._pos()
         try:
             log.info('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
-            self._next_token()
-            pos = self._pos()
             result, node, newpos = self._invoke_rule(name, pos)
+            log.info('SUCCESS %s', self.rulestack())
             self._goto(newpos)
             self._add_ast_node(node_name, node)
             return result
@@ -74,10 +75,9 @@ class Grammar(object):
         try:
             result = rule()
             node = self.ast()
-            log.info('SUCCESS %s', self.rulestack())
+            node['$'] = result
         finally:
             self._pop_ast()
-        self._add_ast_node('$', result)
         return (result, node, self._pos())
 
     def _token(self, token, node_name=None):

@@ -31,7 +31,7 @@ class GrakoGrammar(Grammar):
         raise FailedParse(self._buffer, '<"> or' + "<'>")
 
     def word(self):
-        self._pattern(r'[A-Za-z0-9_]+', 'exp')
+        return self._pattern(r'[A-Za-z0-9_]+', 'exp')
 
     def pattern(self):
         self._token('?/')
@@ -52,16 +52,19 @@ class GrakoGrammar(Grammar):
 
     def repeat(self):
         self._token('{')
-        self._rule('expre')
+        expre = self._rule('expre')
         self._token('}')
         if not self._try('-'):
             self._try('+')
+        return expre
 
     def special(self):
+        p = self._pos()
         self._token('?')
         while self._buffer.next() != '?':
             if self._eof():
                 raise FailedParse(self._buffer, '?')
+        return self._buffer.text[p:self._pos()]
 
     def atom(self):
         p = self._pos()
@@ -136,11 +139,11 @@ class GrakoGrammar(Grammar):
         raise FailedParse(self._buffer, 'term')
 
     def named(self):
-        self._rule('word', 'name')
+        name = self._rule('word', 'name')
         self._token(':')
         try:
-            self._rule('term', 'exp')
-            return (self.ast()['name'], self.ast()['exp'])
+            exp = self._rule('term', 'exp')
+            return name, exp
         except FailedParse as e:
             raise FailedCut(self._buffer, e)
 
@@ -185,19 +188,21 @@ class GrakoGrammar(Grammar):
 
 
     def option(self):
-        self._rule('sequence', 'exp')
+        opts = [self._rule('sequence', 'exp')]
         while self._try('|'):
-            self._rule('sequence', 'exp')
+            opts.append(self._rule('sequence', 'exp'))
+        return opts
 
     def expre(self):
         return self.option()
 
     def rule(self):
-        self._rule('word', 'name')
+        name = self._rule('word', 'name')
         self._token('=')
-        self._rule('expre', 'exp')
+        expre = self._rule('expre', 'exp')
         if not self._try('.'):
             self._try(';')
+        return name, expre
 
     def grammar(self):
         rules = [self._rule('rule', 'rules')]

@@ -9,7 +9,10 @@ class AttributeDict(OrderedDict):
         if name in self:
             return self[name]
         else:
-            return object.__getattribute__(self, name)
+            return super(AttributeDict, self).__getattribute__(name)
+
+    def __repr__(self):
+        return dict.__repr__(self)
 
 
 def memoize(func):
