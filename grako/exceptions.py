@@ -44,8 +44,9 @@ class FailedRef(FailedParse):
 
     @property
     def message(self):
-        template = '{}:{} could not resolve reference to rule {}'
-        return template.format(self.info.line, self.info.col, self.name)
+        info = self.buf.line_info(self.pos)
+        template = '{}:{} could not resolve reference to rule "{}"'
+        return template.format(info.line, info.col, self.name)
 
 class FailedCut(FailedParse):
     def __init__(self, buf, nested):
