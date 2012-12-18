@@ -1,6 +1,7 @@
+from .util import memoize
 from .buffering import Buffer
 from .exceptions import * #@UnusedWildImport
-from .util import AST, memoize
+from .ast import AST
 import logging
 log = logging.getLogger('grako.grammar')
 

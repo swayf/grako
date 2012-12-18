@@ -1,52 +1,5 @@
+import sys
 import functools
-from collections import OrderedDict, Mapping
-
-class AST(Mapping):
-    def __init__(self):
-        self.elements = OrderedDict()
-
-    def __iter__(self):
-        return iter(self.elements)
-
-    def __contains__(self, value):
-        return value in self.elements
-
-    def __len__(self):
-        return len(self.elements)
-
-    def __getitem__(self, key):
-        if key not in self.elements:
-            self.elements[key] = list()
-        return self.elements[key]
-
-    def __getattr__(self, name):
-        if name in self:
-            return self[name]
-
-    @staticmethod
-    def pprint(arg, depth=0):
-        indent = ' ' * 4 * depth
-        indent1 = ' ' * 4 * (depth + 1)
-        result = ''
-        if isinstance(arg, list):
-            result += '\n' + indent + '[\n'
-            for e in arg:
-                result += AST.pprint(e, depth + 1) + '\n'
-            result += indent + ']\n'
-            return result
-        elif isinstance(arg, AST):
-            result += '\n' + indent + 'ast{\n'
-            for k in arg.keys():
-                result += indent1 + str(k) + ':'
-                value = arg[k]
-                result += AST.pprint(value, depth + 1) + '\n'
-            result += indent + '}\n'
-            return result
-        else:
-            return indent1 + str(arg)
-
-    def __repr__(self):
-        return self.pprint(self)
 
 
 def memoize(func):
@@ -70,4 +23,47 @@ def memoize(func):
                 cache[key] = e
                 raise
     return functools.update_wrapper(memoize, func)
+
+
+def trim(docstring):
+    """
+    Definition of the trim algorithm from Python's PEP 257. It is used
+    to trim the templates used by the nodes.
+
+    http://www.python.org/dev/peps/pep-0257/
+    """
+    if not docstring:
+        return ''
+    # Convert tabs to spaces (following the normal Python rules)
+    # and split into a list of lines:
+    lines = docstring.expandtabs().splitlines()
+    # Determine minimum indentation (first line doesn't count):
+    indent = sys.maxint
+    for line in lines[1:]:
+        stripped = line.lstrip()
+        if stripped:
+            indent = min(indent, len(line) - len(stripped))
+    # Remove indentation (first line is special):
+    trimmed = [lines[0].strip()]
+    if indent < sys.maxint:
+        for line in lines[1:]:
+            trimmed.append(line[indent:].rstrip())
+    # Strip off trailing and leading blank lines:
+    while trimmed and not trimmed[-1]:
+        trimmed.pop()
+    while trimmed and not trimmed[0]:
+        trimmed.pop(0)
+    # Return a single string:
+    return '\n'.join(trimmed)
+
+def indent(text, indent=1):
+    """ Indent the given block of text by indent*4 spaces
+    """
+    if text is None:
+        return ''
+    text = str(text)
+    if indent >= 0:
+        lines = [' ' * 4 * indent + t for t in text.split('\n')]
+        text = '\n'.join(lines)
+    return text
 
