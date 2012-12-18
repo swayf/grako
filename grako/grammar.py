@@ -78,11 +78,11 @@ class Grammar(object):
         try:
             rule()
             node = self.ast
-            semantic_rule = self._find_semantic_rule(name)
-            if semantic_rule:
-                node = semantic_rule(node)
         finally:
             self._pop_ast()
+        semantic_rule = self._find_semantic_rule(name)
+        if semantic_rule:
+            node = semantic_rule(node)
         return (node, self._pos)
 
     def _token(self, token, node_name=None):
@@ -97,7 +97,10 @@ class Grammar(object):
     def _try(self, token, node_name=None):
         self._next_token()
         log.debug('try <%s> \n\t%s', token, self._buffer.lookahead())
-        return self._buffer.match(token) is not None
+        if self._buffer.match(token) is not None:
+            self._add_ast_node(node_name, token)
+            return True
+
 
     def _pattern(self, pattern, node_name=None):
         self._next_token()

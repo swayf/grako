@@ -1,35 +1,38 @@
 from collections import OrderedDict, Mapping
 
 class AST(Mapping):
-    def __init__(self):
-        self.elements = OrderedDict()
+    def __init__(self, **kwargs):
+        self._elements = OrderedDict(**kwargs)
 
     def add(self, key, value):
-        previous = self.elements.get(key, None)
+        previous = self._elements.get(key, None)
         if previous is None:
-            self.elements[key] = value
+            self._elements[key] = value
         elif isinstance(previous, list):
             previous.append(value)
         else:
-            self.elements[key] = [previous, value]
+            self._elements[key] = [previous, value]
 
-    def __iter__(self):
-        return iter(self.elements)
-
-    def __contains__(self, value):
-        return value in self.elements
-
-    def __len__(self):
-        return len(self.elements)
-
-    def __getitem__(self, key):
-        if key not in self.elements:
-            self.elements[key] = list()
+    def first(self):
+        key = self.elements.keys[0]
         return self.elements[key]
 
-    def __getattr__(self, name):
-        if name in self:
-            return self[name]
+    def __iter__(self):
+        return iter(self._elements)
+
+    def __contains__(self, value):
+        return value in self._elements
+
+    def __len__(self):
+        return len(self._elements)
+
+    def __getitem__(self, key):
+        if key not in self._elements:
+            self._elements[key] = list()
+        return self._elements[key]
+
+    def __getattr__(self, key):
+        return self.__getitem__(key)
 
     @staticmethod
     def pprint(arg, depth=0):
@@ -48,7 +51,7 @@ class AST(Mapping):
                 result += indent1 + str(k) + ':'
                 value = arg[k]
                 result += AST.pprint(value, depth + 1) + '\n'
-            result += indent + '}\n'
+            result += indent + '}'
             return result
         else:
             return str(arg)
