@@ -13,7 +13,7 @@ element = named | term ;
 
 named = name:word value:term ;
 
-term = term:(subexp | repeat | optional | special | atom) ; 
+term = term:(void | subexp | repeat | optional | special | atom) ; 
 
 subexp = '(' ! exp:expre ')' ! ;
 
@@ -36,3 +36,5 @@ token =
 word = word:?/[-_A-Za-z0-9]/? ;
 
 pattern = '?/' pattern:?/.*/?   '/?' ;
+
+void = void:'()' ;

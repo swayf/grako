@@ -183,12 +183,18 @@ class GrakoGrammarBase(Grammar):
         raise FailedParse(self._buffer, 'named')
 
     def _sequence_(self):
+#        p = self._pos
+#        try:
+#            self._rule('element', 'elements')
+#        except FailedParse:
+#            self._goto(p)
+#            raise
         while True:
             p = self._pos
             try:
                 if not self._try('!'):
-                    self._rule('element', 'elements')
                     self._try(',')
+                    self._rule('element', 'elements')
                 else:
                     try:
                         # insert cut node here
@@ -196,6 +202,7 @@ class GrakoGrammarBase(Grammar):
                     except FailedParse as e:
                         raise FailedCut(self._buffer, e)
             except FailedCut:
+                self._goto(p)
                 raise
             except FailedParse:
                 self._goto(p)
@@ -209,9 +216,9 @@ class GrakoGrammarBase(Grammar):
             try:
                 self._token('|')
                 self._rule('sequence', 'opts')
-            except FailedCut:
+            except FailedCut as e:
                 self._goto(p)
-                raise
+                raise e.nested
             except FailedParse:
                 self._goto(p)
                 break
