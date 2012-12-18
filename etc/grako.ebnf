@@ -37,4 +37,4 @@ word = word:?/[-_A-Za-z0-9]/? ;
 
 pattern = '?/' pattern:?/.*/?   '/?' ;
 
-void = void:'()' ;
+void = '()' ;

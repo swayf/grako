@@ -3,6 +3,10 @@ from grammar import * #@UnusedWildImport
 __all__ = ['GrakoGrammar']
 
 class GrakoGrammarBase(Grammar):
+
+    def _void_(self):
+        self._token('()', 'void')
+
     def _token_(self):
         p = self._pos
         try:
@@ -35,7 +39,7 @@ class GrakoGrammarBase(Grammar):
 
     def _pattern_(self):
         self._token('?/')
-        self._pattern(r'(.*?)(?=/\?)', 'exp')
+        self._pattern(r'(.*?)(?=/\?)', 'pattern')
         self._token('/?')
 
     def _cut_(self):
@@ -74,6 +78,14 @@ class GrakoGrammarBase(Grammar):
 
     def _atom_(self):
         p = self._pos
+        try:
+            self._rule('void', 'atom')
+            return
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            pass
+        self._goto(p)
         try:
             self._rule('cut', 'atom')
             return
@@ -173,14 +185,14 @@ class GrakoGrammarBase(Grammar):
             pass
         self._goto(p)
         try:
-            self._rule('term', 'term')
+            self._rule('term', 'element')
             return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
-        raise FailedParse(self._buffer, 'named')
+        raise FailedParse(self._buffer, 'element')
 
     def _sequence_(self):
 #        p = self._pos
@@ -338,9 +350,9 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def element(self, ast):
-        if ast.term:
-            return ast.term
-        return ast
+        if 'named' in ast:
+            return ast
+        return ast.element
 
     def sequence(self, ast):
         return ast.elements
@@ -348,7 +360,7 @@ class GrakoGrammar(AbstractGrakoGrammar):
     def option(self, ast):
         if 'opts' in ast:
             result = AST(opts=ast.seq)
-            result.update(opts=ast.opts)
+            result.add('opts', ast.opts)
             return result
         return ast.seq
 
