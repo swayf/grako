@@ -14,6 +14,13 @@ class AST(Mapping):
         else:
             self._elements[key] = [previous, value]
 
+    def update(self, *args, **kwargs):
+        for dct in args:
+            for k, v in dct:
+                self.add(k, v)
+        for k, v in kwargs.items():
+            self.add(k, v)
+
     @property
     def first(self):
         key = self.elements.keys[0]

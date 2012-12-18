@@ -204,8 +204,17 @@ class GrakoGrammarBase(Grammar):
 
     def _option_(self):
         self._rule('sequence', 'seq')
-        while self._try('|'):
-            self._rule('sequence', 'opts')
+        while True:
+            p = self._pos
+            try:
+                self._token('|')
+                self._rule('sequence', 'opts')
+            except FailedCut:
+                self._goto(p)
+                raise
+            except FailedParse:
+                self._goto(p)
+                break
 
     def _expre_(self):
         self._rule('option', 'expre')
@@ -330,8 +339,10 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast.elements
 
     def option(self, ast):
-        if ast.opts:
-            return list(ast.seq) + list(ast.opts)
+        if 'opts' in ast:
+            result = AST(opts=ast.seq)
+            result.update(opts=ast.opts)
+            return result
         return ast.seq
 
     def expre(self, ast):
