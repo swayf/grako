@@ -1,14 +1,19 @@
 import logging
-from grako.bootstrap import GrakoGrammar
+from grako.bootstrap import *
 logging.basicConfig()
 logging.getLogger().setLevel(logging.ERROR)
 
 def main():
     text = open('grammar/grako.ebnf').read()
     g = GrakoGrammar()
-    result = g.parse('grammar', text)
-    print len(result), result
-    print g.ast()
+    try:
+        _result = g.parse('grammar', text)
+    #    print len(result), result
+        print g.ast()
+        print '------------'
+    except Exception as e:
+        print e
+        raise
 
 if __name__ == '__main__':
     main()

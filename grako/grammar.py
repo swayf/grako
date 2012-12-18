@@ -1,12 +1,12 @@
 from .buffering import Buffer
 from .exceptions import * #@UnusedWildImport
-from .util import AttributeDict, memoize
+from .util import AST, memoize
 import logging
 log = logging.getLogger('grako.grammar')
 
 class Grammar(object):
-    def __init__(self, whitespace, comments_re=None):
-        self.whitespace = set(whitespace)
+    def __init__(self, whitespace=None, comments_re=None):
+        self.whitespace = set(whitespace if whitespace else ' \n\r')
         self.comments_re = comments_re
         self._buffer = None
         self._ast_stack = []
@@ -15,7 +15,7 @@ class Grammar(object):
     def parse(self, rule_name, text):
         self._buffer = Buffer(text)
         self._push_ast()
-        return self._rule(rule_name)
+        return self._rule(rule_name, rule_name)
 
     def ast(self):
         return self._ast_stack[-1]
@@ -56,10 +56,10 @@ class Grammar(object):
         pos = self._pos()
         try:
             log.info('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
-            result, node, newpos = self._invoke_rule(name, pos)
+            result, newpos = self._invoke_rule(name, pos)
             log.info('SUCCESS %s', self.rulestack())
+            self._add_ast_node(node_name, result)
             self._goto(newpos)
-            self._add_ast_node(node_name, node)
             return result
         except FailedParse:
             log.info('FAILED %s', self.rulestack())
@@ -73,12 +73,14 @@ class Grammar(object):
         rule = self._find_rule(name)
         self._push_ast()
         try:
-            result = rule()
+            rule()
             node = self.ast()
-            node['$'] = result
+            semantic_rule = self._find_semantic_rule(name)
+            if semantic_rule:
+                node = semantic_rule(node)
         finally:
             self._pop_ast()
-        return (result, node, self._pos())
+        return (node, self._pos())
 
     def _token(self, token, node_name=None):
         self._next_token()
@@ -105,13 +107,19 @@ class Grammar(object):
         return token
 
     def _find_rule(self, name):
-        rule = getattr(self, name, None)
+        rule = getattr(self, '_%s_' % name, None)
         if rule is None or not isinstance(rule, type(self._find_rule)):
             raise FailedRef(self._buffer, name)
         return rule
 
+    def _find_semantic_rule(self, name):
+        result = getattr(self, name, None)
+        if result is None or not isinstance(result, type(self._find_rule)):
+            return None
+        return result
+
     def _push_ast(self):
-        self._ast_stack.append(AttributeDict())
+        self._ast_stack.append(AST())
 
     def _pop_ast(self):
         return self._ast_stack.pop()
