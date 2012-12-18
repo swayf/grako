@@ -32,7 +32,8 @@ class GrakoGrammarBase(Grammar):
 
     def _pattern_(self):
         self._token('?/')
-        self._pattern(r'(.*?)/\?', 'exp')
+        self._pattern(r'(.*?)(?=/\?)', 'exp')
+        self._token('/?')
 
     def _cut_(self):
         self._token('!', 'exp')
