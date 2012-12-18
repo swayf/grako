@@ -1,17 +1,17 @@
 
 grammar = rules:{rule} ;
 
-rule = name:word '=' ! expre:expre ('.'|';') ! ;
+rule = rule:(name:word '=' ! expre:expre) ('.'|';') ! ;
 
 expre = expre:option ;
 
-option = opts:sequence {'|' ! opts:sequence } ;
+option = options:sequence {'|' ! options:sequence } ;
 
 sequence = elements:element { [','] elements:element } ;
 
 element = named | term ;
 
-named = [ name:word ] term:term ;
+named = name:word value:term ;
 
 term = term:(subexp | repeat | optional | special | atom) ; 
 
@@ -23,7 +23,7 @@ optional = '[' ! optional:expre ']' ! ;
 
 special = '?' ! exp:?/.*/? '?' ! ;
 
-atom = exp:(token | word | pattern) ;
+atom = atom:(token | word | pattern) ;
 
 token = 
     token:(

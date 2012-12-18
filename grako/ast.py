@@ -13,6 +13,7 @@ class AST(Mapping):
         else:
             self._elements[key] = [previous, value]
 
+    @property
     def first(self):
         key = self.elements.keys[0]
         return self.elements[key]
@@ -33,6 +34,9 @@ class AST(Mapping):
 
     def __getattr__(self, key):
         return self.__getitem__(key)
+#        if key in self._elements:
+#            return self.__getitem__(key)
+#        raise KeyError(key)
 
     @staticmethod
     def pprint(arg, depth=0):
