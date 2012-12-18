@@ -7,7 +7,7 @@ class GrakoGrammarBase(Grammar):
         p = self._pos
         try:
             self._token("'")
-            result = self._pattern(r"(?:[^'\\]|\\')*")
+            result = self._pattern(r"(?:[^'\\]|\\')*", 'token')
             self._token("'")
             return result
         except FailedCut as e:
@@ -17,7 +17,7 @@ class GrakoGrammarBase(Grammar):
         self._goto(p)
         try:
             self._token('"')
-            result = self._pattern(r'(?:[^"\\]|\\")*')
+            result = self._pattern(r'(?:[^"\\]|\\")*', 'token')
             self._token('"')
             return result
         except FailedCut as e:
@@ -191,17 +191,17 @@ class GrakoGrammarBase(Grammar):
 
 
     def _option_(self):
-        self._rule('sequence', 'options')
+        self._rule('sequence', 'opts')
         while self._try('|'):
-            self._rule('sequence', 'options')
+            self._rule('sequence', 'opts')
 
     def _expre_(self):
-        self._rule('option', 'option')
+        self._rule('option', 'expre')
 
     def _rule_(self):
         self._rule('word', 'name')
         self._token('=')
-        self._rule('expre', 'rule_rhs')
+        self._rule('expre', 'rhs')
         if not self._try(';'):
             self._token('.')
 
@@ -307,23 +307,23 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast.term
 
     def named(self, ast):
-        return AST(name=ast.name, value=ast.value)
+        return ast
 
     def element(self, ast):
-        if ast.named:
-            return ast.named
-        return ast.term
+        if ast.term:
+            return ast.term
+        return ast
 
     def sequence(self, ast):
         return ast.elements
 
     def option(self, ast):
-#        if len(ast.options) == 1:
-#            return list(ast.options)
-        return ast
+        if isinstance(ast.opts, list):
+            return ast
+        return ast.opts
 
     def expre(self, ast):
-        return ast.option
+        return ast.expre
 
     def rule(self, ast):
         return ast

@@ -131,7 +131,7 @@ class Grammar(object):
         return self._ast_stack.pop()
 
     def _add_ast_node(self, name, node):
-        if name is not None:
+        if name is not None and node:
             self.ast.add(name, node)
         return node
 
