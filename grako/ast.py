@@ -1,4 +1,5 @@
 from collections import OrderedDict, Mapping
+import json
 
 class AST(Mapping):
     def __init__(self, **kwargs):
@@ -39,27 +40,11 @@ class AST(Mapping):
 #        raise KeyError(key)
 
     @staticmethod
-    def pprint(arg, depth=0):
-        indent = ' ' * 4 * depth
-        indent1 = ' ' * 4 * (depth + 1)
-        result = ''
-        if isinstance(arg, list):
-            result += '\n' + indent + '[\n'
-            for e in arg:
-                result += AST.pprint(e, depth + 1) + '\n'
-            result += indent + ']\n'
-            return result
-        elif isinstance(arg, AST):
-            result += '\n' + indent + '{\n'
-            for k in arg.keys():
-                result += indent1 + str(k) + ':'
-                value = arg[k]
-                result += AST.pprint(value, depth + 1) + '\n'
-            result += indent + '}'
-            return result
-        else:
-            return str(arg)
+    def serializable(obj):
+        if isinstance(obj, AST):
+            return obj._elements
+        return obj
 
     def __repr__(self):
-        return self.pprint(self)
+        return json.dumps(self._elements, indent=4, default=self.serializable)
 
