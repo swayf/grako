@@ -4,7 +4,7 @@ __all__ = ['GrakoGrammar']
 
 class GrakoGrammarBase(Grammar):
     def _token_(self):
-        p = self._pos()
+        p = self._pos
         try:
             self._token("'")
             result = self._pattern(r"(?:[^'\\]|\\')*")
@@ -56,15 +56,15 @@ class GrakoGrammarBase(Grammar):
         return expre
 
     def _special_(self):
-        p = self._pos()
+        p = self._pos
         self._token('?')
         while self._buffer.next() != '?':
             if self._eof():
                 raise FailedParse(self._buffer, '?')
-        return self._buffer.text[p:self._pos()]
+        return self._buffer.text[p:self._pos]
 
     def _atom_(self):
-        p = self._pos()
+        p = self._pos
         try:
             return self._rule('cut', 'exp')
         except FailedCut as e:
@@ -97,7 +97,7 @@ class GrakoGrammarBase(Grammar):
 
 
     def _term_(self):
-        p = self._pos()
+        p = self._pos
         try:
             return self._rule('atom', 'exp')
         except FailedCut as e:
@@ -145,7 +145,7 @@ class GrakoGrammarBase(Grammar):
             raise FailedCut(self._buffer, e)
 
     def _element_(self):
-        p = self._pos()
+        p = self._pos
         try:
             return self._rule('named', 'name')
         except FailedCut as e:
@@ -165,7 +165,7 @@ class GrakoGrammarBase(Grammar):
     def _sequence_(self):
         seq = []
         while True:
-            p = self._pos()
+            p = self._pos
             try:
                 if not self._try('!'):
                     seq.append(self._rule('element', 'terms'))
@@ -204,7 +204,7 @@ class GrakoGrammarBase(Grammar):
     def _grammar_(self):
         rules = [self._rule('rule', 'rules')]
         while True:
-            p = self._pos()
+            p = self._pos
             try:
                 rules.append(self._rule('rule', 'rules'))
             except FailedParse:

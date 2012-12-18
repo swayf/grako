@@ -18,15 +18,17 @@ class Grammar(object):
         self._push_ast()
         return self._rule(rule_name, rule_name)
 
+    @property
     def ast(self):
         return self._ast_stack[-1]
 
     def result(self):
-        return self.ast()['$'][0]
+        return self.ast['$'][0]
 
     def rulestack(self):
         return '.'.join(self._rule_stack)
 
+    @property
     def _pos(self):
         return self._buffer.pos
 
@@ -54,7 +56,7 @@ class Grammar(object):
     def _rule(self, name, node_name=None):
         self._rule_stack.append(name)
         self._next_token()
-        pos = self._pos()
+        pos = self._pos
         try:
             log.info('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
             result, newpos = self._invoke_rule(name, pos)
@@ -75,13 +77,13 @@ class Grammar(object):
         self._push_ast()
         try:
             rule()
-            node = self.ast()
+            node = self.ast
             semantic_rule = self._find_semantic_rule(name)
             if semantic_rule:
                 node = semantic_rule(node)
         finally:
             self._pop_ast()
-        return (node, self._pos())
+        return (node, self._pos)
 
     def _token(self, token, node_name=None):
         self._next_token()
@@ -127,7 +129,7 @@ class Grammar(object):
 
     def _add_ast_node(self, name, node):
         if name is not None:
-            self.ast()[name].append(node)
+            self.ast.add(name, node)
         return node
 
 

@@ -4,6 +4,15 @@ class AST(Mapping):
     def __init__(self):
         self.elements = OrderedDict()
 
+    def add(self, key, value):
+        previous = self.elements.get(key, None)
+        if previous is None:
+            self.elements[key] = value
+        elif isinstance(previous, list):
+            previous.append(value)
+        else:
+            self.elements[key] = [previous, value]
+
     def __iter__(self):
         return iter(self.elements)
 
@@ -34,7 +43,7 @@ class AST(Mapping):
             result += indent + ']\n'
             return result
         elif isinstance(arg, AST):
-            result += '\n' + indent + 'ast{\n'
+            result += '\n' + indent + '{\n'
             for k in arg.keys():
                 result += indent1 + str(k) + ':'
                 value = arg[k]
@@ -42,7 +51,7 @@ class AST(Mapping):
             result += indent + '}\n'
             return result
         else:
-            return indent1 + str(arg)
+            return str(arg)
 
     def __repr__(self):
         return self.pprint(self)
