@@ -35,9 +35,9 @@ class AST(Mapping):
 
     def __getattr__(self, key):
         return self.__getitem__(key)
-#        if key in self._elements:
-#            return self.__getitem__(key)
-#        raise KeyError(key)
+        if key in self._elements:
+            return self.__getitem__(key)
+        raise KeyError(key)
 
     @staticmethod
     def serializable(obj):

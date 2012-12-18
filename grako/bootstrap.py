@@ -7,9 +7,9 @@ class GrakoGrammarBase(Grammar):
         p = self._pos
         try:
             self._token("'")
-            result = self._pattern(r"(?:[^'\\]|\\')*", 'token')
+            self._pattern(r"(?:[^'\\]|\\')*", 'token')
             self._token("'")
-            return result
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
@@ -17,9 +17,9 @@ class GrakoGrammarBase(Grammar):
         self._goto(p)
         try:
             self._token('"')
-            result = self._pattern(r'(?:[^"\\]|\\")*', 'token')
+            self._pattern(r'(?:[^"\\]|\\")*', 'token')
             self._token('"')
-            return result
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
@@ -48,7 +48,7 @@ class GrakoGrammarBase(Grammar):
 
     def _optional_(self):
         self._token('[')
-        self._rule('expre')
+        self._rule('expre', 'optional')
         self._token(']')
 
     def _plus_(self):
@@ -75,28 +75,32 @@ class GrakoGrammarBase(Grammar):
     def _atom_(self):
         p = self._pos
         try:
-            return self._rule('cut', 'atom')
+            self._rule('cut', 'atom')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
         try:
-            return self._rule('token', 'atom')
+            self._rule('token', 'atom')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
         try:
-            return self._rule('call', 'atom')
+            self._rule('call', 'atom')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
         try:
-            return self._rule('pattern', 'atom')
+            self._rule('pattern', 'atom')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
@@ -108,35 +112,40 @@ class GrakoGrammarBase(Grammar):
     def _term_(self):
         p = self._pos
         try:
-            return self._rule('atom', 'term')
+            self._rule('atom', 'term')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
         try:
-            return self._rule('subexp', 'term')
+            self._rule('subexp', 'term')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
         try:
-            return self._rule('repeat', 'term')
+            self._rule('repeat', 'term')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
         try:
-            return self._rule('optional', 'optional')
+            self._rule('optional', 'term')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
         try:
-            return self._rule('special', 'term')
+            self._rule('special', 'term')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
@@ -149,20 +158,23 @@ class GrakoGrammarBase(Grammar):
         self._token(':')
         try:
             self._rule('term', 'value')
+            return
         except FailedParse as e:
             raise FailedCut(self._buffer, e)
 
     def _element_(self):
         p = self._pos
         try:
-            return self._rule('named', 'named')
+            self._rule('named', 'named')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
             pass
         self._goto(p)
         try:
-            return self._rule('term', 'term')
+            self._rule('term', 'term')
+            return
         except FailedCut as e:
             raise e.nested
         except FailedParse:
@@ -191,7 +203,7 @@ class GrakoGrammarBase(Grammar):
 
 
     def _option_(self):
-        self._rule('sequence', 'opts')
+        self._rule('sequence', 'seq')
         while self._try('|'):
             self._rule('sequence', 'opts')
 
@@ -318,9 +330,9 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast.elements
 
     def option(self, ast):
-        if isinstance(ast.opts, list):
-            return ast
-        return ast.opts
+        if ast.opts:
+            return list(ast.seq) + list(ast.opts)
+        return ast.seq
 
     def expre(self, ast):
         return ast.expre

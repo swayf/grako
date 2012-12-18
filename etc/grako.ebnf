@@ -5,7 +5,7 @@ rule = rule:(name:word '=' ! expre:expre) ('.'|';') ! ;
 
 expre = expre:option ;
 
-option = options:sequence {'|' ! options:sequence } ;
+option = first:sequence {'|' ! options:sequence } ;
 
 sequence = elements:element { [','] elements:element } ;
 
