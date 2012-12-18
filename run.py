@@ -4,12 +4,12 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.ERROR)
 
 def main():
-    text = open('grammar/grako.ebnf').read()
+    text = open('etc/grako.ebnf').read()
     g = GrakoGrammar()
     try:
         _result = g.parse('grammar', text)
     #    print len(result), result
-        print g.ast()
+        print g.ast
         print '------------'
     except Exception as e:
         print e
