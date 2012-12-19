@@ -98,7 +98,7 @@ class SequenceParser(_Parser):
         return [r for r in result if r is not None]
 
     def __str__(self):
-        return ', '.join(str(s) for s in self.sequence)
+        return ' '.join(str(s) for s in self.sequence)
 
 
 class ChoiceParser(_Parser):

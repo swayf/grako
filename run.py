@@ -7,11 +7,27 @@ def main():
     text = open('etc/grako.ebnf').read()
     g = GrakoGrammar()
     _result = g.parse('grammar', text)
-    print g.ast
+#    print g.ast
 
     g = GrakoParserGenerator()
     g.parse('grammar', text)
-    print g.ast['grammar'][0]
+    generated_grammar = str(g.ast['grammar'][0])
+    print generated_grammar
+
+
+    print '-' * 40, 'phase 2'
+
+    g = GrakoParserGenerator()
+    g.parse('grammar', generated_grammar)
+    generated_grammar2 = str(g.ast['grammar'][0])
+    print generated_grammar2
+
+    print '-' * 40, 'phase 3'
+
+    g = GrakoParserGenerator()
+    g.parse('grammar', generated_grammar2)
+    generated_grammar3 = str(g.ast['grammar'][0])
+    print generated_grammar3
 
 if __name__ == '__main__':
     main()
