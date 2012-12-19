@@ -201,7 +201,7 @@ class GrakoGrammarBase(Grammar):
         while True:
             p = self._pos
             try:
-                if not self._try('!'):
+                if not self._try('!', 'sequence'):
                     self._try(',')
                     self._call('element', 'sequence')
                 else:

@@ -1,13 +1,13 @@
 
 grammar = rules:{rule} ;
 
-rule = rhs:(name:word '=' ! expre:expre) ('.'|';') ! ;
+rule = rhs:(name:word '=' ! expre:expre) ('.' | ';') ! ;
 
 expre = expre:option ;
 
-option = first:sequence {'|' ! options:sequence } ;
+option = first:sequence {'|' ! options:sequence} ;
 
-sequence = elements:element { [','] elements:element } ;
+sequence = elements:element {[','] elements:element} ;
 
 element = named | term ;
 
@@ -17,7 +17,7 @@ term = term:(void | subexp | repeat | optional | special | atom) ;
 
 subexp = '(' ! exp:expre ')' ! ;
 
-repeat = '{' !  exp:expre '}' ! plus:['-'|'+'] ! ;
+repeat = '{' ! exp:expre '}' ! plus:['-' | '+'] ! ;
 
 optional = '[' ! optional:expre ']' ! ;
 
@@ -25,16 +25,10 @@ special = '?(' ! special:?/(.*)/? ')?' ! ;
 
 atom = atom:(token | word | pattern) ;
 
-token = 
-    token:(
-    '"' ?/([^"]|\")*/?  '"' 
-    | 
-    "'" ?/([^']|\')*/?  "'" 
-    ) 
-    ;
+token = token:('"' ?/([^"]|")*/? '"' | "'" ?/([^']|')*/? "'") ;
 
 word = word:?/[-_A-Za-z0-9]/? ;
 
-pattern = '?/' pattern:?/(.*?)(?=/\?)/?   '/?' ;
+pattern = '?/' pattern:?/(.*?)(?=/\?)/? '/?' ;
 
 void = '()' ;

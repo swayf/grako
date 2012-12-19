@@ -38,7 +38,7 @@ class _DecoratorParser(_Parser):
 
 class GroupParser(_DecoratorParser):
     def __str__(self):
-        return '(%s)' % str(self.exp)
+        return '(%s)' % str(self.exp).strip()
 
 
 class TokenParser(_Parser):
@@ -54,7 +54,7 @@ class TokenParser(_Parser):
         return result, ctx.buf.pos
 
     def __str__(self):
-        return "'%s'" % self.token.replace("'", "\\'")
+        return "'%s'" % self.token.encode('string-escape')
 
 
 class PatternParser(_Parser):
@@ -71,7 +71,7 @@ class PatternParser(_Parser):
         return result, ctx.buf.pos
 
     def __str__(self):
-        return '?/%s/?' % self.pattern.replace('/', '\/')
+        return '?/%s/?' % self.pattern
 
 
 class SequenceParser(_Parser):
@@ -98,7 +98,7 @@ class SequenceParser(_Parser):
         return [r for r in result if r is not None]
 
     def __str__(self):
-        return ' '.join(str(s) for s in self.sequence)
+        return ' '.join(str(s).strip() for s in self.sequence)
 
 
 class ChoiceParser(_Parser):
@@ -120,7 +120,7 @@ class ChoiceParser(_Parser):
         raise FailedParse(ctx.buf, 'one of {%s}' % ','.join(items))
 
     def __str__(self):
-        return ' | '.join(str(o) for o in self.options)
+        return ' | '.join(str(o).strip() for o in self.options)
 
 
 class RepeatParser(_DecoratorParser):
@@ -242,7 +242,7 @@ class RuleParser(NamedParser):
             return result, ctx.buf.pos
 
     def __str__(self):
-        return '%s = %s ;' % (self.name, str(self.exp))
+        return '%s = %s ;' % (self.name, str(self.exp).strip())
 
 class GrammarParser(object):
     def __init__(self, start, rules):
@@ -267,5 +267,5 @@ class GrammarParser(object):
             r.resolve(rules)
 
     def __str__(self):
-        return '\n\n'.join(str(rule) for rule in self.rules)
+        return '\n\n'.join(str(rule) for rule in self.rules) + '\n'
 
