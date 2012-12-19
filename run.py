@@ -11,7 +11,7 @@ def main():
 
     g = GrakoParserGenerator()
     g.parse('grammar', text)
-    print g.ast['grammar']
+    print g.ast['grammar'][0]
 
 if __name__ == '__main__':
     main()

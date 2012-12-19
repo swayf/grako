@@ -71,7 +71,7 @@ class PatternParser(_Parser):
         return result, ctx.buf.pos
 
     def __str__(self):
-        return '/%s/' % self.pattern.replace('/', '\/')
+        return '?/%s/?' % self.pattern.replace('/', '\/')
 
 
 class SequenceParser(_Parser):
@@ -242,7 +242,7 @@ class RuleParser(NamedParser):
             return result, ctx.buf.pos
 
     def __str__(self):
-        return '%s = %s ; <%s>' % (self.name, str(self.exp), str(type(self.exp)))
+        return '%s = %s ;' % (self.name, str(self.exp))
 
 class GrammarParser(object):
     def __init__(self, start, rules):

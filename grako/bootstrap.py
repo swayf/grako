@@ -309,12 +309,13 @@ class AbstractGrakoGrammar(GrakoGrammarBase):
         return ast
 
 
+def _simplify(x):
+    if isinstance(x, list) and len(x) == 1:
+        return _simplify(x[0])
+    return x
+
+
 class GrakoGrammar(AbstractGrakoGrammar):
-    @staticmethod
-    def _simplify(x):
-        if isinstance(x, list) and len(x) == 1:
-            return GrakoGrammar._simplify(x[0])
-        return x
 
     def token(self, ast):
         return ast
@@ -332,7 +333,7 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def subexp(self, ast):
-        return self._simplify(ast.exp)
+        return _simplify(ast.exp)
 
     def optional(self, ast):
         return ast
@@ -347,27 +348,27 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def atom(self, ast):
-        return self._simplify(ast.atom[0])
+        return _simplify(ast.atom[0])
 
     def term(self, ast):
-        return self._simplify(ast.term[0])
+        return _simplify(ast.term[0])
 
     def named(self, ast):
         return ast
 
     def element(self, ast):
-        return self._simplify(ast.element)
+        return _simplify(ast.element)
 
     def sequence(self, ast):
-        return self._simplify(ast.sequence)
+        return _simplify(ast.sequence)
 
     def choice(self, ast):
         if len(ast.options) == 1:
-            return self._simplify(ast.options)
+            return _simplify(ast.options)
         return ast
 
     def expre(self, ast):
-        return self._simplify(ast.expre)
+        return _simplify(ast.expre)
 
     def rule(self, ast):
         return ast
@@ -378,66 +379,64 @@ class GrakoGrammar(AbstractGrakoGrammar):
 
 class GrakoParserGenerator(AbstractGrakoGrammar):
     def token(self, ast):
-        return TokenParser(ast.token)
+        return TokenParser(ast.token[0])
 
     def word(self, ast):
-        return ast.word
+        return ast.word[0]
 
     def call(self, ast):
-        return RuleRefParser(ast.call)
+        return RuleRefParser(ast.call[0])
 
     def pattern(self, ast):
-        return PatternParser(ast.pattern)
+        return PatternParser(ast.pattern[0])
 
     def cut(self, ast):
         return CutParser()
 
     def subexp(self, ast):
-        return GroupParser(ast.exp)
+        return GroupParser(ast.exp[0])
 
     def optional(self, ast):
-        return OptionalParser(ast.optional)
+        return OptionalParser(ast.optional[0])
 
     def plus(self, ast):
         return ast
 
     def repeat(self, ast):
-        if ast.plus:
-            return RepeatOneParser(ast.repeat)
-        return RepeatParser(ast.repeat)
+        if 'plus' in ast:
+            return RepeatOneParser(ast.repeat[0])
+        return RepeatParser(ast.repeat[0])
 
     def special(self, ast):
-        return SpecialParser(ast.special)
+        return SpecialParser(ast.special[0])
 
     def atom(self, ast):
-        return ast.atom
+        return ast.atom[0]
 
     def term(self, ast):
-        return ast.term
+        return ast.term[0]
 
     def named(self, ast):
-        return NamedParser(ast.name, ast.value)
+        return NamedParser(ast.name[0], ast.value[0])
 
     def element(self, ast):
-        return ast.element
+        return ast.element[0]
 
     def sequence(self, ast):
-        if isinstance(ast.sequence, list):
-            if len(ast.sequence) == 1:
-                return ast.sequence[0]
-            return SequenceParser(ast.sequence)
-        return ast.sequence
+        if len(ast.sequence) == 1:
+            return _simplify(ast.sequence)
+        return SequenceParser(ast.sequence)
 
     def choice(self, ast):
-        if isinstance(ast.options, list):
-            return ChoiceParser(ast.options)
-        return ast.options
+        if len(ast.options) == 1:
+            return ast.options[0]
+        return ChoiceParser(ast.options)
 
     def expre(self, ast):
-        return ast.expre
+        return ast.expre[0]
 
     def rule(self, ast):
-        return RuleParser(ast.name, ast.rhs)
+        return RuleParser(ast.name[0], ast.rhs[0])
 
     def grammar(self, ast):
         return GrammarParser('grammar', ast.rules)
