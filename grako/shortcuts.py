@@ -2,8 +2,8 @@ from parsing import * #@UnusedWildImport
 
 tok_ = TokenParser
 pat_ = PatternParser
-star_ = StarParser
-plus_ = PlusParser
+star_ = RepeatParser
+plus_ = RepeatOneParser
 opt_ = OptionalParser
 cut_ = CutParser()
 ref_ = RuleRefParser

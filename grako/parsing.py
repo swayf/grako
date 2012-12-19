@@ -10,7 +10,7 @@ Named = namedtuple('Named', ['name', 'value'])
 
 class Context(object):
     def __init__(self, rules, buf):
-        self.rules = rules
+        self.rules = {rule.name :rule.exp for rule in rules}
         self.buf = buf
         self.buf.goto(0)
 
@@ -22,18 +22,19 @@ class _Parser(object):
 
 class _DecoratorParser(_Parser):
     def __init__(self, exp):
+        assert isinstance(exp, _Parser), str(exp._elements)
         super(_DecoratorParser, self).__init__()
         self.exp = exp
 
     def parse(self, ctx, pos):
         return self.exp.parse(ctx, pos), ctx.buf.pos
 
-    def __str__(self):
+    def __repr__(self):
         return str(self.exp)
 
 
 class GroupParser(_DecoratorParser):
-    def __str__(self):
+    def __repr__(self):
         return '(%s)' % str(self.exp)
 
 
@@ -49,7 +50,7 @@ class TokenParser(_Parser):
             raise FailedToken(ctx.buf, self.token)
         return result, ctx.buf.pos
 
-    def __str__(self):
+    def __repr__(self):
         return "'%s'" % self.token.replace("'", "\\'")
 
 
@@ -66,12 +67,12 @@ class PatternParser(_Parser):
             raise FailedPattern(ctx.buf, self.pattern)
         return result, ctx.buf.pos
 
-    def __str__(self):
+    def __repr__(self):
         return '/%s/' % self.pattern.replace('/', '\/')
 
 
 class SequenceParser(_Parser):
-    def __init__(self, *sequence):
+    def __init__(self, sequence):
         super(SequenceParser, self).__init__()
         self.sequence = sequence
 
@@ -92,7 +93,7 @@ class SequenceParser(_Parser):
                     raise FailedCut(ctx.buf, e)
         return [r for r in result if r is not None]
 
-    def __str__(self):
+    def __repr__(self):
         return ' '.join(str(s) for s in self.sequence)
 
 
@@ -113,11 +114,11 @@ class ChoiceParser(_Parser):
                 items.append(e.item)
         raise FailedParse(ctx.buf, 'one of {%s}' % ','.join(items))
 
-    def __str__(self):
-        return '%s' % ' | '.join(str(o) for o in self.options)
+    def __repr__(self):
+        return ' | '.join(str(o) for o in self.options)
 
 
-class StarParser(_DecoratorParser):
+class RepeatParser(_DecoratorParser):
     def parse(self, ctx, pos):
         ctx.buf.goto(pos)
         result = []
@@ -134,18 +135,18 @@ class StarParser(_DecoratorParser):
                 break
         return result, ctx.buf.pos
 
-    def __str__(self):
-        return '(%s)*' % str(self.exp)
+    def __repr__(self):
+        return '{%s}' % str(self.exp)
 
 
-class PlusParser(StarParser):
+class RepeatOneParser(RepeatParser):
     def parse(self, ctx, pos):
         head, _p = self.exp.parse(ctx, pos)
-        tail, pos = super(PlusParser, self).parse(ctx, ctx.buf.pos)
+        tail, pos = super(RepeatOneParser, self).parse(ctx, ctx.buf.pos)
         return [head] + tail, pos
 
-    def __str__(self):
-        return '(%s)+' % str(self.exp)
+    def __repr__(self):
+        return '{%s}+' % str(self.exp)
 
 
 class OptionalParser(_DecoratorParser):
@@ -157,15 +158,15 @@ class OptionalParser(_DecoratorParser):
             ctx.buf.goto(pos)
             return None, pos
 
-    def __str__(self):
-        return '(%s)?' % str(self.exp)
+    def __repr__(self):
+        return '[%s]' % str(self.exp)
 
 
 class CutParser(_Parser):
     def parse(self, ctx, pos):
         return None, pos
 
-    def __str__(self):
+    def __repr__(self):
         return '!'
 
 
@@ -180,7 +181,7 @@ class RuleRefParser(_Parser):
         except KeyError:
             raise FailedRef(ctx.buf, self.name)
 
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
 class NamedParser(_DecoratorParser):
@@ -194,8 +195,14 @@ class NamedParser(_DecoratorParser):
         tree, pos = self.exp.parse(ctx, pos)
         return Named(self.name, tree), pos
 
-    def __str__(self):
-        return '%s:(%s)' % (self.name, str(self.exp))
+    def __repr__(self):
+        return '%s:%s' % (self.name, str(self.exp))
+
+
+class SpecialParser(_Parser):
+    def __init__(self, special):
+        super(SpecialParser, self).__init__()
+        self.special = special
 
 
 class RuleParser(NamedParser):
@@ -228,3 +235,31 @@ class RuleParser(NamedParser):
                 if len(v) == 1:
                     result[k] = v[0]
             return result, ctx.buf.pos
+
+    def __repr__(self):
+        return '%s = %s ;' % (self.name, str(self.exp))
+
+class GrammarParser(object):
+    def __init__(self, start, rules):
+        super(GrammarParser, self).__init__()
+        self.rules = rules
+        self.start = start
+
+    def parse(self, buf):
+        log.info('enter grammar')
+        try:
+            tree, _p = self.start.parse(Context(self.rules, buf), 0)
+            return tree
+        except:
+            log.info('failed grammar')
+            raise
+        else:
+            log.info('exit grammar')
+
+    def _resolve(self, rules):
+        for r in rules.values():
+            r.resolve(rules)
+
+    def __repr__(self):
+        return '\n\n'.join('%s = %s' % (rule.name, rule.exp) for rule in self.rules)
+

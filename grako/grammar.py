@@ -16,7 +16,7 @@ class Grammar(object):
     def parse(self, rule_name, text):
         self._buffer = Buffer(text)
         self._push_ast()
-        return self._rule(rule_name, rule_name)
+        return self._call(rule_name, rule_name)
 
     @property
     def ast(self):
@@ -53,7 +53,7 @@ class Grammar(object):
         self._eatcomments()
         self._eatwhitespace()
 
-    def _rule(self, name, node_name=None):
+    def _call(self, name, node_name=None):
         self._rule_stack.append(name)
         self._next_token()
         pos = self._pos

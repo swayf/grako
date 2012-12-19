@@ -10,15 +10,15 @@ class AST(Mapping):
         if previous is None:
             self._elements[key] = value
         elif isinstance(previous, list):
-            if isinstance(value, list):
-                previous.extend(value)
-            else:
-                previous.append(value)
+#            if isinstance(value, list):
+#                previous.extend(value)
+#            else:
+            previous.append(value)
         else:
-            if isinstance(value, list):
-                self._elements[key] = [previous] + value
-            else:
-                self._elements[key] = [previous, value]
+#            if isinstance(value, list):
+#                self._elements[key] = [previous] + value
+#            else:
+            self._elements[key] = [previous, value]
 
     def update(self, *args, **kwargs):
         for dct in args:
