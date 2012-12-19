@@ -8,17 +8,9 @@ class AST(Mapping):
     def add(self, key, value):
         previous = self._elements.get(key, None)
         if previous is None:
-            self._elements[key] = value
-        elif isinstance(previous, list):
-#            if isinstance(value, list):
-#                previous.extend(value)
-#            else:
-            previous.append(value)
+            self._elements[key] = [value]
         else:
-#            if isinstance(value, list):
-#                self._elements[key] = [previous] + value
-#            else:
-            self._elements[key] = [previous, value]
+            previous.append(value)
 
     def update(self, *args, **kwargs):
         for dct in args:
@@ -58,6 +50,6 @@ class AST(Mapping):
             return obj._elements
         return obj
 
-    def __repr__(self):
+    def __str__(self):
         return json.dumps(self._elements, indent=4, default=self.serializable)
 

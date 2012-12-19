@@ -194,7 +194,7 @@ class GrakoGrammarBase(Grammar):
     def _sequence_(self):
 #        p = self._pos
 #        try:
-#            self._call('element', 'elements')
+#            self._call('element', 'sequence')
 #        except FailedParse:
 #            self._goto(p)
 #            raise
@@ -203,11 +203,11 @@ class GrakoGrammarBase(Grammar):
             try:
                 if not self._try('!'):
                     self._try(',')
-                    self._call('element', 'elements')
+                    self._call('element', 'sequence')
                 else:
                     try:
                         # insert cut node here
-                        self._call('sequence', 'elements')
+                        self._call('sequence', 'sequence')
                     except FailedParse as e:
                         raise FailedCut(self._buffer, e)
             except FailedCut:
@@ -310,11 +310,17 @@ class AbstractGrakoGrammar(GrakoGrammarBase):
 
 
 class GrakoGrammar(AbstractGrakoGrammar):
+    @staticmethod
+    def _simplify(x):
+        if isinstance(x, list) and len(x) == 1:
+            return GrakoGrammar._simplify(x[0])
+        return x
+
     def token(self, ast):
         return ast
 
     def word(self, ast):
-        return ast.word
+        return ast
 
     def call(self, ast):
         return ast
@@ -326,7 +332,7 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def subexp(self, ast):
-        return ast.exp
+        return self._simplify(ast.exp)
 
     def optional(self, ast):
         return ast
@@ -341,10 +347,10 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def atom(self, ast):
-        return ast.atom
+        return self._simplify(ast.atom[0])
 
     def term(self, ast):
-        return ast.term
+        return self._simplify(ast.term[0])
 
     def named(self, ast):
         return ast
@@ -355,7 +361,7 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast.element
 
     def sequence(self, ast):
-        return ast.elements
+        return self._simplify(ast.sequence)
 
     def choice(self, ast):
         if len(ast.options) == 1:
@@ -363,7 +369,7 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def expre(self, ast):
-        return ast.expre
+        return self._simplify(ast.expre)
 
     def rule(self, ast):
         return ast
@@ -395,7 +401,7 @@ class GrakoParserGenerator(AbstractGrakoGrammar):
         return OptionalParser(ast.optional)
 
     def plus(self, ast):
-        return ast.symbol
+        return ast
 
     def repeat(self, ast):
         if ast.plus:
@@ -418,13 +424,16 @@ class GrakoParserGenerator(AbstractGrakoGrammar):
         return ast.element
 
     def sequence(self, ast):
-        if isinstance(ast.elements, list):
-            return SequenceParser(ast.elements)
-        else:
-            return SequenceParser([ast.elements])
+        if isinstance(ast.sequence, list):
+            if len(ast.sequence) == 1:
+                return ast.sequence[0]
+            return SequenceParser(ast.sequence)
+        return ast.sequence
 
     def choice(self, ast):
-        return ChoiceParser(ast.options)
+        if isinstance(ast.options, list):
+            return ChoiceParser(ast.options)
+        return ast.options
 
     def expre(self, ast):
         return ast.expre
