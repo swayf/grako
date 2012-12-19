@@ -174,7 +174,7 @@ class GrakoGrammarBase(Grammar):
     def _element_(self):
         p = self._pos
         try:
-            self._call('named', 'named')
+            self._call('named', 'element')
             return
         except FailedCut as e:
             raise e.nested
@@ -356,16 +356,14 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def element(self, ast):
-        if 'named' in ast:
-            return ast
-        return ast.element
+        return self._simplify(ast.element)
 
     def sequence(self, ast):
         return self._simplify(ast.sequence)
 
     def choice(self, ast):
         if len(ast.options) == 1:
-            return ast.options
+            return self._simplify(ast.options)
         return ast
 
     def expre(self, ast):
