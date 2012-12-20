@@ -5,17 +5,20 @@ from collections import namedtuple
 import logging
 log = logging.getLogger('grako.buffering')
 
+__all__ = ['Buffer']
+
 RE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['pos', 'line', 'col', 'text'])
 
 class Buffer(object):
-    def __init__(self, text):
+    def __init__(self, text, whitespace=None):
         self.text = text
         self.pos = 0
         self.marks = []
         self.linecache = self._build_line_cache()
+        self.whitespace = set(whitespace if whitespace else '\t \r\n')
 
     def atend(self):
         return self.pos >= len(self.text)
@@ -63,6 +66,10 @@ class Buffer(object):
         else:
             self.pos = self.marks[i]
             del self.marks[i:]
+
+    def eatwhitespace(self):
+        while self.current() in self.whitespace:
+            self.next()
 
     def match(self, token):
         if self.atend():

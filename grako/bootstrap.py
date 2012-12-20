@@ -439,5 +439,5 @@ class GrakoParserGenerator(AbstractGrakoGrammar):
         return RuleParser(ast.name[0], ast.rhs[0])
 
     def grammar(self, ast):
-        return GrammarParser('grammar', ast.rules)
+        return GrammarParser(ast.rules)
 

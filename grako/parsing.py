@@ -1,6 +1,7 @@
 import re
 import logging
 from collections import namedtuple, defaultdict
+from .buffering import Buffer
 from .exceptions import *
 #from .util import memoize
 
@@ -19,7 +20,7 @@ class Context(object):
 
 
 class _Parser(object):
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         return None, pos
 
 
@@ -29,8 +30,8 @@ class _DecoratorParser(_Parser):
         super(_DecoratorParser, self).__init__()
         self.exp = exp
 
-    def parse(self, ctx, pos):
-        return self.exp.parse(ctx, pos), ctx.buf.pos
+    def _parse(self, ctx, pos):
+        return self.exp._parse(ctx, pos), ctx.buf.pos
 
     def __str__(self):
         return str(self.exp)
@@ -46,7 +47,7 @@ class TokenParser(_Parser):
         super(TokenParser, self).__init__()
         self.token = token
 
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         ctx.buf.goto(pos)
         result = ctx.buf.match(self.token)
         if result is None:
@@ -63,7 +64,7 @@ class PatternParser(_Parser):
         self.pattern = pattern
         self.re = re.compile(pattern)
 
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         ctx.buf.goto(pos)
         result = ctx.buf.matchre(self.re)
         if result is None:
@@ -80,7 +81,7 @@ class SequenceParser(_Parser):
         assert isinstance(sequence, list), str(sequence)
         self.sequence = sequence
 
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         return self.parse_seq(ctx, pos, self.sequence), ctx.buf.pos
 
     def parse_seq(self, ctx, pos, seq):
@@ -88,7 +89,7 @@ class SequenceParser(_Parser):
         result = []
         for i, s in enumerate(seq):
             if not isinstance(s, CutParser):
-                tree, pos = s.parse(ctx, pos)
+                tree, pos = s._parse(ctx, pos)
                 result.append(tree)
             else:
                 try:
@@ -107,12 +108,12 @@ class ChoiceParser(_Parser):
         assert isinstance(options, list), repr(options)
         self.options = options
 
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         items = []
         for o in self.options:
             ctx.buf.goto(pos)
             try:
-                return o.parse(ctx, pos), ctx.buf.pos
+                return o._parse(ctx, pos), ctx.buf.pos
             except FailedCut as e:
                 raise e.nested
             except FailedParse as e:
@@ -124,13 +125,13 @@ class ChoiceParser(_Parser):
 
 
 class RepeatParser(_DecoratorParser):
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         ctx.buf.goto(pos)
         result = []
         while True:
             p = ctx.buf.pos
             try:
-                tree, pos = self.exp.parse(ctx, pos)
+                tree, pos = self.exp._parse(ctx, pos)
                 result.append(tree)
             except FailedCut:
                 ctx.buf.goto(p)
@@ -145,9 +146,9 @@ class RepeatParser(_DecoratorParser):
 
 
 class RepeatOneParser(RepeatParser):
-    def parse(self, ctx, pos):
-        head, _p = self.exp.parse(ctx, pos)
-        tail, pos = super(RepeatOneParser, self).parse(ctx, ctx.buf.pos)
+    def _parse(self, ctx, pos):
+        head, _p = self.exp._parse(ctx, pos)
+        tail, pos = super(RepeatOneParser, self)._parse(ctx, ctx.buf.pos)
         return [head] + tail, pos
 
     def __str__(self):
@@ -155,10 +156,10 @@ class RepeatOneParser(RepeatParser):
 
 
 class OptionalParser(_DecoratorParser):
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         ctx.buf.goto(pos)
         try:
-            return self.exp.parse(ctx, pos), ctx.buf.pos
+            return self.exp._parse(ctx, pos), ctx.buf.pos
         except FailedParse:
             ctx.buf.goto(pos)
             return None, pos
@@ -168,7 +169,7 @@ class OptionalParser(_DecoratorParser):
 
 
 class CutParser(_Parser):
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         return None, pos
 
     def __str__(self):
@@ -180,9 +181,9 @@ class RuleRefParser(_Parser):
         super(RuleRefParser, self).__init__()
         self.name = name
 
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         try:
-            return ctx.rules[self.name].parse(ctx, pos), ctx.buf.pos
+            return ctx.rules[self.name]._parse(ctx, pos), ctx.buf.pos
         except KeyError:
             raise FailedRef(ctx.buf, self.name)
 
@@ -196,8 +197,8 @@ class NamedParser(_DecoratorParser):
         assert isinstance(exp, _Parser), str(exp)
         self.name = name
 
-    def parse(self, ctx, pos):
-        tree, pos = self.exp.parse(ctx, pos)
+    def _parse(self, ctx, pos):
+        tree, pos = self.exp._parse(ctx, pos)
         return Named(self.name, tree), pos
 
     def __str__(self):
@@ -211,11 +212,11 @@ class SpecialParser(_Parser):
 
 
 class RuleParser(NamedParser):
-    def parse(self, ctx, pos):
+    def _parse(self, ctx, pos):
         ctx.buf.goto(pos)
         log.debug('enter %s %d %s', self.name, pos, ctx.buf.lookahead())
         try:
-            tree, pos = self.exp.parse(ctx, pos)
+            tree, pos = self.exp._parse(ctx, pos)
             log.debug('exit %s', self.name)
         except FailedPattern:
             log.debug('failed %s', self.name)
@@ -245,26 +246,24 @@ class RuleParser(NamedParser):
         return '%s = %s ;' % (self.name, str(self.exp).strip())
 
 class GrammarParser(object):
-    def __init__(self, start, rules):
+    def __init__(self, rules):
         super(GrammarParser, self).__init__()
         assert isinstance(rules, list), str(rules)
         self.rules = rules
-        self.start = start
 
-    def parse(self, buf):
+    def parse(self, start, text):
         log.info('enter grammar')
+        buf = Buffer(text)
         try:
-            tree, _p = self.start.parse(Context(self.rules, buf), 0)
+            ctx = Context(self.rules, buf)
+            start_rule = ctx.rules[start]
+            tree, _p = start_rule._parse(ctx, 0)
             return tree
         except:
             log.info('failed grammar')
             raise
         else:
             log.info('exit grammar')
-
-    def _resolve(self, rules):
-        for r in rules.values():
-            r.resolve(rules)
 
     def __str__(self):
         return '\n\n'.join(str(rule) for rule in self.rules) + '\n'

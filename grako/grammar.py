@@ -6,15 +6,16 @@ import logging
 log = logging.getLogger('grako.grammar')
 
 class Grammar(object):
-    def __init__(self, whitespace=None, comments_re=None):
-        self.whitespace = set(whitespace if whitespace else ' \n\r')
+    def __init__(self, text, whitespace=None, comments_re=None):
+        self.text = text
+        self.whitespace = set(whitespace if whitespace else '\t \n\r')
         self.comments_re = comments_re
         self._buffer = None
         self._ast_stack = []
         self._rule_stack = []
 
-    def parse(self, rule_name, text):
-        self._buffer = Buffer(text)
+    def parse(self, rule_name):
+        self._buffer = Buffer(self.text, self.whitespace)
         self._push_ast()
         return self._call(rule_name, rule_name)
 
