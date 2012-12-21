@@ -1,6 +1,8 @@
 from collections import OrderedDict, Mapping
 import json
 
+__all__ = ['AST']
+
 class AST(Mapping):
     def __init__(self, **kwargs):
         self._elements = OrderedDict(**kwargs)
@@ -37,6 +39,9 @@ class AST(Mapping):
         if key not in self._elements:
             self._elements[key] = list()
         return self._elements[key]
+
+    def __setitem__(self, key, value):
+        self._elements[key] = value
 
     def __getattr__(self, key):
         return self.__getitem__(key)
