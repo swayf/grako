@@ -1,11 +1,11 @@
 import re
 import logging
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 from .buffering import Buffer
 from .exceptions import *
-#from .util import memoize
+from .ast import AST
 
-log = logging.getLogger('grako.parsig')
+log = logging.getLogger('grako.parsing')
 
 Named = namedtuple('Named', ['name', 'value'])
 
@@ -13,15 +13,29 @@ def check(result):
     assert isinstance(result, _Parser), str(result)
 
 class Context(object):
-    def __init__(self, rules, buf):
+    def __init__(self, rules, text):
         self.rules = {rule.name :rule.exp for rule in rules}
-        self.buf = buf
+        self.buf = Buffer(text)
         self.buf.goto(0)
 
 
 class _Parser(object):
+
+    def parse(self, ctx):
+        result, newpos = self._parse(ctx, ctx.buf.pos)
+        ctx.buf.goto(newpos)
+        return result
+
     def _parse(self, ctx, pos):
         return None, pos
+
+
+class EOFParser(_Parser):
+    def _parse(self, ctx, pos):
+        ctx.buf.goto(pos)
+        if not ctx.buf.atend():
+            raise FailedParse(ctx.buf, '<EOF>')
+        return None, ctx.buf.pos
 
 
 class _DecoratorParser(_Parser):
@@ -31,7 +45,7 @@ class _DecoratorParser(_Parser):
         self.exp = exp
 
     def _parse(self, ctx, pos):
-        return self.exp._parse(ctx, pos), ctx.buf.pos
+        return self.exp.parse(ctx), ctx.buf.pos
 
     def __str__(self):
         return str(self.exp)
@@ -48,6 +62,7 @@ class TokenParser(_Parser):
         self.token = token
 
     def _parse(self, ctx, pos):
+        log.info('token %s\n\t%s', self.token, ctx.buf.lookahead())
         ctx.buf.goto(pos)
         result = ctx.buf.match(self.token)
         if result is None:
@@ -65,10 +80,12 @@ class PatternParser(_Parser):
         self.re = re.compile(pattern)
 
     def _parse(self, ctx, pos):
+        log.info('pattern %s\n\t%s', self.pattern, ctx.buf.lookahead())
         ctx.buf.goto(pos)
         result = ctx.buf.matchre(self.re)
         if result is None:
             raise FailedPattern(ctx.buf, self.pattern)
+        print 'newpos', ctx.buf.pos, ctx.buf.lookahead()
         return result, ctx.buf.pos
 
     def __str__(self):
@@ -85,18 +102,19 @@ class SequenceParser(_Parser):
         return self.parse_seq(ctx, pos, self.sequence), ctx.buf.pos
 
     def parse_seq(self, ctx, pos, seq):
+        log.debug('sequence %s', str([type(s) for s in self.sequence]))
         ctx.buf.goto(pos)
         result = []
         for i, s in enumerate(seq):
             if not isinstance(s, CutParser):
-                tree, pos = s._parse(ctx, pos)
+                tree = s.parse(ctx)
                 result.append(tree)
             else:
                 try:
                     result.extend(self.parse_seq(ctx, ctx.buf.pos, seq[i + 1:]))
                 except FailedParse as e:
                     raise FailedCut(ctx.buf, e)
-        return [r for r in result if r is not None]
+        return result  # [r for r in result if r is not None]
 
     def __str__(self):
         return ' '.join(str(s).strip() for s in self.sequence)
@@ -113,7 +131,7 @@ class ChoiceParser(_Parser):
         for o in self.options:
             ctx.buf.goto(pos)
             try:
-                return o._parse(ctx, pos), ctx.buf.pos
+                return o.parse(ctx), ctx.buf.pos
             except FailedCut as e:
                 raise e.nested
             except FailedParse as e:
@@ -126,12 +144,13 @@ class ChoiceParser(_Parser):
 
 class RepeatParser(_DecoratorParser):
     def _parse(self, ctx, pos):
+        log.info('repeat %s', str(self.exp))
         ctx.buf.goto(pos)
         result = []
         while True:
             p = ctx.buf.pos
             try:
-                tree, pos = self.exp._parse(ctx, pos)
+                tree = self.exp.parse(ctx)
                 result.append(tree)
             except FailedCut:
                 ctx.buf.goto(p)
@@ -147,9 +166,9 @@ class RepeatParser(_DecoratorParser):
 
 class RepeatOneParser(RepeatParser):
     def _parse(self, ctx, pos):
-        head, _p = self.exp._parse(ctx, pos)
-        tail, pos = super(RepeatOneParser, self)._parse(ctx, ctx.buf.pos)
-        return [head] + tail, pos
+        head = self.exp.parse(ctx)
+        tail = super(RepeatOneParser, self).parse(ctx)
+        return [head] + tail, ctx.buf.pos
 
     def __str__(self):
         return '{%s}+' % str(self.exp)
@@ -159,7 +178,7 @@ class OptionalParser(_DecoratorParser):
     def _parse(self, ctx, pos):
         ctx.buf.goto(pos)
         try:
-            return self.exp._parse(ctx, pos), ctx.buf.pos
+            return self.exp.parse(ctx), ctx.buf.pos
         except FailedParse:
             ctx.buf.goto(pos)
             return None, pos
@@ -182,8 +201,10 @@ class RuleRefParser(_Parser):
         self.name = name
 
     def _parse(self, ctx, pos):
+        log.info('ref %s %d %s', self.name, pos, ctx.buf.lookahead())
         try:
-            return ctx.rules[self.name]._parse(ctx, pos), ctx.buf.pos
+            rule = ctx.rules[self.name]
+            return rule.parse(ctx), ctx.buf.pos
         except KeyError:
             raise FailedRef(ctx.buf, self.name)
 
@@ -198,8 +219,8 @@ class NamedParser(_DecoratorParser):
         self.name = name
 
     def _parse(self, ctx, pos):
-        tree, pos = self.exp._parse(ctx, pos)
-        return Named(self.name, tree), pos
+        tree = self.exp.parse(ctx)
+        return Named(name=self.name, value=tree), ctx.buf.pos
 
     def __str__(self):
         return '%s:%s' % (self.name, str(self.exp))
@@ -210,40 +231,38 @@ class SpecialParser(_Parser):
         super(SpecialParser, self).__init__()
         self.special = special
 
+    def __str__(self):
+        return '?/%s/?' % self.pattern
 
 class RuleParser(NamedParser):
     def _parse(self, ctx, pos):
         ctx.buf.goto(pos)
-        log.debug('enter %s %d %s', self.name, pos, ctx.buf.lookahead())
+        log.info('enter %s %d %s', self.name, pos, ctx.buf.lookahead())
         try:
-            tree, pos = self.exp._parse(ctx, pos)
-            log.debug('exit %s', self.name)
+            tree, pos = self.exp.parse(ctx)
+            log.info('exit %s', self.name)
         except FailedPattern:
-            log.debug('failed %s', self.name)
+            log.info('failed %s', self.name)
             raise FailedParse(ctx.buf, self.name)
         except FailedParse as e:
-            log.debug('failed %s', self.name)
+            log.info('failed %s', self.name)
             raise FailedMatch(ctx.buf, self.name, e.item)
         except:
-            log.debug('failed %s', self.name)
+            log.info('failed %s', self.name)
             raise
 
         if not isinstance(tree, list):
             return tree, ctx.buf.pos
         else:
-            result = defaultdict(list)
+            result = AST()
             for d in tree:
                 if isinstance(d, Named):
-                    result[d[0]].append(d[1])
-#                elif isinstance(d, dict):
-#                    result.update(d)
-            for k, v in result.iteritems():
-                if len(v) == 1:
-                    result[k] = v[0]
+                    result[d.name] = d.value
             return result, ctx.buf.pos
 
     def __str__(self):
         return '%s = %s ;' % (self.name, str(self.exp).strip())
+
 
 class GrammarParser(object):
     def __init__(self, rules):
@@ -253,11 +272,12 @@ class GrammarParser(object):
 
     def parse(self, start, text):
         log.info('enter grammar')
-        buf = Buffer(text)
         try:
-            ctx = Context(self.rules, buf)
+            ctx = Context(self.rules, text)
             start_rule = ctx.rules[start]
-            tree, _p = start_rule._parse(ctx, 0)
+            tree, _p = start_rule.parse(ctx)
+            if not ctx.buf.atend():
+                raise FailedParse(ctx.buf, '<EOF>')
             return tree
         except:
             log.info('failed grammar')

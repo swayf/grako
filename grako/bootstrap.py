@@ -201,15 +201,7 @@ class GrakoGrammarBase(Grammar):
         while True:
             p = self._pos
             try:
-                if not self._try('!', 'sequence'):
-                    self._try(',')
-                    self._call('element', 'sequence')
-                else:
-                    try:
-                        # insert cut node here
-                        self._call('sequence', 'sequence')
-                    except FailedParse as e:
-                        raise FailedCut(self._buffer, e)
+                self._call('element', 'sequence')
             except FailedCut:
                 self._goto(p)
                 raise

@@ -1,4 +1,4 @@
-#FIXME: There could be a file buffer using random access
+# FIXME: There could be a file buffer using random access
 import re as regexp
 from bisect import bisect
 from collections import namedtuple
@@ -68,10 +68,11 @@ class Buffer(object):
             del self.marks[i:]
 
     def eatwhitespace(self):
-        while self.current() in self.whitespace:
+        while not self.atend() and self.current() in self.whitespace:
             self.next()
 
     def match(self, token):
+        self.eatwhitespace()
         if self.atend():
             if token is None:
                 return True
@@ -85,11 +86,12 @@ class Buffer(object):
             self.goto(p)
 
     def matchre(self, pattern):
-        log.debug("matching'%s' at %d - %s", str(pattern), self.pos, self.lookahead())
+        self.eatwhitespace()
         if isinstance(pattern, basestring):
             re = regexp.compile(pattern)
         else:
             re = pattern
+        log.debug("matching'%s' at %d - %s", re.pattern, self.pos, self.lookahead())
         matched = re.match(self.text, self.pos)
         if matched:
             token = matched.group()

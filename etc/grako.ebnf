@@ -1,5 +1,5 @@
 
-grammar = rules:{rule} ;
+grammar = rules:{rule}+ ;
 
 rule = rhs:(name:word '=' ! expre:expre) ('.' | ';') ! ;
 
@@ -27,7 +27,7 @@ atom = atom:(token | word | pattern) ;
 
 token = token:('"' ?/([^"]|")*/? '"' | "'" ?/([^']|')*/? "'") ;
 
-word = word:?/[-_A-Za-z0-9]/? ;
+word = word:?/[-_A-Za-z0-9]+/? ;
 
 pattern = '?/' pattern:?/(.*?)(?=/\?)/? '/?' ;
 
