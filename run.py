@@ -11,7 +11,7 @@ def main():
     text = open('etc/grako.ebnf').read()
     g = GrakoGrammar(text)
     g.parse('grammar')
-#    print g.ast
+    print g.ast
     generated_grammar0 = str(g.ast['grammar'][0])
     open('0.ebnf', 'w').write(text)
 
@@ -56,7 +56,7 @@ def main():
     print '-' * 40, 'phase 5'
     text = open('4.ebnf').read()
     result = parser.parse('grammar', text)
-    print str(result)
+    print result
 
 if __name__ == '__main__':
     main()
