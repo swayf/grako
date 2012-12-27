@@ -1,14 +1,14 @@
 grammar = rules:{rule}+ ;
 
-rule = rhs:(name:word '=' ! expre:expre) ('.' | ';') ! ;
+rule = name:word '=' ! rhs:expre ('.' | ';') ! ;
 
 expre = expre:option ;
 
-option = first:sequence {'|' ! options:sequence} ;
+option = options:sequence {'|' ! options:sequence} ;
 
 sequence = elements:element {[','] elements:element} ;
 
-element = named | term ;
+element = element:(named | term) ;
 
 named = name:word ':' value:term ;
 
@@ -22,14 +22,16 @@ optional = '[' ! optional:expre ']' ! ;
 
 special = '?(' ! special:?/(.*)/? ')?' ! ;
 
-atom = atom:(cut | token | word | pattern) ;
+atom = atom:(cut | token | call | pattern) ;
+
+call = word ;
 
 void = '()' ;
 
 cut = '!' ;
 
-token = token:('"' ?/([^"]|\\")*/? '"' | "'" ?/([^']|\\')*/? "'") ;
+token = ('"' ?/([^"]|\\")*/? '"' | "'" ?/([^']|\\')*/? "'") ;
 
-word = word:?/[-_A-Za-z0-9]+/? ;
+word = ?/[-_A-Za-z0-9]+/? ;
 
 pattern = '?/' pattern:?/(.*?)(?=/\?)/? '/?' ;
