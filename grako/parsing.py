@@ -2,7 +2,7 @@ import re
 import logging
 from collections import namedtuple
 from .buffering import Buffer
-from .exceptions import *
+from .exceptions import *  # @UnusedWildImport
 from .ast import AST
 
 log = logging.getLogger('grako.parsing')
@@ -19,7 +19,7 @@ class Context(object):
         self.buf.goto(0)
         self._rule_stack = []
 
-    def gotp(self, pos):
+    def goto(self, pos):
         self.buf.goto(pos)
 
     @property
@@ -103,15 +103,17 @@ class SequenceParser(_Parser):
     def parse_seq(self, ctx, seq):
         log.debug('sequence %s', str([type(s) for s in self.sequence]))
         result = []
-        for i, s in enumerate(seq):
-            if not isinstance(s, CutParser):
-                tree = s.parse(ctx)
-                result.append(tree)
-            else:
-                try:
-                    result.extend(self.parse_seq(ctx, ctx.buf.pos, seq[i + 1:]))
-                except FailedParse as e:
-                    raise FailedCut(ctx.buf, e)
+        for _i, s in enumerate(seq):
+            tree = s.parse(ctx)
+            result.append(tree)
+#            if not isinstance(s, CutParser):
+#                tree = s.parse(ctx)
+#                result.append(tree)
+#            else:
+#                try:
+#                    result.extend(self.parse_seq(ctx, seq[i + 1:]))
+#                except FailedParse as e:
+#                    raise FailedCut(ctx.buf, e)
         return [r for r in result if r is not None]
 
     def __str__(self):
@@ -216,16 +218,7 @@ class NamedParser(_DecoratorParser):
         self.name = name
 
     def parse(self, ctx):
-        ctx._rule_stack.append(self.name)
-        log.info('%s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
-        try:
-            tree = self.exp.parse(ctx)
-            log.info('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
-            return Named(name=self.name, value=tree)
-        except FailedParse:
-            log.info('FAIL %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
-        finally:
-            ctx._rule_stack.pop()
+        return Named(name=self.name, value=self.exp.parse(ctx))
 
     def __str__(self):
         return '%s:%s' % (self.name, str(self.exp))
@@ -241,7 +234,16 @@ class SpecialParser(_Parser):
 
 class RuleParser(NamedParser):
     def parse(self, ctx):
-        tree = self.exp.parse(ctx)
+        ctx._rule_stack.append(self.name)
+        log.info('%s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+        try:
+            tree = self.exp.parse(ctx)
+            log.info('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+        except FailedParse:
+            log.info('FAIL %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+            raise
+        finally:
+            ctx._rule_stack.pop()
 
         if not isinstance(tree, list):
             return tree
