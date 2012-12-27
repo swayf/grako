@@ -1,4 +1,3 @@
-
 grammar = rules:{rule}+ ;
 
 rule = rhs:(name:word '=' ! expre:expre) ('.' | ';') ! ;
@@ -13,7 +12,7 @@ element = named | term ;
 
 named = name:word ':' value:term ;
 
-term = term:(void | subexp | repeat | optional | special | atom) ; 
+term = term:(void | subexp | repeat | optional | special | atom) ;
 
 subexp = '(' ! exp:expre ')' ! ;
 
@@ -23,12 +22,14 @@ optional = '[' ! optional:expre ']' ! ;
 
 special = '?(' ! special:?/(.*)/? ')?' ! ;
 
-atom = atom:(token | word | pattern) ;
+atom = atom:(cut | token | word | pattern) ;
 
-token = token:('"' ?/([^"]|")*/? '"' | "'" ?/([^']|')*/? "'") ;
+void = '()' ;
+
+cut = '!' ;
+
+token = token:('"' ?/([^"]|\\")*/? '"' | "'" ?/([^']|\\')*/? "'") ;
 
 word = word:?/[-_A-Za-z0-9]+/? ;
 
 pattern = '?/' pattern:?/(.*?)(?=/\?)/? '/?' ;
-
-void = '()' ;
