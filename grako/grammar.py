@@ -1,6 +1,6 @@
 from .util import memoize
 from .buffering import Buffer
-from .exceptions import * #@UnusedWildImport
+from .exceptions import *  # @UnusedWildImport
 from .ast import AST
 import logging
 log = logging.getLogger('grako.grammar')
@@ -37,8 +37,7 @@ class Grammar(object):
         self._buffer.goto(pos)
 
     def _eatwhitespace(self):
-        while self._buffer.current() in self.whitespace:
-            self._buffer.next()
+        self._buffer.eatwhitespace()
 
     def _eatcomments(self):
         if self.comments_re is not None:

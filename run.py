@@ -29,8 +29,8 @@ def main():
     g.parse('grammar')
     generated_grammar2 = str(g.ast['grammar'][0])
 #    print generated_grammar2
-    open('2.ebnf', 'w').write(generated_grammar2.decode('string-escape'))
-#    assert generated_grammar2 == generated_grammar1
+    open('2.ebnf', 'w').write(generated_grammar2)
+    assert generated_grammar2 == generated_grammar1
 
     print '-' * 40, 'phase 3'
     text = open('2.ebnf').read()
@@ -39,7 +39,7 @@ def main():
     g.parse('grammar')
     generated_grammar3 = str(g.ast['grammar'][0])
 #    print generated_grammar3
-    open('3.ebnf', 'w').write(generated_grammar3.decode('string-escape'))
+    open('3.ebnf', 'w').write(generated_grammar3)
     assert generated_grammar3 == generated_grammar2
 
     print '-' * 40, 'phase 4'
@@ -49,10 +49,11 @@ def main():
     parser = g.ast['grammar'][0]
     generated_grammar4 = str(parser)
 #    print generated_grammar4
-    open('4.ebnf', 'w').write(generated_grammar4.decode('string-escape'))
+    open('4.ebnf', 'w').write(generated_grammar4)
     assert generated_grammar4 == generated_grammar3
 
     print '-' * 40, 'phase 5'
+    text = open('4.ebnf').read()
     result = parser.parse('grammar', text)
     print result
 

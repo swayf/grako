@@ -71,7 +71,12 @@ class TokenParser(_Parser):
         return result
 
     def __str__(self):
-        return "'%s'" % self.token.encode('string-escape')
+        if "'" in self.token:
+            if '"' in self.token:
+                return "'%s'" % self.token.encode('string-escape')
+            else:
+                return '"%s"' % self.token
+        return "'%s'" % self.token
 
 
 class PatternParser(_Parser):
@@ -134,7 +139,7 @@ class ChoiceParser(_Parser):
             try:
                 return o.parse(ctx)
             except FailedCut as e:
-                raise e.nested
+                raise
             except FailedParse as e:
                 items.append(e.item)
         raise FailedParse(ctx.buf, 'one of {%s}' % ','.join(items))
@@ -267,12 +272,15 @@ class GrammarParser(object):
     def parse(self, start, text):
         log.info('enter grammar')
         try:
-            ctx = Context(self.rules, text)
-            start_rule = ctx.rules[start]
-            tree, _p = start_rule.parse(ctx)
-            if not ctx.buf.atend():
-                raise FailedParse(ctx.buf, '<EOF>')
-            return tree
+            try:
+                ctx = Context(self.rules, text)
+                start_rule = ctx.rules[start]
+                tree, _p = start_rule.parse(ctx)
+                if not ctx.buf.atend():
+                    raise FailedParse(ctx.buf, '<EOF>')
+                return tree
+            except FailedCut as e:
+                raise e.nested
         except:
             log.info('failed grammar')
             raise
