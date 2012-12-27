@@ -275,7 +275,8 @@ class GrammarParser(object):
             try:
                 ctx = Context(self.rules, text)
                 start_rule = ctx.rules[start]
-                tree, _p = start_rule.parse(ctx)
+                tree = start_rule.parse(ctx)
+                ctx.buf.eatwhitespace()
                 if not ctx.buf.atend():
                     raise FailedParse(ctx.buf, '<EOF>')
                 return tree

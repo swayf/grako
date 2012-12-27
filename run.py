@@ -55,7 +55,7 @@ def main():
     print '-' * 40, 'phase 5'
     text = open('4.ebnf').read()
     result = parser.parse('grammar', text)
-    print result
+    print str(result)
 
 if __name__ == '__main__':
     main()
