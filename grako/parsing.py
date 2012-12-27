@@ -1,6 +1,7 @@
 import re
 import logging
 from collections import namedtuple
+from .util import memoize
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
@@ -64,7 +65,7 @@ class TokenParser(_Parser):
         self.token = token
 
     def parse(self, ctx):
-        log.info('token <%s>\n\t%s', self.token, ctx.buf.lookahead())
+        log.debug('token <%s>\n\t%s', self.token, ctx.buf.lookahead())
         result = ctx.buf.match(self.token)
         if result is None:
             raise FailedToken(ctx.buf, self.token)
@@ -86,7 +87,7 @@ class PatternParser(_Parser):
         self.re = re.compile(pattern)
 
     def parse(self, ctx):
-        log.info('pattern <%s>\n\t%s', self.pattern, ctx.buf.lookahead())
+        log.debug('pattern <%s>\n\t%s', self.pattern, ctx.buf.lookahead())
         result = ctx.buf.matchre(self.re)
         if result is None:
             raise FailedPattern(ctx.buf, self.pattern)
@@ -150,7 +151,7 @@ class ChoiceParser(_Parser):
 
 class RepeatParser(_DecoratorParser):
     def parse(self, ctx):
-        log.info('repeat %s', str(self.exp))
+        log.debug('repeat %s', str(self.exp))
         result = []
         while True:
             p = ctx.buf.pos
@@ -240,12 +241,12 @@ class SpecialParser(_Parser):
 class RuleParser(NamedParser):
     def parse(self, ctx):
         ctx._rule_stack.append(self.name)
-        log.info('%s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+        log.debug('%s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
         try:
             tree = self.exp.parse(ctx)
-            log.info('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+            log.debug('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
         except FailedParse:
-            log.info('FAIL %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+            log.debug('FAIL %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
             raise
         finally:
             ctx._rule_stack.pop()
@@ -258,6 +259,11 @@ class RuleParser(NamedParser):
                 if isinstance(d, Named):
                     result[d.name] = d.value
             return result
+
+    @memoize
+    def _invoke_rule(self, ctx, pos):
+        ctx.goto(pos)
+        return (self.exp.parse(ctx), ctx.pos)
 
     def __str__(self):
         return '%s = %s ;' % (self.name, str(self.exp).strip())
@@ -279,14 +285,13 @@ class GrammarParser(object):
                 ctx.buf.eatwhitespace()
                 if not ctx.buf.atend():
                     raise FailedParse(ctx.buf, '<EOF>')
+                log.info('SUCCESS grammar')
                 return tree
             except FailedCut as e:
                 raise e.nested
         except:
-            log.info('failed grammar')
+            log.warning('failed grammar')
             raise
-        else:
-            log.info('exit grammar')
 
     def __str__(self):
         return '\n\n'.join(str(rule) for rule in self.rules) + '\n'

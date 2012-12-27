@@ -10,8 +10,9 @@ def main():
     print '-' * 40, 'phase 0'
     text = open('etc/grako.ebnf').read()
     g = GrakoGrammar(text)
-    _result = g.parse('grammar')
+    g.parse('grammar')
 #    print g.ast
+    generated_grammar0 = str(g.ast['grammar'][0])
     open('0.ebnf', 'w').write(text)
 
     print '-' * 40, 'phase 1'
