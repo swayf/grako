@@ -260,7 +260,7 @@ class RuleParser(NamedParser):
         ctx.push_ast()
         log.debug('%s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
         try:
-            _tree, newpos = self._invoke_rule(ctx, ctx.pos)
+            _tree, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
             ctx.goto(newpos)
             log.debug('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
             return ctx.ast
@@ -271,7 +271,8 @@ class RuleParser(NamedParser):
             ctx.pop_ast()
             ctx._rule_stack.pop()
 
-    def _invoke_rule(self, ctx, pos):
+    @memoize
+    def _invoke_rule(self, name, ctx, pos):
         ctx.goto(pos)
         return (self.exp.parse(ctx), ctx.pos)
 
