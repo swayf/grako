@@ -1,11 +1,18 @@
 import sys
 import functools
 
+__all__ = ['simplify', 'memoize', 'trim', 'indent']
+
+def simplify(x):
+    if isinstance(x, list) and len(x) == 1:
+        return simplify(x[0])
+    return x
+
 
 def memoize(func):
     func.cache = {}
     def memoize(*args, **kw):
-        if kw: # frozenset is used to ensure hashability
+        if kw:  # frozenset is used to ensure hashability
             key = args, frozenset(kw.iteritems())
         else:
             key = args

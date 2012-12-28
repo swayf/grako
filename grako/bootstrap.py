@@ -1,5 +1,6 @@
-from grammar import * #@UnusedWildImport
-from parsing import * #@UnusedWildImport
+from .util import simplify
+from .grammar import *  # @UnusedWildImport
+from .parsing import *  # @UnusedWildImport
 
 __all__ = ['GrakoGrammar', 'GrakoParserGenerator']
 
@@ -301,12 +302,6 @@ class AbstractGrakoGrammar(GrakoGrammarBase):
         return ast
 
 
-def _simplify(x):
-    if isinstance(x, list) and len(x) == 1:
-        return _simplify(x[0])
-    return x
-
-
 class GrakoGrammar(AbstractGrakoGrammar):
 
     def token(self, ast):
@@ -325,7 +320,7 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def subexp(self, ast):
-        return _simplify(ast.exp)
+        return simplify(ast.exp)
 
     def optional(self, ast):
         return ast
@@ -340,27 +335,27 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
     def atom(self, ast):
-        return _simplify(ast.atom[0])
+        return simplify(ast.atom[0])
 
     def term(self, ast):
-        return _simplify(ast.term[0])
+        return simplify(ast.term[0])
 
     def named(self, ast):
         return ast
 
     def element(self, ast):
-        return _simplify(ast.element)
+        return simplify(ast.element)
 
     def sequence(self, ast):
-        return _simplify(ast.sequence)
+        return simplify(ast.sequence)
 
     def choice(self, ast):
         if len(ast.options) == 1:
-            return _simplify(ast.options)
+            return simplify(ast.options)
         return ast
 
     def expre(self, ast):
-        return _simplify(ast.expre)
+        return simplify(ast.expre)
 
     def rule(self, ast):
         return ast
@@ -416,7 +411,7 @@ class GrakoParserGenerator(AbstractGrakoGrammar):
 
     def sequence(self, ast):
         if len(ast.sequence) == 1:
-            return _simplify(ast.sequence)
+            return simplify(ast.sequence)
         return SequenceParser(ast.sequence)
 
     def choice(self, ast):

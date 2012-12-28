@@ -14,9 +14,9 @@ named = name:word ':' value:term ;
 
 term = term:(void | subexp | repeat | optional | special | atom) ;
 
-subexp = '(' ! exp:expre ')' ! ;
+subexp = '(' ! subexp:expre ')' ! ;
 
-repeat = '{' ! exp:expre '}' ! plus:['-' | '+'] ! ;
+repeat = '{' ! repeat:expre '}' ! plus:['-' | '+'] ! ;
 
 optional = '[' ! optional:expre ']' ! ;
 
@@ -24,13 +24,13 @@ special = '?(' ! special:?/(.*)/? ')?' ! ;
 
 atom = atom:(cut | token | call | pattern) ;
 
-call = word ;
+call = call:word ;
 
-void = '()' ;
+void = void:'()' ;
 
-cut = '!' ;
+cut = cut:'!' ;
 
-token = ('"' ?/([^"]|\\")*/? '"' | "'" ?/([^']|\\')*/? "'") ;
+token = ('"' token:?/([^"]|\\")*/? '"' | "'" token:?/([^']|\\')*/? "'") ;
 
 word = ?/[-_A-Za-z0-9]+/? ;
 

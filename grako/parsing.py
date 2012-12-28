@@ -1,14 +1,11 @@
 import re
 import logging
-from collections import namedtuple
-from .util import memoize
+from .util import memoize, simplify
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
 
 log = logging.getLogger('grako.parsing')
-
-Named = namedtuple('Named', ['name', 'value'])
 
 def check(result):
     assert isinstance(result, _Parser), str(result)
@@ -18,6 +15,7 @@ class Context(object):
         self.rules = {rule.name :rule for rule in rules}
         self.buf = Buffer(text)
         self.buf.goto(0)
+        self._ast_stack = [AST()]
         self._rule_stack = []
 
     def goto(self, pos):
@@ -29,6 +27,21 @@ class Context(object):
 
     def rulestack(self):
         return '.'.join(self._rule_stack)
+
+    @property
+    def ast(self):
+        return self._ast_stack[-1]
+
+    def push_ast(self):
+        self._ast_stack.append(AST())
+
+    def pop_ast(self):
+        return self._ast_stack.pop()
+
+    def add_ast_node(self, name, node):
+        if name is not None and node:
+            self.ast.add(name, node)
+        return node
 
 class _Parser(object):
 
@@ -104,7 +117,7 @@ class SequenceParser(_Parser):
         self.sequence = sequence
 
     def parse(self, ctx):
-        return self.parse_seq(ctx, self.sequence)
+        return simplify(self.parse_seq(ctx, self.sequence))
 
     def parse_seq(self, ctx, seq):
         log.debug('sequence %s', str([type(s) for s in self.sequence]))
@@ -163,7 +176,7 @@ class RepeatParser(_DecoratorParser):
             except FailedParse:
                 ctx.buf.goto(p)
                 break
-        return result
+        return simplify(result)
 
     def __str__(self):
         return '{%s}' % str(self.exp)
@@ -172,7 +185,7 @@ class RepeatParser(_DecoratorParser):
 class RepeatOneParser(RepeatParser):
     def parse(self, ctx):
         head = self.exp.parse(ctx)
-        return [head] + super(RepeatOneParser, self).parse(ctx)
+        return simplify([head] + super(RepeatOneParser, self).parse(ctx))
 
     def __str__(self):
         return '{%s}+' % str(self.exp)
@@ -224,7 +237,9 @@ class NamedParser(_DecoratorParser):
         self.name = name
 
     def parse(self, ctx):
-        return Named(name=self.name, value=self.exp.parse(ctx))
+        value = self.exp.parse(ctx)
+        ctx.add_ast_node(self.name, value)
+        return value
 
     def __str__(self):
         return '%s:%s' % (self.name, str(self.exp))
@@ -238,29 +253,24 @@ class SpecialParser(_Parser):
     def __str__(self):
         return '?/%s/?' % self.pattern
 
+
 class RuleParser(NamedParser):
     def parse(self, ctx):
         ctx._rule_stack.append(self.name)
+        ctx.push_ast()
         log.debug('%s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
         try:
-            tree = self.exp.parse(ctx)
+            _tree, newpos = self._invoke_rule(ctx, ctx.pos)
+            ctx.goto(newpos)
             log.debug('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+            return ctx.ast
         except FailedParse:
             log.debug('FAIL %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
             raise
         finally:
+            ctx.pop_ast()
             ctx._rule_stack.pop()
 
-        if not isinstance(tree, list):
-            return tree
-        else:
-            result = AST()
-            for d in tree:
-                if isinstance(d, Named):
-                    result[d.name] = d.value
-            return result
-
-    @memoize
     def _invoke_rule(self, ctx, pos):
         ctx.goto(pos)
         return (self.exp.parse(ctx), ctx.pos)
@@ -282,11 +292,12 @@ class GrammarParser(object):
                 ctx = Context(self.rules, text)
                 start_rule = ctx.rules[start]
                 tree = start_rule.parse(ctx)
+                ctx.add_ast_node(start, tree)
                 ctx.buf.eatwhitespace()
                 if not ctx.buf.atend():
                     raise FailedParse(ctx.buf, '<EOF>')
                 log.info('SUCCESS grammar')
-                return tree
+                return ctx.ast
             except FailedCut as e:
                 raise e.nested
         except:

@@ -59,5 +59,5 @@ class AST(Mapping):
         return self.serializable(self._elements)
 
     def __str__(self):
-        return json.dumps(self._elements, indent=4, default=self.serializable)
+        return json.dumps(self._elements, indent=2, default=self.serializable)
 
