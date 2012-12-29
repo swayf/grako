@@ -1,4 +1,3 @@
-from .util import simplify
 from .grammar import *  # @UnusedWildImport
 from .parsing import *  # @UnusedWildImport
 

@@ -1,6 +1,5 @@
 import re
 import logging
-import itertools
 from .util import memoize, simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
@@ -46,13 +45,8 @@ class Context(object):
         return node
 
 class _Parser(Renderer):
-    _counter = itertools.count()
-
     def parse(self, ctx):
         return None
-
-    def counter(self):
-        return self._counter.next()
 
 class EOFParser(_Parser):
     def parse(self, ctx):
@@ -115,8 +109,7 @@ class TokenParser(_Parser):
     def render_fields(self, fields):
         fields.update(token=self.token.encode('string-escape'))
 
-    template = '''exp = self._token('{token}')
-                '''
+    template = "exp = self._token('{token}')"
 
 
 class PatternParser(_Parser):
@@ -169,7 +162,7 @@ class SequenceParser(_Parser):
         return ' '.join(str(s).strip() for s in self.sequence)
 
     def render_fields(self, fields):
-        fields.update(seq='\n'.join(render(s) for s in self.sequence))
+        fields.update(seq='\n'.join(trim(render(s)) for s in self.sequence))
 
     template = '{seq}'
 
@@ -243,15 +236,18 @@ class RepeatParser(_DecoratorParser):
     def __str__(self):
         return '{%s}' % str(self.exp)
 
-    template = '''\
+    def render_fields(self, fields):
+        fields.update(innerexp=indent(trim(render(self.exp))))
+
+    template = '''
                 while True:
                     p = self.pos
                     try:
-                        {exp}
+                    {innerexp}
                     except FailedCut:
                         raise
                     except FailedParse:
-                        ctx.buf.goto(p)
+                        self.goto(p)
                         break
                 '''
 
@@ -263,6 +259,22 @@ class RepeatOneParser(RepeatParser):
 
     def __str__(self):
         return '{%s}+' % str(self.exp)
+
+    def render_fields(self, fields):
+        fields.update(innerexp=indent(render(self.exp), 2))
+
+    template = '''\
+                {exp}
+                while True:
+                    p = self.pos
+                    try:
+                    {innerexp}
+                    except FailedCut:
+                        raise
+                    except FailedParse:
+                        self.goto(p)
+                        break
+                '''
 
 
 class OptionalParser(_DecoratorParser):
@@ -309,10 +321,8 @@ class NamedParser(_DecoratorParser):
     def __str__(self):
         return '%s:%s' % (self.name, str(self.exp))
 
-    template = '''\
-                {exp}
-                self.ast["{name}"] += exp
-                '''
+    template = '''{exp}
+                    self.ast["{name}"] += exp '''
 
 
 class SpecialParser(_Parser):
@@ -341,8 +351,7 @@ class RuleRefParser(_Parser):
     def __str__(self):
         return self.name
 
-    template = '''exp = self._call("{name}")
-                '''
+    template = 'exp = self._call("{name}")'
 
 
 class RuleParser(NamedParser):

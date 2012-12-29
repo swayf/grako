@@ -1,3 +1,4 @@
+import itertools
 from .util import trim
 
 def render(node):
@@ -21,6 +22,10 @@ def render(node):
 
 class Renderer(object):
     template = ''
+    _counter = itertools.count()
+
+    def counter(self):
+        return self._counter.next()
 
     def render_fields(self, fields):
         pass
