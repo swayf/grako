@@ -212,7 +212,8 @@ class ChoiceParser(_Parser):
                     '''
 
     template = '''\
-                while True:
+                for _ in ('once',):
+                    # break with the first option that succeeds
                 {options}
                     raise FailedParse(self.buf, 'no viable option') '''
 
@@ -430,10 +431,24 @@ class GrammarParser(Renderer):
         return '\n\n'.join(str(rule) for rule in self.rules) + '\n'
 
     def render_fields(self, fields):
-        fields.update(rules=indent(render(self.rules)))
+        abstract_template = trim(self.abstract_rule_template)
+        abstract_rules = [abstract_template.format(name=rule.name) for rule in self.rules]
+        abstract_rules = indent('\n'.join(abstract_rules))
+        fields.update(rules=indent(render(self.rules)),
+                      abstract_rules=abstract_rules
+                      )
+
+
+    abstract_rule_template = '''
+            def {name}(ast):
+                return ast
+            '''
 
     template = '''\
+                from grammar import *
+
                 class {name}ParserBase(Grammar):
                 {rules}
-
+                class Abstract{name}Parser({name}ParserBase):
+                {abstract_rules}
                 '''

@@ -4,7 +4,7 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 logging.getLogger('grako.buffering').setLevel(logging.WARNING)
 logging.getLogger('grako.grammar').setLevel(logging.WARNING)
-logging.getLogger('grako.parsing').setLevel(logging.INFO)
+logging.getLogger('grako.parsing').setLevel(logging.WARNING)
 
 def main():
     print '-' * 40, 'phase 0'
