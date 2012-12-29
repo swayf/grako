@@ -7,7 +7,7 @@ logging.getLogger('grako.grammar').setLevel(logging.WARNING)
 logging.getLogger('grako.parsing').setLevel(logging.WARNING)
 
 def main():
-    print '-' * 40, 'phase 0'
+    print '-' * 20, 'phase 0 - parse using the bootstrap grammar'
     text = open('etc/grako.ebnf').read()
     g = GrakoParser(text)
     g.parse('grammar')
@@ -15,7 +15,7 @@ def main():
 #    generated_grammar0 = str(g.ast['grammar'][0])
     open('0.ebnf', 'w').write(text)
 
-    print '-' * 40, 'phase 1'
+    print '-' * 20, 'phase 1 - parse with parser generator'
     text = open('0.ebnf').read()
     g = GrakoGrammarGenerator(text)
     g.parse('grammar')
@@ -24,7 +24,7 @@ def main():
 #    print generated_grammar1
 
 
-    print '-' * 40, 'phase 2'
+    print '-' * 20, 'phase 2 - parse previous output with the parser generator'
     text = open('1.ebnf').read()
     g = GrakoGrammarGenerator(text)
     g.parse('grammar')
@@ -33,17 +33,16 @@ def main():
     open('2.ebnf', 'w').write(generated_grammar2)
     assert generated_grammar2 == generated_grammar1
 
-    print '-' * 40, 'phase 3'
+    print '-' * 20, 'phase 3 - repeat'
     text = open('2.ebnf').read()
     g = GrakoGrammarGenerator(text)
-    g.parse('grammar')
     g.parse('grammar')
     generated_grammar3 = str(g.ast['grammar'][0])
 #    print generated_grammar3
     open('3.ebnf', 'w').write(generated_grammar3)
     assert generated_grammar3 == generated_grammar2
 
-    print '-' * 40, 'phase 4'
+    print '-' * 20, 'phase 4 - repeat'
     text = open('3.ebnf').read()
     g = GrakoGrammarGenerator(text)
     g.parse('grammar')
@@ -53,16 +52,16 @@ def main():
     open('4.ebnf', 'w').write(generated_grammar4)
     assert generated_grammar4 == generated_grammar3
 
-    print '-' * 40, 'phase 5'
+    print '-' * 20, 'phase 5 - parse using the grammar model'
     text = open('4.ebnf').read()
     _result = parser.parse('grammar', text)
 #    print _result
 
-    print '-' * 40, 'phase 6'
+    print '-' * 20, 'phase 6 - generate parser code'
     gencode = parser.render()
     open('gencode6.py', 'w').write(gencode)
 
-    print '-' * 40, 'phase 7'
+    print '-' * 20, 'phase 7 - import generated code'
     from gencode6 import AbstractGrakoParser
 
 
