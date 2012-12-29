@@ -243,6 +243,18 @@ class RepeatParser(_DecoratorParser):
     def __str__(self):
         return '{%s}' % str(self.exp)
 
+    template = '''\
+                while True:
+                    p = self.pos
+                    try:
+                        {exp}
+                    except FailedCut:
+                        raise
+                    except FailedParse:
+                        ctx.buf.goto(p)
+                        break
+                '''
+
 
 class RepeatOneParser(RepeatParser):
     def parse(self, ctx):
@@ -299,7 +311,7 @@ class NamedParser(_DecoratorParser):
 
     template = '''\
                 {exp}
-                self.ast["{name}"] = exp
+                self.ast["{name}"] += exp
                 '''
 
 
