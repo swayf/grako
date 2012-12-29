@@ -56,8 +56,8 @@ def trim(docstring):
         for line in lines[1:]:
             trimmed.append(line[indent:].rstrip())
     # Strip off trailing and leading blank lines:
-    while trimmed and not trimmed[-1]:
-        trimmed.pop()
+#    while trimmed and not trimmed[-1]:
+#        trimmed.pop()
     while trimmed and not trimmed[0]:
         trimmed.pop(0)
     # Return a single string:

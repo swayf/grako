@@ -1,6 +1,7 @@
 import re
 import logging
-from .util import memoize, simplify
+from .util import memoize, simplify, indent
+from .rendering import Renderer, render
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
@@ -43,7 +44,7 @@ class Context(object):
             self.ast.add(name, node)
         return node
 
-class _Parser(object):
+class _Parser(Renderer):
 
     def parse(self, ctx):
         return None
@@ -52,6 +53,8 @@ class EOFParser(_Parser):
     def parse(self, ctx):
         if not ctx.buf.atend():
             raise FailedParse(ctx.buf, '<EOF>')
+
+    template = 'self._eol()'
 
 
 class _DecoratorParser(_Parser):
@@ -71,6 +74,7 @@ class GroupParser(_DecoratorParser):
     def __str__(self):
         return '(%s)' % str(self.exp).strip()
 
+    template = '({exp})'
 
 class TokenParser(_Parser):
     def __init__(self, token):
@@ -92,22 +96,30 @@ class TokenParser(_Parser):
                 return '"%s"' % self.token
         return "'%s'" % self.token
 
+    template = '''\
+                self._token("{token}")
+                '''
+
 
 class PatternParser(_Parser):
     def __init__(self, pattern):
         super(PatternParser, self).__init__()
         self.pattern = pattern
-        self.re = re.compile(pattern)
+        self._re = re.compile(pattern)
 
     def parse(self, ctx):
         log.debug('pattern <%s>\n\t%s', self.pattern, ctx.buf.lookahead())
-        result = ctx.buf.matchre(self.re)
+        result = ctx.buf.matchre(self._re)
         if result is None:
             raise FailedPattern(ctx.buf, self.pattern)
         return result
 
     def __str__(self):
         return '?/%s/?' % self.pattern
+
+    template = '''\
+                self._pattern("{pattern}")
+                '''
 
 
 class SequenceParser(_Parser):
@@ -212,6 +224,35 @@ class CutParser(_Parser):
         return '!'
 
 
+class NamedParser(_DecoratorParser):
+    def __init__(self, name, exp):
+        super(NamedParser, self).__init__(exp)
+        assert isinstance(exp, _Parser), str(exp)
+        self.name = name
+
+    def parse(self, ctx):
+        value = self.exp.parse(ctx)
+        ctx.add_ast_node(self.name, value)
+        return value
+
+    def __str__(self):
+        return '%s:%s' % (self.name, str(self.exp))
+
+    template = '''\
+                exp = {exp}
+                self.ast["{name}"] = exp
+                '''
+
+
+class SpecialParser(_Parser):
+    def __init__(self, special):
+        super(SpecialParser, self).__init__()
+        self.special = special
+
+    def __str__(self):
+        return '?/%s/?' % self.pattern
+
+
 class RuleRefParser(_Parser):
     def __init__(self, name):
         super(RuleRefParser, self).__init__()
@@ -229,29 +270,7 @@ class RuleRefParser(_Parser):
     def __str__(self):
         return self.name
 
-
-class NamedParser(_DecoratorParser):
-    def __init__(self, name, exp):
-        super(NamedParser, self).__init__(exp)
-        assert isinstance(exp, _Parser), str(exp)
-        self.name = name
-
-    def parse(self, ctx):
-        value = self.exp.parse(ctx)
-        ctx.add_ast_node(self.name, value)
-        return value
-
-    def __str__(self):
-        return '%s:%s' % (self.name, str(self.exp))
-
-
-class SpecialParser(_Parser):
-    def __init__(self, special):
-        super(SpecialParser, self).__init__()
-        self.special = special
-
-    def __str__(self):
-        return '?/%s/?' % self.pattern
+    template = 'self.call_("{name}")'
 
 
 class RuleParser(NamedParser):
@@ -279,11 +298,21 @@ class RuleParser(NamedParser):
     def __str__(self):
         return '%s = %s ;' % (self.name, str(self.exp).strip())
 
+    def render_fields(self, fields):
+        fields.update(exp=indent(render(self.exp)))
 
-class GrammarParser(object):
-    def __init__(self, rules):
+    template = '''
+                def _{name}_(self):
+                {exp}
+
+                '''
+
+
+class GrammarParser(Renderer):
+    def __init__(self, name, rules):
         super(GrammarParser, self).__init__()
         assert isinstance(rules, list), str(rules)
+        self.name = name
         self.rules = rules
 
     def parse(self, start, text):
@@ -308,3 +337,11 @@ class GrammarParser(object):
     def __str__(self):
         return '\n\n'.join(str(rule) for rule in self.rules) + '\n'
 
+    def render_fields(self, fields):
+        fields.update(rules=indent(render(self.rules)))
+
+    template = '''\
+                class {name}ParserBase(Grammar):
+                {rules}
+
+                '''

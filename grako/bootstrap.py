@@ -6,6 +6,9 @@ __all__ = ['GrakoGrammar', 'GrakoParserGenerator']
 
 class GrakoGrammarBase(Grammar):
 
+    def __init__(self, text):
+        super(GrakoGrammarBase, self).__init__('Grako', text)
+
     def _void_(self):
         self._token('()', 'void')
 
@@ -426,5 +429,5 @@ class GrakoParserGenerator(AbstractGrakoGrammar):
         return RuleParser(ast.name[0], ast.rhs[0])
 
     def grammar(self, ast):
-        return GrammarParser(ast.rules)
+        return GrammarParser(self.name, ast.rules)
 
