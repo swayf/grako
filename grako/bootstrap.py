@@ -1,12 +1,12 @@
-from .grammar import *  # @UnusedWildImport
+from .grammars import *  # @UnusedWildImport
 from .parsing import *  # @UnusedWildImport
 
-__all__ = ['GrakoGrammar', 'GrakoParserGenerator']
+__all__ = ['GrakoParser', 'GrakoGrammarGenerator']
 
-class GrakoGrammarBase(Grammar):
+class GrakoParserBase(Parser):
 
     def __init__(self, text):
-        super(GrakoGrammarBase, self).__init__('Grako', text)
+        super(GrakoParserBase, self).__init__('Grako', text)
 
     def _void_(self):
         self._token('()', 'void')
@@ -250,7 +250,7 @@ class GrakoGrammarBase(Grammar):
         self._eof()
 
 
-class AbstractGrakoGrammar(GrakoGrammarBase):
+class AbstractGrakoParser(GrakoParserBase):
     def token(self, ast):
         return ast
 
@@ -304,7 +304,7 @@ class AbstractGrakoGrammar(GrakoGrammarBase):
         return ast
 
 
-class GrakoGrammar(AbstractGrakoGrammar):
+class GrakoParser(AbstractGrakoParser):
 
     def token(self, ast):
         return ast
@@ -366,38 +366,38 @@ class GrakoGrammar(AbstractGrakoGrammar):
         return ast
 
 
-class GrakoParserGenerator(AbstractGrakoGrammar):
+class GrakoGrammarGenerator(AbstractGrakoParser):
     def token(self, ast):
-        return TokenParser(ast.token[0])
+        return TokenGrammar(ast.token[0])
 
     def word(self, ast):
         return ast.word[0]
 
     def call(self, ast):
-        return RuleRefParser(ast.call[0])
+        return RuleRefGrammar(ast.call[0])
 
     def pattern(self, ast):
-        return PatternParser(ast.pattern[0])
+        return PatternGrammar(ast.pattern[0])
 
     def cut(self, ast):
-        return CutParser()
+        return CutGrammar()
 
     def subexp(self, ast):
-        return GroupParser(ast.exp[0])
+        return GroupGrammar(ast.exp[0])
 
     def optional(self, ast):
-        return OptionalParser(ast.optional[0])
+        return OptionalGrammar(ast.optional[0])
 
     def plus(self, ast):
         return ast
 
     def repeat(self, ast):
         if 'plus' in ast:
-            return RepeatOneParser(ast.repeat[0])
-        return RepeatParser(ast.repeat[0])
+            return RepeatOneGrammar(ast.repeat[0])
+        return RepeatGrammar(ast.repeat[0])
 
     def special(self, ast):
-        return SpecialParser(ast.special[0])
+        return SpecialGrammar(ast.special[0])
 
     def atom(self, ast):
         return ast.atom[0]
@@ -406,7 +406,7 @@ class GrakoParserGenerator(AbstractGrakoGrammar):
         return ast.term[0]
 
     def named(self, ast):
-        return NamedParser(ast.name[0], ast.value[0])
+        return NamedGrammar(ast.name[0], ast.value[0])
 
     def element(self, ast):
         return ast.element[0]
@@ -414,19 +414,19 @@ class GrakoParserGenerator(AbstractGrakoGrammar):
     def sequence(self, ast):
         if len(ast.sequence) == 1:
             return simplify(ast.sequence)
-        return SequenceParser(ast.sequence)
+        return SequenceGrammar(ast.sequence)
 
     def choice(self, ast):
         if len(ast.options) == 1:
             return ast.options[0]
-        return ChoiceParser(ast.options)
+        return ChoiceGrammar(ast.options)
 
     def expre(self, ast):
         return ast.expre[0]
 
     def rule(self, ast):
-        return RuleParser(ast.name[0], ast.rhs[0])
+        return RuleGrammar(ast.name[0], ast.rhs[0])
 
     def grammar(self, ast):
-        return GrammarParser(self.name, ast.rules)
+        return Grammar(self.name, ast.rules)
 

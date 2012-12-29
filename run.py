@@ -9,7 +9,7 @@ logging.getLogger('grako.parsing').setLevel(logging.WARNING)
 def main():
     print '-' * 40, 'phase 0'
     text = open('etc/grako.ebnf').read()
-    g = GrakoGrammar(text)
+    g = GrakoParser(text)
     g.parse('grammar')
 #    print g.ast
 #    generated_grammar0 = str(g.ast['grammar'][0])
@@ -17,7 +17,7 @@ def main():
 
     print '-' * 40, 'phase 1'
     text = open('0.ebnf').read()
-    g = GrakoParserGenerator(text)
+    g = GrakoGrammarGenerator(text)
     g.parse('grammar')
     generated_grammar1 = str(g.ast['grammar'][0])
     open('1.ebnf', 'w').write(generated_grammar1)
@@ -26,7 +26,7 @@ def main():
 
     print '-' * 40, 'phase 2'
     text = open('1.ebnf').read()
-    g = GrakoParserGenerator(text)
+    g = GrakoGrammarGenerator(text)
     g.parse('grammar')
     generated_grammar2 = str(g.ast['grammar'][0])
 #    print generated_grammar2
@@ -35,7 +35,7 @@ def main():
 
     print '-' * 40, 'phase 3'
     text = open('2.ebnf').read()
-    g = GrakoParserGenerator(text)
+    g = GrakoGrammarGenerator(text)
     g.parse('grammar')
     g.parse('grammar')
     generated_grammar3 = str(g.ast['grammar'][0])
@@ -45,7 +45,7 @@ def main():
 
     print '-' * 40, 'phase 4'
     text = open('3.ebnf').read()
-    g = GrakoParserGenerator(text)
+    g = GrakoGrammarGenerator(text)
     g.parse('grammar')
     parser = g.ast['grammar'][0]
     generated_grammar4 = str(parser)

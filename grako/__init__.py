@@ -1,8 +1,8 @@
 # coding: utf-8
 
 from .buffering import Buffer
-from .grammar import Grammar
-from .bootstrap import GrakoGrammar
+from .parsing import Parser
+from .bootstrap import GrakoParser
 
 def main():
     pass
