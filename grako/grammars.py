@@ -219,7 +219,7 @@ class ChoiceGrammar(_Grammar):
                 for _ in ('once',):
                     # break with the first option that succeeds
                 {options}
-                    raise FailedParse(self.buf, 'no viable option') '''
+                    self.error(FailedParse, 'no viable option') '''
 
 
 class RepeatGrammar(_DecoratorGrammar):
@@ -249,14 +249,14 @@ class RepeatGrammar(_DecoratorGrammar):
                 def repeat{n}():
                     result = []
                     while True:
-                        p = self.pos
+                        p = self._pos
                         try:
                 {innerexp}
                             result.append(exp)
                         except FailedCut:
                             raise
                         except FailedParse:
-                            self.goto(p)
+                            self._goto(p)
                             break
                     return result
                 exp = repeat{n}() '''
@@ -280,14 +280,14 @@ class RepeatOneGrammar(RepeatGrammar):
                 {exp}
                     result = [exp]
                     while True:
-                        p = self.pos
+                        p = self._pos
                         try:
                 {innerexp}
                             result.append(exp)
                         except FailedCut:
                             raise
                         except FailedParse:
-                            self.goto(p)
+                            self._goto(p)
                             break
                     return result
                 exp = repeat{n}() '''
@@ -309,11 +309,11 @@ class OptionalGrammar(_DecoratorGrammar):
         fields.update(exp=indent(render(self.exp)))
 
     template = '''\
-            p = self.pos
+            p = self._pos
             try:
             {exp}
             except FailedParse:
-                self.goto(p)
+                self._goto(p)
             '''
 
 
@@ -342,7 +342,7 @@ class NamedGrammar(_DecoratorGrammar):
 
     template = '''
                 {exp}
-                self.ast.{name} += exp'''
+                self._add_ast_node('{name}', exp)'''
 
 
 class SpecialGrammar(_Grammar):
@@ -405,9 +405,9 @@ class RuleGrammar(NamedGrammar):
     template = '''
                 def _{name}_(self):
                 {exp}
+                    return exp
 
                 '''
-
 
 class Grammar(Renderer):
     def __init__(self, name, rules):
@@ -448,13 +448,13 @@ class Grammar(Renderer):
 
 
     abstract_rule_template = '''
-            def {name}(ast):
+            def {name}(self, ast):
                 return ast
             '''
 
     template = '''\
-                from grako.parsing import *
-                from grako.exceptions import *
+                from grako.parsing import * # @UnusedWildImport
+                from grako.exceptions import * # @UnusedWildImport
 
                 class {name}ParserBase(Parser):
                 {rules}

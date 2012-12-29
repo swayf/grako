@@ -62,7 +62,12 @@ def main():
     open('gencode6.py', 'w').write(gencode)
 
     print '-' * 20, 'phase 7 - import generated code'
-    from gencode6 import AbstractGrakoParser
+    from gencode6 import AbstractGrakoParser as GenParser
+    print '-' * 20, 'phase 8 - compile using generated code'
+    parser = GenParser('Test', text)
+    result = parser.parse('grammar')
+    print result
+#    print parser.ast
 
 
 if __name__ == '__main__':

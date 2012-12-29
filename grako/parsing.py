@@ -132,8 +132,9 @@ class Parser(object):
         return self._ast_stack.pop()
 
     def _add_ast_node(self, name, node):
-        if name is not None and node:
+        if name is not None:  # and node:
             self.ast.add(name, node)
         return node
 
-
+    def error(self, etype, item):
+        raise etype(self._buffer, item)
