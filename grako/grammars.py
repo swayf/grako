@@ -273,8 +273,8 @@ class RepeatOneGrammar(RepeatGrammar):
 
     template = '''
                 def repeat{n}():
-                    result = []
                 {exp}
+                    result = [exp]
                     while True:
                         p = self.pos
                         try:
