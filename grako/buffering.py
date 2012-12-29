@@ -16,7 +16,6 @@ class Buffer(object):
     def __init__(self, text, whitespace=None):
         self.text = text
         self.pos = 0
-        self.marks = []
         self.linecache = self._build_line_cache()
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
 
@@ -51,21 +50,6 @@ class Buffer(object):
 
     def move(self, n):
         self.goto(self.pos + n)
-
-
-    def mark(self):
-        self.marks.push(self.pos)
-        return len(self.marks) - 1
-
-    def unmark(self):
-        return self.marks.pop()
-
-    def goback(self, i=None):
-        if i is None:
-            self.pos = self.unmark()
-        else:
-            self.pos = self.marks[i]
-            del self.marks[i:]
 
     def eatwhitespace(self):
         while not self.atend() and self.current() in self.whitespace:
