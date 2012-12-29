@@ -48,6 +48,7 @@ class _Grammar(Renderer):
     def parse(self, ctx):
         return None
 
+
 class EOFGrammar(_Grammar):
     def parse(self, ctx):
         if not ctx.buf.atend():
@@ -67,7 +68,6 @@ class _DecoratorGrammar(_Grammar):
 
     def __str__(self):
         return str(self.exp)
-
 
 class GroupGrammar(_DecoratorGrammar):
     def __str__(self):
@@ -128,6 +128,9 @@ class PatternGrammar(_Grammar):
     def __str__(self):
         return '?/%s/?' % self.pattern
 
+    def render_fields(self, fields):
+        fields.update(pattern=self.pattern.encode('string-escape'))
+
     template = '''\
                 exp = self._pattern(r'{pattern}')
                 '''
@@ -164,7 +167,8 @@ class SequenceGrammar(_Grammar):
     def render_fields(self, fields):
         fields.update(seq='\n'.join(trim(render(s)) for s in self.sequence))
 
-    template = '{seq}'
+    template = '''
+                {seq}'''
 
 
 class ChoiceGrammar(_Grammar):
@@ -191,7 +195,7 @@ class ChoiceGrammar(_Grammar):
 
     def render_fields(self, fields):
         template = trim(self.option_template)
-        options = [template.format(option=render(o)) for o in self.options]
+        options = [template.format(option=indent(render(o))) for o in self.options]
         options = '\n'.join(o for o in options)
         fields.update(options=indent(options))
 
@@ -203,7 +207,7 @@ class ChoiceGrammar(_Grammar):
 
     option_template = '''\
                     try:
-                        {option}
+                    {option}
                         break
                     except FailedCut:
                         raise
@@ -301,10 +305,13 @@ class OptionalGrammar(_DecoratorGrammar):
     def __str__(self):
         return '[%s]' % str(self.exp)
 
+    def render_fields(self, fields):
+        fields.update(exp=indent(render(self.exp)))
+
     template = '''\
             p = self.pos
             try:
-                {exp}
+            {exp}
             except FailedParse:
                 self.goto(p)
             '''
@@ -333,8 +340,9 @@ class NamedGrammar(_DecoratorGrammar):
     def __str__(self):
         return '%s:%s' % (self.name, str(self.exp))
 
-    template = '''{exp}
-                    self.ast.{name} += exp '''
+    template = '''
+                {exp}
+                self.ast.{name} += exp'''
 
 
 class SpecialGrammar(_Grammar):
@@ -363,7 +371,7 @@ class RuleRefGrammar(_Grammar):
     def __str__(self):
         return self.name
 
-    template = 'exp = self._call("{name}")'
+    template = '''exp = self._call("{name}")'''
 
 
 class RuleGrammar(NamedGrammar):
@@ -445,7 +453,8 @@ class Grammar(Renderer):
             '''
 
     template = '''\
-                from parsing import *
+                from grako.parsing import *
+                from grako.exceptions import *
 
                 class {name}ParserBase(Parser):
                 {rules}

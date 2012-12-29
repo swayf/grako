@@ -59,7 +59,11 @@ def main():
 #    print _result
 
     print '-' * 40, 'phase 6'
-    print parser.render()
+    gencode = parser.render()
+    open('gencode6.py', 'w').write(gencode)
+
+    print '-' * 40, 'phase 7'
+    from gencode6 import AbstractGrakoParser
 
 
 if __name__ == '__main__':
