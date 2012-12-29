@@ -129,7 +129,7 @@ class PatternParser(_Parser):
         return '?/%s/?' % self.pattern
 
     template = '''\
-                exp = self._pattern("{pattern}")
+                exp = self._pattern(r'{pattern}')
                 '''
 
 
@@ -237,19 +237,24 @@ class RepeatParser(_DecoratorParser):
         return '{%s}' % str(self.exp)
 
     def render_fields(self, fields):
-        fields.update(innerexp=indent(trim(render(self.exp))))
+        fields.update(n=self.counter(),
+                      innerexp=indent(render(self.exp), 3))
 
     template = '''
-                while True:
-                    p = self.pos
-                    try:
-                    {innerexp}
-                    except FailedCut:
-                        raise
-                    except FailedParse:
-                        self.goto(p)
-                        break
-                '''
+                def repeat{n}():
+                    result = []
+                    while True:
+                        p = self.pos
+                        try:
+                {innerexp}
+                            result.append(exp)
+                        except FailedCut:
+                            raise
+                        except FailedParse:
+                            self.goto(p)
+                            break
+                    return result
+                exp = repeat{n}() '''
 
 
 class RepeatOneParser(RepeatParser):
@@ -261,20 +266,26 @@ class RepeatOneParser(RepeatParser):
         return '{%s}+' % str(self.exp)
 
     def render_fields(self, fields):
-        fields.update(innerexp=indent(render(self.exp), 2))
+        fields.update(n=self.counter(),
+                      exp=indent(render(self.exp)),
+                      innerexp=indent(render(self.exp), 3))
 
-    template = '''\
+    template = '''
+                def repeat{n}():
+                    result = []
                 {exp}
-                while True:
-                    p = self.pos
-                    try:
-                    {innerexp}
-                    except FailedCut:
-                        raise
-                    except FailedParse:
-                        self.goto(p)
-                        break
-                '''
+                    while True:
+                        p = self.pos
+                        try:
+                {innerexp}
+                            result.append(exp)
+                        except FailedCut:
+                            raise
+                        except FailedParse:
+                            self.goto(p)
+                            break
+                    return result
+                exp = repeat{n}() '''
 
 
 class OptionalParser(_DecoratorParser):

@@ -1,4 +1,4 @@
-grammar = {rules:rule}+ ;
+grammar = rules:{rule}+ ;
 
 rule = name:word '=' ! rhs:expre ('.' | ';') ! ;
 
