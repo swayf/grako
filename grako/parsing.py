@@ -1,6 +1,7 @@
 import re
 import logging
-from .util import memoize, simplify, indent
+import itertools
+from .util import memoize, simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
@@ -45,9 +46,13 @@ class Context(object):
         return node
 
 class _Parser(Renderer):
+    _counter = itertools.count()
 
     def parse(self, ctx):
         return None
+
+    def counter(self):
+        return self._counter.next()
 
 class EOFParser(_Parser):
     def parse(self, ctx):
@@ -74,7 +79,18 @@ class GroupParser(_DecoratorParser):
     def __str__(self):
         return '(%s)' % str(self.exp).strip()
 
-    template = '({exp})'
+    def render_fields(self, fields):
+        fields.update(
+                      n=self.counter(),
+                      exp=indent(render(self.exp))
+                      )
+
+    template = '''\
+                def group{n}():
+                {exp}
+                    return exp
+                exp = group{n}() '''
+
 
 class TokenParser(_Parser):
     def __init__(self, token):
@@ -96,8 +112,10 @@ class TokenParser(_Parser):
                 return '"%s"' % self.token
         return "'%s'" % self.token
 
-    template = '''\
-                self._token("{token}")
+    def render_fields(self, fields):
+        fields.update(token=self.token.encode('string-escape'))
+
+    template = '''exp = self._token('{token}')
                 '''
 
 
@@ -118,7 +136,7 @@ class PatternParser(_Parser):
         return '?/%s/?' % self.pattern
 
     template = '''\
-                self._pattern("{pattern}")
+                exp = self._pattern("{pattern}")
                 '''
 
 
@@ -150,6 +168,11 @@ class SequenceParser(_Parser):
     def __str__(self):
         return ' '.join(str(s).strip() for s in self.sequence)
 
+    def render_fields(self, fields):
+        fields.update(seq='\n'.join(render(s) for s in self.sequence))
+
+    template = '{seq}'
+
 
 class ChoiceParser(_Parser):
     def __init__(self, options):
@@ -172,6 +195,33 @@ class ChoiceParser(_Parser):
 
     def __str__(self):
         return ' | '.join(str(o).strip() for o in self.options)
+
+    def render_fields(self, fields):
+        template = trim(self.option_template)
+        options = [template.format(option=render(o)) for o in self.options]
+        options = '\n'.join(o for o in options)
+        fields.update(options=indent(options))
+
+    def render(self):
+        if len(self.options) == 1:
+            return render(self.options[0])
+        else:
+            return super(ChoiceParser, self).render()
+
+    option_template = '''\
+                    try:
+                        {option}
+                        break
+                    except FailedCut:
+                        raise
+                    except FailedParse:
+                        pass\
+                    '''
+
+    template = '''\
+                while True:
+                {options}
+                    raise FailedParse(self.buf, 'no viable option') '''
 
 
 class RepeatParser(_DecoratorParser):
@@ -215,6 +265,15 @@ class OptionalParser(_DecoratorParser):
     def __str__(self):
         return '[%s]' % str(self.exp)
 
+    template = '''\
+            p = self.pos
+            try:
+                {exp}
+            except FailedParse:
+                self.goto(p)
+            '''
+
+
 
 class CutParser(_Parser):
     def parse(self, ctx):
@@ -239,7 +298,7 @@ class NamedParser(_DecoratorParser):
         return '%s:%s' % (self.name, str(self.exp))
 
     template = '''\
-                exp = {exp}
+                {exp}
                 self.ast["{name}"] = exp
                 '''
 
@@ -270,7 +329,8 @@ class RuleRefParser(_Parser):
     def __str__(self):
         return self.name
 
-    template = 'self.call_("{name}")'
+    template = '''exp = self._call("{name}")
+                '''
 
 
 class RuleParser(NamedParser):

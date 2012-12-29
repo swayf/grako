@@ -9,6 +9,8 @@ def render(node):
         return 'true'
     elif node is False:
         return 'false'
+    elif isinstance(node, int):
+        return node
     elif isinstance(node, basestring):
         return node
     elif isinstance(node, list):
