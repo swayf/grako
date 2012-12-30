@@ -82,17 +82,15 @@ The expressions, in reverse order of precedence, can be:
         Optionally match ``e``.
 
     ``{ e }``
-|
+
     ``{ e }*``
         Match ``e`` zero or more times.
 
     ``{ e }+``
-    |
     ``{ e }-``
         Match ``e`` one or more times.
 
     ``'<text>'``
-    |
     ``"<text>"``
         Match the text within the quotation marks.
 
