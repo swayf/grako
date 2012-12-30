@@ -9,7 +9,7 @@ class Parser(object):
     def __init__(self, name, text, whitespace=None, comments_re=None, ignorecase=False):
         self.name = name
         self.text = text
-        self.whitespace = set(whitespace if whitespace else '\t \n\r')
+        self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
         self.comments_re = comments_re
         self.ignorecase = ignorecase
         self._buffer = None
