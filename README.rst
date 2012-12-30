@@ -67,7 +67,7 @@ The EBNF Grammar Syntax
 
     name = expre ;
 
- The expressions, in reverse order of precedence, can be::
+The expressions, in reverse order of precedence, can be::
 
 | e1 \| e2 | Match either e1 or e2. |
 | e1 e2 | Match e1 and then match e2. |
