@@ -10,8 +10,8 @@ Grako
 
 The generated parser consists of two classes:
 
-    A base class derived from `Parser` wich implements the parser with one method for each grammar rule. Because the methods should not be called directly, they are named enclosing the rule's name with underscores:
+    A base class derived from ``Parser`` wich implements the parser with one method for each grammar rule. Because the methods should not be called directly, they are named enclosing the rule's name with underscores:
 
-..code:: python
+.. code:: python
     
-    `def _myrulename_(self):
+    def _myrulename_(self):
