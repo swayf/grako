@@ -107,3 +107,23 @@ The expressions, in reverse order of precedence, can be:
 
     Only elements that have a name assigned will be part of the generated
     AST. Other elements are simply discarded.
+
+Whitespace
+----------
+
+By default, **Grako** generated parsers skip the usual whitespace charactes (``\t`` ``\v`` ``\n`` ``\r`` and the space), but you can change that behaviour by passing a ``whitespace`` parameter to your parser::
+
+    parser = MyParser(text, whitespace='\t ')
+
+If you pass no whitespace characters::
+
+    parser = MyParser(text, whitespace='')
+
+then you will have to handle whitespace in your grammar as it's often done in PEG_.
+
+
+Comments
+--------
+
+There's no support for dealing with comments in this version of **Grako**.
+
