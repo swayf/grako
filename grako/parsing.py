@@ -6,11 +6,12 @@ import logging
 log = logging.getLogger('grako.grammar')
 
 class Parser(object):
-    def __init__(self, name, text, whitespace=None, comments_re=None):
+    def __init__(self, name, text, whitespace=None, comments_re=None, ignorecase=False):
         self.name = name
         self.text = text
         self.whitespace = set(whitespace if whitespace else '\t \n\r')
         self.comments_re = comments_re
+        self.ignorecase = ignorecase
         self._buffer = None
         self._ast_stack = []
         self._rule_stack = []
@@ -90,7 +91,7 @@ class Parser(object):
     def _token(self, token, node_name=None):
         self._next_token()
         log.debug('match <%s> \n\t%s', token, self._buffer.lookahead())
-        if self._buffer.match(token) is None:
+        if self._buffer.match(token, self.ignorecase) is None:
             log.debug('failed <%s>', token)
             raise FailedToken(self._buffer, token)
         self._add_ast_node(node_name, token)
@@ -99,7 +100,7 @@ class Parser(object):
     def _try(self, token, node_name=None):
         self._next_token()
         log.debug('try <%s> \n\t%s', token, self._buffer.lookahead())
-        if self._buffer.match(token) is not None:
+        if self._buffer.match(token, self.ignorecase) is not None:
             self._add_ast_node(node_name, token)
             return True
 
@@ -107,7 +108,7 @@ class Parser(object):
     def _pattern(self, pattern, node_name=None):
         self._next_token()
         log.debug('match %s\n\t%s', pattern, self._buffer.lookahead())
-        token = self._buffer.matchre(pattern)
+        token = self._buffer.matchre(pattern, self.ignorecase)
         if token is None:
             log.debug('failed %s', pattern)
             raise FailedPattern(self._buffer, pattern)

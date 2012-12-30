@@ -55,7 +55,7 @@ class Buffer(object):
         while not self.atend() and self.current() in self.whitespace:
             self.next()
 
-    def match(self, token):
+    def match(self, token, ignorecase=False):
         self.eatwhitespace()
         if self.atend():
             if token is None:
@@ -63,16 +63,20 @@ class Buffer(object):
             return None
 
         p = self.pos
-        if all(c == self.next() for c in token):
+        if ignorecase:
+            result = all(c == self.next().lower() for c in token.lower())
+        else:
+            result = all(c == self.next() for c in token)
+        if result:
             log.debug("matched '%s' at %d - %s", token, self.pos, self.lookahead())
             return token
         else:
             self.goto(p)
 
-    def matchre(self, pattern):
+    def matchre(self, pattern, ignorecase=False):
         self.eatwhitespace()
         if isinstance(pattern, basestring):
-            re = regexp.compile(pattern)
+            re = regexp.compile(pattern, regexp.IGNORECASE if ignorecase else 0)
         else:
             re = pattern
         log.debug("matching'%s' at %d - %s", re.pattern, self.pos, self.lookahead())
