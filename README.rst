@@ -65,7 +65,7 @@ The EBNF Grammar Syntax
 
 **Grako** uses a small variation over standard EBNF_. A grammar consists of a sequence of one or more rules of the form::
 
-    name = expre ;
+    ``name = expre ;``
 
 The expressions, in reverse order of precedence, can be:
 
@@ -101,5 +101,8 @@ The expressions, in reverse order of precedence, can be:
         after this point.
 
     ``name:e``
-        At the result of ``e`` to the AST using name ``name``.
+        At the result of ``e`` to the AST using ``name`` as key.
 
+.. warning::
+    Only elements that have a name assigned will be part of the generated
+    AST. Other elements are simply discarded.
