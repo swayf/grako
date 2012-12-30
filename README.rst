@@ -22,16 +22,16 @@ The generated parser consists of two classes:
     def myrulename(self, ast):
         return ast
        
-The ASTs are dictionary-like objects that contain one keyed item for every named element in the original grammar rule. Items can be acced through the standard dict syntax (``ast['key']``) or as attributes (``ast.key``).
+The ASTs are dictionary-like objects that contain one keyed item for every named element in the original grammar rule. Items can be acced through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``.
 
-Using the Took
+Using the Tool
 --------------
 
 **Grako** is run from the commandline like this::
 
     $ python -m grako
 
-The `-h` and `--help` parameters provide full usage information::
+The *-h* and *--help* parameters provide full usage information::
 
     $ python -m grako --help
     Parse and translate an EBNF grammar into a Python parser.
@@ -48,3 +48,26 @@ The `-h` and `--help` parameters provide full usage information::
         -h, --help      print this help
     $
 
+Using The Generated Parser
+--------------------------
+
+To use the generated parser, subclass the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule name::
+
+    class MyParser(MyAbstractParser):
+        pass
+
+    parser = MyParser('text to parse')
+    result = parser.parse('start')
+    print result
+
+The EBNF Grammar Syntax
+-----------------------
+
+**Grako** uses a small variation over standard EBNF_. A grammar consists of a sequence of one or more rules of the form::
+
+    name = expre ;
+
+ The expressions, in reverse order of precedence, can be::
+
+| e1 \| e2 | Match either e1 or e2. |
+| e1 e2 | Match e1 and then match e2. |
