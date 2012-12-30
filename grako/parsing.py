@@ -18,7 +18,8 @@ class Parser(object):
     def parse(self, rule_name):
         self._buffer = Buffer(self.text, self.whitespace)
         self._push_ast()
-        return self._call(rule_name, rule_name)
+        self._call(rule_name, rule_name)
+        return self.ast
 
     @property
     def ast(self):

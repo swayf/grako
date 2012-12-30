@@ -54,20 +54,25 @@ def main():
 
     print '-' * 20, 'phase 5 - parse using the grammar model'
     text = open('4.ebnf').read()
-    _result = parser.parse('grammar', text)
-#    print _result
+    ast5 = parser.parse('grammar', text)
+    open('5.ast', 'w').write(str(ast5))
+#    print ast5
 
     print '-' * 20, 'phase 6 - generate parser code'
-    gencode = parser.render()
-    open('gencode6.py', 'w').write(gencode)
+    gencode6 = parser.render()
+    open('gencode6.py', 'w').write(gencode6)
 
     print '-' * 20, 'phase 7 - import generated code'
     from gencode6 import AbstractGrakoParser as GenParser
     print '-' * 20, 'phase 8 - compile using generated code'
     parser = GenParser('Test', text)
     result = parser.parse('grammar')
-    print result
-#    print parser.ast
+    assert result == parser.ast
+    open('8.ast', 'w').write(str(parser.ast))
+#    print ast5
+#    print '=' * 20
+#    print result
+    assert result == ast5
 
 
 if __name__ == '__main__':

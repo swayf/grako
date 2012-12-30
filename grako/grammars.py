@@ -405,7 +405,6 @@ class RuleGrammar(NamedGrammar):
     template = '''
                 def _{name}_(self):
                 {exp}
-                    return exp
 
                 '''
 
