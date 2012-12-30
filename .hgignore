@@ -1,3 +1,4 @@
 \.hgingore$
 \.pyc$
 ^\.
+^tmp/
