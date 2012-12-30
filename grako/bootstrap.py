@@ -8,9 +8,6 @@ class GrakoParserBase(Parser):
     def parse(self, rule='grammar'):
         return super(GrakoParserBase, self).parse(rule)[rule][0]
 
-    def __init__(self, text):
-        super(GrakoParserBase, self).__init__('Grako', text)
-
     def _void_(self):
         self._token('()', 'void')
 
