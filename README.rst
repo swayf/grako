@@ -122,8 +122,32 @@ If you pass no whitespace characters::
 then you will have to handle whitespace in your grammar as it's often done in PEG_.
 
 
+Case Sensitivity
+----------------
+
+If your language is case insensitive, you can tell your parser so using the ``ignorecase`` parameter::
+
+    parser = MyParser(text, ignorecase=True)
+
+The change will affect both token and pattern matching.
+
 Comments
 --------
 
 There's no support for dealing with comments in this version of **Grako**.
+
+Semantic Actions
+----------------
+
+There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars, and provide for poor modularization from the parser execution perspective.
+
+The overridable per-rule methods in the generated abstract parser provide enough opportunity to do post-processing, checks (like for inadecuate use of keywords), and AST transformation.
+
+For finer-grained control it is enough to declare more rules, as the impact on the parsing times will be minimal.
+
+If pre-processing is required, one can place invocations of empty rules where appropiate::
+
+    preproc1 = () ;
+
+-------------------------
 
