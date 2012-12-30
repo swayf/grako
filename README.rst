@@ -15,4 +15,9 @@ The generated parser consists of two classes:
     :::python
     def _myrulename_(self):
 
-* An abstract class with one method per grammar rule. Each method receives the *Abstract Syntax Tree* (AST) built for the rule as parameter. The methods in the abstract class return the same ast, but derived classes can override the methods to have them return anything they like.
+* An abstract class with one method per grammar rule. Each method receives the *Abstract Syntax Tree* (AST) built for the rule as parameter. The methods in the abstract class return the same ast, but derived classes can override the methods to have them return anything they like::
+
+.. code :: python
+
+def myrulename(self, ast):
+    return ast
