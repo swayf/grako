@@ -69,5 +69,8 @@ The EBNF Grammar Syntax
 
 The expressions, in reverse order of precedence, can be:
 
-| e1 \| e2 | Match either e1 or e2. |
-| e1 e2 | Match e1 and then match e2. |
+    ``e1 | e2``
+        Match either ``e1`` or ``e2``.
+
+    ``e1 e2`` 
+        Match ``e1`` and then match ``e2``.
