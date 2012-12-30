@@ -19,5 +19,5 @@ The generated parser consists of two classes:
 
 .. code :: python
 
-def myrulename(self, ast):
-    return ast
+    def myrulename(self, ast):
+        return ast
