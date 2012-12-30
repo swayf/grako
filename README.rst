@@ -81,17 +81,13 @@ The expressions, in reverse order of precedence, can be:
     ``[ e ]``
         Optionally match ``e``.
 
-    ``{ e }``
-
-    ``{ e }*``
+    ``{ e }`` or ``{ e }*``
         Match ``e`` zero or more times.
 
-    ``{ e }+``
-    ``{ e }-``
+    ``{ e }+`` or ``{ e }-``
         Match ``e`` one or more times.
 
-    ``'<text>'``
-    ``"<text>"``
+    ``'<text>'`` or ``"<text>"``
         Match the text within the quotation marks.
 
     ``?/<regexp>/?``
