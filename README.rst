@@ -74,3 +74,35 @@ The expressions, in reverse order of precedence, can be:
 
     ``e1 e2`` 
         Match ``e1`` and then match ``e2``.
+
+    ``( e )``
+        Grouping. Match ``e''.
+
+    ``[ e ]``
+        Optionally match ``e``.
+
+    ``{ e }``
+    ``{ e }*``
+        Match ``e`` zero or more times.
+
+    ``{ e }+``
+    ``{ e }-``
+        Match ``e`` one or more times.
+
+    ``'<text>'``
+    ``"<text>"``
+        Match the text within the quotation marks.
+
+    ``?/<regexp>/?``
+        Match the Python_ regular expression ``<regexp>``.
+
+    ``()``
+        The empty expression. Match nothing.
+
+    ``!``
+        The cut expression. Prevent other options to be evaluated
+        after this point.
+
+    ``name:e``
+        At the result of ``e`` to the AST using name ``name``.
+
