@@ -21,3 +21,30 @@ The generated parser consists of two classes:
 
     def myrulename(self, ast):
         return ast
+       
+The ASTs are dictionary-like objects that contain one keyed item for every named element in the original grammar rule. Items can be acced through the standard dict syntax (``ast['key']``) or as attributes (``ast.key``).
+
+Using the Took
+--------------
+
+**Grako** is run from the commandline like this::
+
+    $ python -m grako
+
+The `-h` and `--help` parameters provide full usage information::
+
+    $ python -m grako --help
+    Parse and translate an EBNF grammar into a Python parser.
+
+    Usage: grako <grammar.ebnf> [<name>]
+           grako (-h|--help)
+
+    Arguments:
+        <grammar.ebnf>  The EBNF grammar to generate a parser for.
+        <name>          Optional name. It defaults to the base name
+                        of the grammar file.
+
+    Options:
+        -h, --help      print this help
+    $
+
