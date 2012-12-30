@@ -104,5 +104,6 @@ The expressions, in reverse order of precedence, can be:
         At the result of ``e`` to the AST using ``name`` as key.
 
 **Warning**::
+
     Only elements that have a name assigned will be part of the generated
     AST. Other elements are simply discarded.
