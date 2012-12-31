@@ -83,7 +83,7 @@ class GroupGrammar(_DecoratorGrammar):
                 def group{n}():
                 {exp}
                     return exp
-                exp = group{n}() '''
+                exp = group{n}() # @UnusedVariable'''
 
 
 class TokenGrammar(_Grammar):
@@ -109,7 +109,7 @@ class TokenGrammar(_Grammar):
     def render_fields(self, fields):
         fields.update(token=self.token.encode('string-escape'))
 
-    template = "exp = self._token('{token}')"
+    template = "exp = self._token('{token}') # @UnusedVariable"
 
 
 class PatternGrammar(_Grammar):
@@ -132,7 +132,7 @@ class PatternGrammar(_Grammar):
         fields.update(pattern=self.pattern.encode('string-escape'))
 
     template = '''\
-                exp = self._pattern(r'{pattern}')
+                exp = self._pattern(r'{pattern}') # @UnusedVariable
                 '''
 
 
@@ -252,7 +252,7 @@ class RepeatGrammar(_DecoratorGrammar):
                             self._goto(p)
                             break
                     return result
-                exp = repeat{n}() '''
+                exp = repeat{n}() # @UnusedVariable'''
 
 
 class RepeatOneGrammar(RepeatGrammar):
@@ -283,7 +283,7 @@ class RepeatOneGrammar(RepeatGrammar):
                             self._goto(p)
                             break
                     return result
-                exp = repeat{n}() '''
+                exp = repeat{n}() # @UnusedVariable'''
 
 
 class OptionalGrammar(_DecoratorGrammar):
@@ -366,7 +366,7 @@ class RuleRefGrammar(_Grammar):
     def __str__(self):
         return self.name
 
-    template = '''exp = self._call("{name}")'''
+    template = '''exp = self._call("{name}") # @UnusedVariable'''
 
 
 class RuleGrammar(NamedGrammar):
