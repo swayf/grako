@@ -9,8 +9,8 @@ class FailedParse(Exception):
     @property
     def message(self):
         info = self.buf.line_info(self.pos)
-        template = "{}:{} failed, expecting '{}':\n{}"
-        return template.format(info.line, info.col, self.item, info.text)
+        template = "{}:{} failed, expecting '{}':\n{}\n{}^"
+        return template.format(info.line, info.col, self.item, info.text, ' ' * info.col)
 
     def __str__(self):
         return self.message
@@ -56,3 +56,9 @@ class FailedCut(FailedParse):
     @property
     def message(self):
         return self.nested.message
+
+
+class FailedChoice(FailedParse):
+    @property
+    def message(self):
+        return 'no viable option'

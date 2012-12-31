@@ -138,5 +138,5 @@ class Parser(object):
             self.ast.add(name, node)
         return node
 
-    def error(self, etype, item):
+    def error(self, item, etype=FailedParse):
         raise etype(self._buffer, item)

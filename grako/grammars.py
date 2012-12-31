@@ -151,14 +151,6 @@ class SequenceGrammar(_Grammar):
         for _i, s in enumerate(seq):
             tree = s.parse(ctx)
             result.append(tree)
-#            if not isinstance(s, CutParser):
-#                tree = s.parse(ctx)
-#                result.append(tree)
-#            else:
-#                try:
-#                    result.extend(self.parse_seq(ctx, seq[i + 1:]))
-#                except FailedParse as e:
-#                    raise FailedCut(ctx.buf, e)
         return [r for r in result if r is not None]
 
     def __str__(self):
@@ -168,7 +160,8 @@ class SequenceGrammar(_Grammar):
         fields.update(seq='\n'.join(trim(render(s)) for s in self.sequence))
 
     template = '''
-                {seq}'''
+                {seq}\
+                '''
 
 
 class ChoiceGrammar(_Grammar):
@@ -185,7 +178,7 @@ class ChoiceGrammar(_Grammar):
             try:
                 return o.parse(ctx)
             except FailedCut as e:
-                raise
+                raise e.nested
             except FailedParse as e:
                 items.append(e.item)
         raise FailedParse(ctx.buf, 'one of {%s}' % ','.join(items))
@@ -209,8 +202,8 @@ class ChoiceGrammar(_Grammar):
                     try:
                     {option}
                         break
-                    except FailedCut:
-                        raise
+                    except FailedCut as e:
+                        raise e.nested
                     except FailedParse:
                         pass\
                     '''
@@ -219,7 +212,7 @@ class ChoiceGrammar(_Grammar):
                 for _ in ('once',):
                     # break with the first option that succeeds
                 {options}
-                    self.error(FailedParse, 'no viable option') '''
+                    self.error('no viable option') '''
 
 
 class RepeatGrammar(_DecoratorGrammar):
@@ -324,6 +317,8 @@ class CutGrammar(_Grammar):
 
     def __str__(self):
         return '!'
+
+    template = 'cut_seen = True'
 
 
 class NamedGrammar(_DecoratorGrammar):

@@ -51,7 +51,7 @@ The *-h* and *--help* parameters provide full usage information::
 Using The Generated Parser
 --------------------------
 
-To use the generated parser, subclass the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule name::
+To use the generated parser, subclass the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name::
 
     class MyParser(MyAbstractParser):
         pass
@@ -101,7 +101,7 @@ The expressions, in reverse order of precedence, can be:
         after this point.
 
     ``name:e``
-        At the result of ``e`` to the AST using ``name`` as key.
+        Add the result of ``e`` to the AST using ``name`` as key.
 
 **Warning**::
 
