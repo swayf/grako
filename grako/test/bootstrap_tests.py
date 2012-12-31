@@ -11,7 +11,7 @@ logging.getLogger('grako.parsing').setLevel(logging.WARNING)
 def main():
     print '-' * 20, 'phase 0 - parse using the bootstrap grammar'
     text = open('etc/grako.ebnf').read()
-    g = GrakoParser(text)
+    g = GrakoParser('Grako', text)
     g.parse()
 #    print g.ast
 #    generated_grammar0 = str(g.ast['grammar'][0])
@@ -19,7 +19,7 @@ def main():
 
     print '-' * 20, 'phase 1 - parse with parser generator'
     text = open('tmp/0.ebnf').read()
-    g = GrakoGrammarGenerator(text)
+    g = GrakoGrammarGenerator('Grako', text)
     g.parse()
     generated_grammar1 = str(g.ast['grammar'][0])
     open('tmp/1.ebnf', 'w').write(generated_grammar1)
@@ -28,7 +28,7 @@ def main():
 
     print '-' * 20, 'phase 2 - parse previous output with the parser generator'
     text = open('tmp/1.ebnf').read()
-    g = GrakoGrammarGenerator(text)
+    g = GrakoGrammarGenerator('Grako', text)
     g.parse()
     generated_grammar2 = str(g.ast['grammar'][0])
 #    print generated_grammar2
@@ -37,7 +37,7 @@ def main():
 
     print '-' * 20, 'phase 3 - repeat'
     text = open('tmp/2.ebnf').read()
-    g = GrakoGrammarGenerator(text)
+    g = GrakoGrammarGenerator('Grako', text)
     g.parse()
     generated_grammar3 = str(g.ast['grammar'][0])
 #    print generated_grammar3
@@ -46,7 +46,7 @@ def main():
 
     print '-' * 20, 'phase 4 - repeat'
     text = open('tmp/3.ebnf').read()
-    g = GrakoGrammarGenerator(text)
+    g = GrakoGrammarGenerator('Grako', text)
     g.parse()
     parser = g.ast['grammar'][0]
     generated_grammar4 = str(parser)
@@ -67,7 +67,7 @@ def main():
     print '-' * 20, 'phase 7 - import generated code'
     from gencode6 import AbstractGrakoParser as GenParser
     print '-' * 20, 'phase 8 - compile using generated code'
-    parser = GenParser('Test', text)
+    parser = GenParser(text)
     result = parser.parse('grammar')
     assert result == parser.ast
     open('tmp/8.ast', 'w').write(str(parser.ast))

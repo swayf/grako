@@ -6,8 +6,7 @@ import logging
 log = logging.getLogger('grako.grammar')
 
 class Parser(object):
-    def __init__(self, name, text, whitespace=None, comments_re=None, ignorecase=False):
-        self.name = name
+    def __init__(self, text, whitespace=None, comments_re=None, ignorecase=False):
         self.text = text
         self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
         self.comments_re = comments_re
