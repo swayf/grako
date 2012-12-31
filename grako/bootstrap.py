@@ -371,6 +371,11 @@ class GrakoParser(AbstractGrakoParser):
 
 
 class GrakoGrammarGenerator(AbstractGrakoParser):
+
+    def __init__(self, grammar_name, text, whitespace=None, comments_re=None, ignorecase=False):
+        super(GrakoGrammarGenerator, self).__init__(grammar_name, text, whitespace, comments_re, ignorecase)
+        self.rules = {}
+
     def token(self, ast):
         return TokenGrammar(ast.token[0])
 
@@ -429,7 +434,18 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
         return ast.expre[0]
 
     def rule(self, ast):
-        return RuleGrammar(ast.name[0], ast.rhs[0])
+        name = ast.name[0]
+        rhs = ast.rhs[0]
+        if not name in self.rules:
+            rule = RuleGrammar(name, rhs)
+            self.rules[name] = rule
+        else:
+            rule = self.rules[name]
+            if isinstance(rule.exp, ChoiceGrammar):
+                rule.exp.options.append(rhs)
+            else:
+                rule.exp = ChoiceGrammar([rule.exp, rhs])
+        return rule
 
     def grammar(self, ast):
         return Grammar(self.grammar_name, ast.rules)
