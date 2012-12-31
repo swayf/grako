@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from .grammars import *  # @UnusedWildImport
 from .parsing import *  # @UnusedWildImport
 
@@ -374,7 +375,7 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
 
     def __init__(self, grammar_name, text, whitespace=None, comments_re=None, ignorecase=False):
         super(GrakoGrammarGenerator, self).__init__(grammar_name, text, whitespace, comments_re, ignorecase)
-        self.rules = {}
+        self.rules = OrderedDict()
 
     def token(self, ast):
         return TokenGrammar(ast.token[0])
