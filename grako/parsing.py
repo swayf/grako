@@ -3,7 +3,7 @@ from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
 import logging
-log = logging.getLogger('grako.grammar')
+log = logging.getLogger('grako.parsing')
 
 class Parser(object):
     def __init__(self, text, whitespace=None, comments_re=None, ignorecase=False):

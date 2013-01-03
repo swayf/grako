@@ -6,7 +6,7 @@ from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
 
-log = logging.getLogger('grako.parsing')
+log = logging.getLogger('grako.grammars')
 
 def check(result):
     assert isinstance(result, _Grammar), str(result)
