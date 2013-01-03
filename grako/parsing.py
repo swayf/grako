@@ -1,16 +1,16 @@
+import sys
 from .util import memoize
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
-import logging
-log = logging.getLogger('grako.parsing')
 
 class Parser(object):
-    def __init__(self, text, whitespace=None, comments_re=None, ignorecase=False):
+    def __init__(self, text, whitespace=None, comments_re=None, ignorecase=False, verbose=False):
         self.text = text
         self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
         self.comments_re = comments_re
         self.ignorecase = ignorecase
+        self.verbose = verbose
         self._buffer = None
         self._ast_stack = []
         self._rule_stack = []
@@ -60,14 +60,14 @@ class Parser(object):
         self._next_token()
         pos = self._pos
         try:
-            log.info('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
+            self.trace('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
             result, newpos = self._invoke_rule(name, pos)
-            log.info('SUCCESS %s', self.rulestack())
+            self.trace('SUCCESS %s', self.rulestack())
             self._add_ast_node(node_name, result)
             self._goto(newpos)
             return result
         except FailedParse:
-            log.info('FAILED %s', self.rulestack())
+            self.trace('FAILED %s', self.rulestack())
             self._goto(pos)
             raise
         finally:
@@ -89,16 +89,16 @@ class Parser(object):
 
     def _token(self, token, node_name=None):
         self._next_token()
-        log.debug('match <%s> \n\t%s', token, self._buffer.lookahead())
+        self.trace('match <%s> \n\t%s', token, self._buffer.lookahead())
         if self._buffer.match(token, self.ignorecase) is None:
-            log.debug('failed <%s>', token)
+            self.trace('failed <%s>', token)
             raise FailedToken(self._buffer, token)
         self._add_ast_node(node_name, token)
         return token
 
     def _try(self, token, node_name=None):
         self._next_token()
-        log.debug('try <%s> \n\t%s', token, self._buffer.lookahead())
+        self.trace('try <%s> \n\t%s', token, self._buffer.lookahead())
         if self._buffer.match(token, self.ignorecase) is not None:
             self._add_ast_node(node_name, token)
             return True
@@ -106,10 +106,10 @@ class Parser(object):
 
     def _pattern(self, pattern, node_name=None):
         self._next_token()
-        log.debug('match %s\n\t%s', pattern, self._buffer.lookahead())
+        self.trace('match %s\n\t%s', pattern, self._buffer.lookahead())
         token = self._buffer.matchre(pattern, self.ignorecase)
         if token is None:
-            log.debug('failed %s', pattern)
+            self.trace('failed %s', pattern)
             raise FailedPattern(self._buffer, pattern)
         self._add_ast_node(node_name, token)
         return token
@@ -139,3 +139,7 @@ class Parser(object):
 
     def error(self, item, etype=FailedParse):
         raise etype(self._buffer, item)
+
+    def trace(self, msg, *params):
+        if self.verbose:
+            print >> sys.stderr, msg % params

@@ -3,7 +3,7 @@ sys.path.append('tmp')
 import logging
 from grako.bootstrap import *  # @UnusedWildImport
 logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.ERROR)
 logging.getLogger('grako.buffering').setLevel(logging.WARNING)
 logging.getLogger('grako.grammar').setLevel(logging.WARNING)
 logging.getLogger('grako.parsing').setLevel(logging.WARNING)
