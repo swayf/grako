@@ -224,8 +224,6 @@ class RepeatGrammar(_DecoratorGrammar):
             try:
                 tree = self.exp.parse(ctx)
                 result.append(tree)
-            except FailedCut:
-                raise
             except FailedParse:
                 ctx.buf.goto(p)
                 break
@@ -246,8 +244,6 @@ class RepeatGrammar(_DecoratorGrammar):
                         try:
                 {innerexp}
                             result.append(exp)
-                        except FailedCut:
-                            raise
                         except FailedParse:
                             self._goto(p)
                             break
@@ -277,8 +273,6 @@ class RepeatOneGrammar(RepeatGrammar):
                         try:
                 {innerexp}
                             result.append(exp)
-                        except FailedCut:
-                            raise
                         except FailedParse:
                             self._goto(p)
                             break
