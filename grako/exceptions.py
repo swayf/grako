@@ -1,6 +1,4 @@
-
-
-class FailedParse(Exception):
+class FailedParseBase(Exception):
     def __init__(self, buf, item):
         self.buf = buf
         self.pos = buf.pos
@@ -8,12 +6,16 @@ class FailedParse(Exception):
 
     @property
     def message(self):
-        info = self.buf.line_info(self.pos)
-        template = "{}:{} failed, expecting '{}':\n{}\n{}^"
-        return template.format(info.line, info.col, self.item, info.text, ' ' * info.col)
+        return self.item
 
     def __str__(self):
-        return self.message
+        info = self.buf.line_info(self.pos)
+        template = "{}:{} failed {} :\n{}\n{}^"
+        return template.format(info.line, info.col, self.message, info.text, ' ' * info.col)
+
+
+class FailedParse(FailedParseBase):
+    pass
 
 
 class FailedToken(FailedParse):
@@ -21,10 +23,17 @@ class FailedToken(FailedParse):
         super(FailedToken, self).__init__(buf, token)
         self.token = token
 
+    @property
+    def message(self):
+        return "expecting '%s'" % self.token
 
 class FailedPattern(FailedParse):
     def __init__(self, buf, pattern):
         super(FailedPattern, self).__init__(buf, pattern)
+
+    @property
+    def message(self):
+        return "expecting '%s'" % self.pattern
 
 
 class FailedMatch(FailedParse):
@@ -34,19 +43,17 @@ class FailedMatch(FailedParse):
 
     @property
     def message(self):
-        return '<{}> {}'.format(self.name, super(FailedMatch, self).message)
+        return "expecting '%s'" % self.name
 
 
-class FailedRef(FailedParse):
+class FailedRef(FailedParseBase):
     def __init__(self, buf, name):
         super(FailedRef, self).__init__(buf, name)
         self.name = name
 
     @property
     def message(self):
-        info = self.buf.line_info(self.pos)
-        template = '{}:{} could not resolve reference to rule "{}"'
-        return template.format(info.line, info.col, self.name)
+        return "could not resolve reference to rule '%s'" % self.name
 
 class FailedCut(FailedParse):
     def __init__(self, buf, nested):
