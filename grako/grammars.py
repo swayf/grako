@@ -1,8 +1,6 @@
 import re
 import logging
 from copy import deepcopy
-from pprint import pprint
-from collections import defaultdict
 from .util import memoize, simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
@@ -275,7 +273,10 @@ class RepeatGrammar(_DecoratorGrammar):
 
 
     def _first(self, k, F):
-        return {()} | self.exp._first(k, F)
+        result = {()}
+        for _i in xrange(k):
+            result = dot(result, self.exp._first(k, F), k)
+        return {()} | result
 
     def __str__(self):
         return '{%s}' % str(self.exp)
@@ -306,7 +307,10 @@ class RepeatOneGrammar(RepeatGrammar):
         return simplify([head] + super(RepeatOneGrammar, self).parse(ctx))
 
     def _first(self, k, F):
-        return self.exp._first(k, F)
+        result = {()}
+        for _i in xrange(k):
+            result = dot(result, self.exp._first(k, F), k)
+        return result
 
     def __str__(self):
         return '{%s}+' % str(self.exp)

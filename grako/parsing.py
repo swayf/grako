@@ -73,7 +73,7 @@ class Parser(object):
         finally:
             self._rule_stack.pop()
 
-#    @memoize
+    @memoize
     def _invoke_rule(self, name, pos):
         rule = self._find_rule(name)
         self._push_ast()
