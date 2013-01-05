@@ -2,7 +2,7 @@
 """
 Parse and translate an EBNF grammar into a Python parser.
 
-Usage: grako <grammar.ebnf> [<name>]
+Usage: grako <grammar.ebnf> [<name>] [options]
        grako (-h|--help)
 
 Arguments:
@@ -11,6 +11,8 @@ Arguments:
                     of the grammar file.
 
 Options:
+    -o <filename>   write output to <filename>
+    -v              produce verbose output
     -h, --help      print this help
 """
 import os
@@ -25,10 +27,17 @@ def main():
     name = args['<name>']
     if name is None:
         name = os.path.splitext(os.path.basename(filename))[0]
+    outname = args['-o']
+    if outname and os.path.isfile(outname):
+       os.unlink(outname)
     text = open(filename, 'r').read()
-    parser = GrakoGrammarGenerator(name, text)
+    parser = GrakoGrammarGenerator(name, text, verbose=args['-v'])
     grammar = parser.parse()
-    print grammar.render()
+    text = grammar.render()
+    if outname:
+        open(outname, 'w').write(text)
+    else:
+        print text
 
 if __name__ == '__main__':
     main()

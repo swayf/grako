@@ -6,8 +6,8 @@ __all__ = ['GrakoParser', 'GrakoGrammarGenerator']
 
 class GrakoParserBase(Parser):
 
-    def __init__(self, grammar_name, text, whitespace=None, comments_re=None, ignorecase=False):
-        super(GrakoParserBase, self).__init__(text, whitespace=None, comments_re=None, ignorecase=False)
+    def __init__(self, grammar_name, text, verbose=False):
+        super(GrakoParserBase, self).__init__(text, ignorecase=True, verbose=verbose)
         self.grammar_name = grammar_name
 
     def parse(self, rule='grammar'):
@@ -373,8 +373,8 @@ class GrakoParser(AbstractGrakoParser):
 
 class GrakoGrammarGenerator(AbstractGrakoParser):
 
-    def __init__(self, grammar_name, text, whitespace=None, comments_re=None, ignorecase=False):
-        super(GrakoGrammarGenerator, self).__init__(grammar_name, text, whitespace, comments_re, ignorecase)
+    def __init__(self, grammar_name, text, verbose=False):
+        super(GrakoGrammarGenerator, self).__init__(grammar_name, text, verbose=verbose)
         self.rules = OrderedDict()
 
     def token(self, ast):
