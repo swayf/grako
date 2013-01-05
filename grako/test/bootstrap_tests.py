@@ -1,5 +1,7 @@
 import sys
 sys.path.append('tmp')
+import os
+from pprint import pprint
 import logging
 from grako.bootstrap import *  # @UnusedWildImport
 logging.basicConfig()
@@ -9,6 +11,7 @@ logging.getLogger('grako.grammar').setLevel(logging.WARNING)
 logging.getLogger('grako.parsing').setLevel(logging.WARNING)
 
 def main():
+    os.chdir('/art/grako')
     print '-' * 20, 'phase 0 - parse using the bootstrap grammar'
     text = open('etc/grako.ebnf').read()
     g = GrakoParser('Grako', text)
@@ -49,6 +52,7 @@ def main():
     g = GrakoGrammarGenerator('Grako', text)
     g.parse()
     parser = g.ast['grammar'][0]
+    pprint(parser.first_sets, indent=2, depth=3)
     generated_grammar4 = str(parser)
 #    print generated_grammar4
     open('tmp/4.ebnf', 'w').write(generated_grammar4)

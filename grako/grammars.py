@@ -1,5 +1,8 @@
 import re
 import logging
+from copy import deepcopy
+from pprint import pprint
+from collections import defaultdict
 from .util import memoize, simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
@@ -10,6 +13,9 @@ log = logging.getLogger('grako.grammars')
 
 def check(result):
     assert isinstance(result, _Grammar), str(result)
+
+def dot(x, y, k):
+    return set([ (a + b)[:k] for a in x for b in y])
 
 class Context(object):
     def __init__(self, rules, text):
@@ -45,8 +51,21 @@ class Context(object):
         return node
 
 class _Grammar(Renderer):
+    def __init__(self):
+        super(_Grammar, self).__init__()
+        self._first_set = None
+
     def parse(self, ctx):
         return None
+
+    @property
+    def firstset(self):
+        if self._first_set is None:
+            self._first_set = self._first(self, {})
+        return self._first_set
+
+    def _first(self, k, F):
+        return set()
 
 
 class EOFGrammar(_Grammar):
@@ -65,6 +84,9 @@ class _DecoratorGrammar(_Grammar):
 
     def parse(self, ctx):
         return self.exp.parse(ctx)
+
+    def _first(self, k, F):
+        return self.exp._first(k, F)
 
     def __str__(self):
         return str(self.exp)
@@ -98,6 +120,9 @@ class TokenGrammar(_Grammar):
             raise FailedToken(ctx.buf, self.token)
         return result
 
+    def _first(self, k, F):
+        return set([(self.token,)])
+
     def __str__(self):
         if "'" in self.token:
             if '"' in self.token:
@@ -124,6 +149,9 @@ class PatternGrammar(_Grammar):
         if result is None:
             raise FailedPattern(ctx.buf, self.pattern)
         return result
+
+    def _first(self, k, F):
+        return set([(self.pattern,)])
 
     def __str__(self):
         return '?/%s/?' % self.pattern
@@ -152,6 +180,12 @@ class SequenceGrammar(_Grammar):
             tree = s.parse(ctx)
             result.append(tree)
         return [r for r in result if r is not None]
+
+    def _first(self, k, F):
+        result = {()}
+        for s in self.sequence:
+            result = dot(result, s._first(k, F), k)
+        return result
 
     def __str__(self):
         return ' '.join(str(s).strip() for s in self.sequence)
@@ -183,6 +217,13 @@ class ChoiceGrammar(_Grammar):
                 items.append(e.item)
         raise FailedParse(ctx.buf, 'one of {%s}' % ','.join(items))
 
+
+    def _first(self, k, F):
+        result = set()
+        for o in self.options:
+            result |= o._first(k, F)
+        return result
+
     def __str__(self):
         return ' | '.join(str(o).strip() for o in self.options)
 
@@ -190,7 +231,8 @@ class ChoiceGrammar(_Grammar):
         template = trim(self.option_template)
         options = [template.format(option=indent(render(o))) for o in self.options]
         options = '\n'.join(o for o in options)
-        fields.update(options=indent(options))
+        fields.update(n=self.counter(),
+                      options=indent(options))
 
     def render(self):
         if len(self.options) == 1:
@@ -201,7 +243,7 @@ class ChoiceGrammar(_Grammar):
     option_template = '''\
                     try:
                     {option}
-                        break
+                        return exp
                     except FailedCut as e:
                         raise e.nested
                     except FailedParse:
@@ -209,10 +251,11 @@ class ChoiceGrammar(_Grammar):
                     '''
 
     template = '''\
-                for _ in ('once',):
-                    # break with the first option that succeeds
+                def option{n}():
                 {options}
-                    self.error('no viable option') '''
+                    self.error('no viable option')
+                exp = option{n}()
+                '''
 
 
 class RepeatGrammar(_DecoratorGrammar):
@@ -223,11 +266,16 @@ class RepeatGrammar(_DecoratorGrammar):
             p = ctx.buf.pos
             try:
                 tree = self.exp.parse(ctx)
-                result.append(tree)
+                if tree is not None:
+                    result.append(tree)
             except FailedParse:
                 ctx.buf.goto(p)
                 break
         return simplify(result)
+
+
+    def _first(self, k, F):
+        return {()} | self.exp._first(k, F)
 
     def __str__(self):
         return '{%s}' % str(self.exp)
@@ -243,7 +291,8 @@ class RepeatGrammar(_DecoratorGrammar):
                         p = self._pos
                         try:
                 {innerexp}
-                            result.append(exp)
+                            if exp is not None:
+                                result.append(exp)
                         except FailedParse:
                             self._goto(p)
                             break
@@ -255,6 +304,9 @@ class RepeatOneGrammar(RepeatGrammar):
     def parse(self, ctx):
         head = self.exp.parse(ctx)
         return simplify([head] + super(RepeatOneGrammar, self).parse(ctx))
+
+    def _first(self, k, F):
+        return self.exp._first(k, F)
 
     def __str__(self):
         return '{%s}+' % str(self.exp)
@@ -289,6 +341,9 @@ class OptionalGrammar(_DecoratorGrammar):
             ctx.goto(p)
             return None
 
+    def _first(self, k, F):
+        return {()} | self.exp._first(k, F)
+
     def __str__(self):
         return '[%s]' % str(self.exp)
 
@@ -297,10 +352,11 @@ class OptionalGrammar(_DecoratorGrammar):
 
     template = '''\
             p = self._pos
+            exp = None
             try:
             {exp}
             except FailedParse:
-                self._goto(p)
+                self._goto(p)\
             '''
 
 
@@ -309,10 +365,13 @@ class CutGrammar(_Grammar):
     def parse(self, ctx):
         return None
 
+    def _first(self, k, F):
+        return {('!',)}
+
     def __str__(self):
         return '!'
 
-    template = 'cut_seen = True'
+    template = 'cut_seen = True # @UnusedVariable'
 
 
 class NamedGrammar(_DecoratorGrammar):
@@ -339,6 +398,9 @@ class SpecialGrammar(_Grammar):
         super(SpecialGrammar, self).__init__()
         self.special = special
 
+    def _first(self, k, F):
+        return set([(self.special,)])
+
     def __str__(self):
         return '?/%s/?' % self.pattern
 
@@ -356,6 +418,9 @@ class RuleRefGrammar(_Grammar):
             raise FailedRef(ctx.buf, self.name)
         except FailedParse:
             raise
+
+    def _first(self, k, F):
+        return F.get(self.name, set())
 
     def __str__(self):
         return self.name
@@ -385,6 +450,10 @@ class RuleGrammar(NamedGrammar):
         ctx.goto(pos)
         return (self.exp.parse(ctx), ctx.pos)
 
+
+    def _first(self, k, F):
+        return self.exp._first(k, F)
+
     def __str__(self):
         return '%s = %s ;' % (self.name, str(self.exp).strip())
 
@@ -403,6 +472,23 @@ class Grammar(Renderer):
         assert isinstance(rules, list), str(rules)
         self.name = name
         self.rules = rules
+        self._first_sets = self._calc_first_sets()
+
+    @property
+    def first_sets(self):
+        return self._first_sets
+
+    def _calc_first_sets(self, k=1):
+        F = dict()
+        while True:
+            F1 = deepcopy(F)
+            for rule in self.rules:
+                F[rule.name] = F.get(rule.name, set()) | rule._first(k, F)
+            if F1 == F:
+                break
+        for rule in self.rules:
+            rule._first_set = F[rule.name]
+        return F
 
     def parse(self, start, text):
         log.info('enter grammar')
