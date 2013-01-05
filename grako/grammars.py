@@ -57,9 +57,9 @@ class _Grammar(Renderer):
         return None
 
     @property
-    def firstset(self):
+    def firstset(self, k=1):
         if self._first_set is None:
-            self._first_set = self._first(self, {})
+            self._first_set = self._first(k, {})
         return self._first_set
 
     def _first(self, k, F):
@@ -285,6 +285,11 @@ class RepeatGrammar(_DecoratorGrammar):
         fields.update(n=self.counter(),
                       innerexp=indent(render(self.exp), 3))
 
+    def render(self):
+        if {()} in self.exp.firstset:
+            raise GrammarError('may repeat empty sequence')
+        return super(RepeatGrammar, self).render()
+
     template = '''
                 def repeat{n}():
                     result = []
@@ -424,7 +429,8 @@ class RuleRefGrammar(_Grammar):
             raise
 
     def _first(self, k, F):
-        return F.get(self.name, set())
+        self._first_set = F.get(self.name, set())
+        return self._first_set
 
     def __str__(self):
         return self.name
@@ -456,6 +462,8 @@ class RuleGrammar(NamedGrammar):
 
 
     def _first(self, k, F):
+        if self._first_set:
+            return self._first_set
         return self.exp._first(k, F)
 
     def __str__(self):

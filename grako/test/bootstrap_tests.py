@@ -52,7 +52,7 @@ def main():
     g = GrakoGrammarGenerator('Grako', text)
     g.parse()
     parser = g.ast['grammar'][0]
-    pprint(parser.first_sets, indent=2, depth=3)
+#    pprint(parser.first_sets, indent=2, depth=3)
     generated_grammar4 = str(parser)
 #    print generated_grammar4
     open('tmp/4.ebnf', 'w').write(generated_grammar4)

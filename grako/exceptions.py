@@ -1,3 +1,8 @@
+
+class GrammarError(Exception):
+    pass
+
+
 class FailedParseBase(Exception):
     def __init__(self, buf, item):
         self.buf = buf
