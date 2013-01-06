@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Parse and translate an EBNF grammar into a Python parser.
+Parse and translate an EBNF grammar into a Python parser for
+the described language.
 
 Usage: grako <grammar.ebnf> [<name>] [options]
        grako (-h|--help)

@@ -25,6 +25,8 @@ The methods in the abstract parser class return the same AST received as paramet
        
 The ASTs are dictionary-like objects that contain one keyed item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``.
 
+
+
 Using the Tool
 --------------
 
@@ -35,9 +37,10 @@ Using the Tool
 The *-h* and *--help* parameters provide full usage information::
 
     $ python -m grako --help
-    Parse and translate an EBNF grammar into a Python parser.
+    Parse and translate an EBNF grammar into a Python parser for 
+    the described language.
 
-    Usage: grako <grammar.ebnf> [<name>]
+    Usage: grako <grammar.ebnf> [<name>] [options]
            grako (-h|--help)
 
     Arguments:
@@ -46,13 +49,17 @@ The *-h* and *--help* parameters provide full usage information::
                         of the grammar file.
 
     Options:
-        -h, --help      print this help
+        -o <filename>   write output to <filename>
+        -v              produce verbose output
+        -h, --help      show this help
     $
+
+
 
 Using The Generated Parser
 --------------------------
 
-To use the generated parser, subclass the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name::
+To use the generated parser, subclass the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
 
     class MyParser(MyAbstractParser):
         pass
@@ -60,6 +67,7 @@ To use the generated parser, subclass the abstract parser, create an instance of
     parser = MyParser('text to parse')
     result = parser.parse('start')
     print result
+
 
 The EBNF Grammar Syntax
 -----------------------
@@ -109,6 +117,7 @@ The expressions, in reverse order of precedence, can be:
     Only elements that have a name assigned will be part of the generated
     AST. Other elements are simply discarded.
 
+
 Whitespace
 ----------
 
@@ -123,6 +132,7 @@ If you pass no whitespace characters::
 then you will have to handle whitespace in your grammar as it's often done in PEG_.
 
 
+
 Case Sensitivity
 ----------------
 
@@ -132,10 +142,12 @@ If your language is case insensitive, you can tell your parser so using the ``ig
 
 The change will affect both token and pattern matching.
 
+
 Comments
 --------
 
 There's no support for dealing with comments in this version of **Grako**.
+
 
 Semantic Actions
 ----------------
@@ -156,6 +168,8 @@ The abstract parser will contain a rule of of the form::
 
     def preproc(self, ast):
         return ast
+
+
 
 License
 =======
