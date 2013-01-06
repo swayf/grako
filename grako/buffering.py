@@ -10,14 +10,24 @@ __all__ = ['Buffer']
 RE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
-LineInfo = namedtuple('LineInfo', ['pos', 'line', 'col', 'text'])
+LineInfo = namedtuple('LineInfo', ['line', 'col', 'text'])
 
 class Buffer(object):
     def __init__(self, text, whitespace=None):
         self.text = text
         self.pos = 0
+        self.col = 0
+        self.line = 0
         self.linecache = self._build_line_cache()
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
+
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, p):
+        self.goto(p)
 
     def atend(self):
         return self.pos >= len(self.text)
@@ -42,11 +52,15 @@ class Buffer(object):
         if self.atend():
             return None
         c = self.current()
-        self.pos += 1
+        self._pos += 1
+        if c == '\n':
+            self.col = 0
+            self.line += 1
         return c
 
     def goto(self, p):
-        self.pos = max(0, min(len(self.text), p))
+        self._pos = max(0, min(len(self.text), p))
+        self.line, self.col = self.line_info(p)
 
     def move(self, n):
         self.goto(self.pos + n)
@@ -104,4 +118,4 @@ class Buffer(object):
         start, line = self.linecache[p - 1]
         col = pos - start - 1
         text = self.text[start:self.linecache[p].pos]
-        return LineInfo(pos, line, col, text)
+        return LineInfo(line, col, text)
