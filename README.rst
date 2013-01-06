@@ -12,22 +12,18 @@ Grako
 
 The generated parser consists of two classes:
 
-* A base class derived from ``Parser`` wich implements the parser with one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores::
+* A base class derived from ``Parser`` wich implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overriden, etc)::
  
     def _myrulename_(self):
 
-
-    the naming convention is to emphasize that these methods should not be called directly, as the parsing/memoizing engine will do it when appropiate.
-
 * An abstract class with one method per grammar rule. Each method receives the as its single parameter the *Abstract Syntax Tree* (AST) built from the rule invocation::
-
 
     def myrulename(self, ast):
         return ast
 
-The methods in the abstract class return the same ast, but derived classes can override the methods to have them return anything they like::
+The methods in the abstract parser class return the same AST received as parameter, but derived classes can override the methods to have them return something different (like a *Concrete Syntax Tree*).
        
-The ASTs are dictionary-like objects that contain one keyed item for every named element in the original grammar rule. Items can be acced through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``.
+The ASTs are dictionary-like objects that contain one keyed item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``.
 
 Using the Tool
 --------------
