@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, absolute_import, unicode_literals
 import re
 import logging
 from copy import deepcopy
@@ -539,6 +541,8 @@ class Grammar(Renderer):
             '''
 
     template = '''\
+                # -*- coding: utf-8 -*-
+                from __future__ import print_function, division, absolute_import, unicode_literals
                 from grako.parsing import * # @UnusedWildImport
                 from grako.exceptions import * # @UnusedWildImport
 

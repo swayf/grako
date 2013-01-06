@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, absolute_import, unicode_literals
 import os
 import random
 import unittest
@@ -18,8 +20,8 @@ class BufferingTests(unittest.TestCase):
         for p, c in enumerate(self.text):
             bl, bc, _ = self.buf.line_info(p)
             d = self.buf.next()
-#            print 'tx', line, col, c.encode('string-escape')
-#            print 'bu', bl, bc, d.encode('string-escape')
+#            print('tx', line, col, c.encode('string-escape'))
+#            print('bu', bl, bc, d.encode('string-escape'))
             self.assertEqual(bl, line)
             self.assertEqual(bc, col)
             self.assertEqual(d, c)
@@ -31,8 +33,8 @@ class BufferingTests(unittest.TestCase):
     def test_next_consisntency(self):
         while not self.buf.atend():
             bl, bc, _ = self.buf.line_info()
-#            print 'li', bl, bc
-#            print 'bu', self.buf.line, self.buf.col
+#            print('li', bl, bc)
+#            print('bu', self.buf.line, self.buf.col)
             self.assertEqual(bl, self.buf.line)
             self.assertEqual(bc, self.buf.col)
             self.buf.next()
@@ -41,8 +43,8 @@ class BufferingTests(unittest.TestCase):
         for _ in xrange(100):
             self.buf.goto(random.randrange(len(self.text)))
             bl, bc, _ = self.buf.line_info()
-#            print 'li', bl, bc
-#            print 'bu', self.buf.line, self.buf.col
+#            print('li', bl, bc)
+#            print('bu', self.buf.line, self.buf.col)
             self.assertEqual(bl, self.buf.line)
             self.assertEqual(bc, self.buf.col)
 

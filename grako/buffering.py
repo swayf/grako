@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, absolute_import, unicode_literals
 # FIXME: There could be a file buffer using random access
 import re as regexp
 from bisect import bisect as bisect

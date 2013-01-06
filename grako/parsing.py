@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
 from .util import memoize
 from .buffering import Buffer
@@ -142,4 +144,4 @@ class Parser(object):
 
     def trace(self, msg, *params):
         if self.verbose:
-            print >> sys.stderr, msg % params
+            print(msg % params, file=sys.stderr)

@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 """
 Parse and translate an EBNF grammar into a Python parser.
 
@@ -13,8 +13,9 @@ Arguments:
 Options:
     -o <filename>   write output to <filename>
     -v              produce verbose output
-    -h, --help      print this help
+    -h, --help      show this help
 """
+from __future__ import print_function, division, absolute_import, unicode_literals
 import os
 from docopt import docopt
 from .buffering import Buffer
@@ -29,7 +30,7 @@ def main():
         name = os.path.splitext(os.path.basename(filename))[0]
     outname = args['-o']
     if outname and os.path.isfile(outname):
-       os.unlink(outname)
+        os.unlink(outname)
     text = open(filename, 'r').read()
     parser = GrakoGrammarGenerator(name, text, verbose=args['-v'])
     grammar = parser.parse()
@@ -37,7 +38,7 @@ def main():
     if outname:
         open(outname, 'w').write(text)
     else:
-        print text
+        print(text)
 
 if __name__ == '__main__':
     main()
