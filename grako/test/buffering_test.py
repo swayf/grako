@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
-from six.moves import xrange
+from six.moves import xrange  # @UnresolvedImport
 import os
 import random
 import unittest

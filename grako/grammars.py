@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
-from six.moves import xrange
 import re
 import logging
 from copy import deepcopy
@@ -277,7 +276,7 @@ class RepeatGrammar(_DecoratorGrammar):
 
     def _first(self, k, F):
         result = {()}
-        for _i in xrange(k):
+        for _i in range(k):
             result = dot(result, self.exp._first(k, F), k)
         return {()} | result
 
@@ -316,7 +315,7 @@ class RepeatOneGrammar(RepeatGrammar):
 
     def _first(self, k, F):
         result = {()}
-        for _i in xrange(k):
+        for _i in range(k):
             result = dot(result, self.exp._first(k, F), k)
         return result
 
