@@ -160,17 +160,19 @@ The abstract parser will contain a rule of of the form::
 License
 =======
 
-**Grako** is copyrighted:
+**Grako** is copyright 2012-2013 by `ResQSoft Inc.`_ and  `Juancarlo Añez`_
 
-    (C) ResQSoft Inc. 2012-2013
+.. _`ResQSoft Inc.`:  http://www.resqsoft.com/
+.. _`Juancarlo Añez`: mailto:apalala@gmail.com
 
-    (C) Juancarlo Añez 2012-2013
-
-You may use the tool under the terms of the `GNU General Public License (GPL) version 3`_ as described in the `LICENSE.txt`_ file.
-
+You may use the tool under the terms of the `GNU General Public License (GPL) version 3`_ as described in the enclosed **LICENSE.txt** file.
 
 .. _`GNU General Public License (GPL) version 3`:  http://www.gnu.org/licenses/gpl.html
-.. _`LICENSE.txt`: LICENSE.txt
+
+The tool uses the docopt_ 0.5.0 library for command-line argument processing, and that is copyright 2012 by **Vladimir Keleshev**, and used under an `MIT License`_.
+
+.. _docopt: https://github.com/halst/docopt/
+.. _`MIT License`:  http://mit-license.org/
 
 -------------------------
 
