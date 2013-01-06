@@ -1,7 +1,7 @@
 import sys
 sys.path.append('tmp')
 import os
-from pprint import pprint
+from pprint import *  # @UnusedWildImport
 import logging
 from grako.bootstrap import *  # @UnusedWildImport
 logging.basicConfig()
@@ -69,7 +69,7 @@ def main():
     open('tmp/gencode6.py', 'w').write(gencode6)
 
     print '-' * 20, 'phase 7 - import generated code'
-    from gencode6 import AbstractGrakoParser as GenParser
+    from gencode6 import AbstractGrakoParser as GenParser  # @UnresolvedImport
     print '-' * 20, 'phase 8 - compile using generated code'
     parser = GenParser(text)
     result = parser.parse('grammar')

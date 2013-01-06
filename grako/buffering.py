@@ -1,6 +1,6 @@
 # FIXME: There could be a file buffer using random access
 import re as regexp
-from bisect import bisect
+from bisect import bisect as bisect
 from collections import namedtuple
 import logging
 log = logging.getLogger('grako.buffering')
@@ -88,12 +88,12 @@ class Buffer(object):
             return token
 
     def _build_line_cache(self):
-        cache = [PosLine(0, 0)]
+        cache = [PosLine(-1, 0)]
         n = 0
         for i in xrange(len(self.text)):
             if self.text[i] == '\n':
                 n += 1
-                cache.append(PosLine(i, n))
+                cache.append(PosLine(i , n))
         cache.append(PosLine(len(self.text), n + 1))
         return cache
 
@@ -102,6 +102,6 @@ class Buffer(object):
             pos = self.pos
         p = bisect(self.linecache, PosLine(pos, 0))
         start, line = self.linecache[p - 1]
-        col = pos - start
+        col = pos - start - 1
         text = self.text[start:self.linecache[p].pos]
         return LineInfo(pos, line, col, text)
