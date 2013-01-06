@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
-from six.moves import xrange  # @UnresolvedImport
 import os
 import random
 import unittest
@@ -42,7 +41,7 @@ class BufferingTests(unittest.TestCase):
             self.buf.next()
 
     def test_goto_consistency(self):
-        for _ in xrange(100):
+        for _ in range(100):
             self.buf.goto(random.randrange(len(self.text)))
             bl, bc, _ = self.buf.line_info()
 #            print('li', bl, bc)

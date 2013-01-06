@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
-import six
-from six.moves import xrange
 # FIXME: There could be a file buffer using random access
 import re as regexp
 from bisect import bisect as bisect
@@ -11,7 +9,7 @@ log = logging.getLogger('grako.buffering')
 
 __all__ = ['Buffer']
 
-RE = type(regexp.compile('.'))
+RETYPE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['line', 'col', 'text'])
@@ -95,10 +93,10 @@ class Buffer(object):
 
     def matchre(self, pattern, ignorecase=False):
         self.eatwhitespace()
-        if isinstance(pattern, six.string_types):
-            re = regexp.compile(pattern, regexp.IGNORECASE if ignorecase else 0)
-        else:
+        if isinstance(pattern, RETYPE):
             re = pattern
+        else:
+            re = regexp.compile(pattern, regexp.IGNORECASE if ignorecase else 0)
         log.debug("matching'%s' at %d - %s", re.pattern, self.pos, self.lookahead())
         matched = re.match(self.text, self.pos)
         if matched:
@@ -110,8 +108,8 @@ class Buffer(object):
     def _build_line_cache(self):
         cache = [PosLine(-1, 0)]
         n = 0
-        for i in xrange(len(self.text)):
-            if self.text[i] == '\n':
+        for i, c in enumerate(self.text):
+            if c == '\n':
                 n += 1
                 cache.append(PosLine(i , n))
         cache.append(PosLine(len(self.text), n + 1))

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
-import six
 import itertools
 from .util import trim
 
@@ -9,16 +8,6 @@ def render(node):
     """
     if isinstance(node, Renderer):
         return node.render()
-    elif node is None:
-        return ''
-    elif node is True:
-        return 'true'
-    elif node is False:
-        return 'false'
-    elif isinstance(node, int):
-        return node
-    elif isinstance(node, six.string_types):
-        return node
     elif isinstance(node, list):
         return ''.join(render(e) for e in node)
     else:
