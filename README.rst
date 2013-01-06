@@ -148,7 +148,28 @@ For finer-grained control it is enough to declare more rules, as the impact on t
 
 If pre-processing is required, one can place invocations of empty rules where appropiate::
 
-    preproc1 = () ;
+    myrule = first_part preproc {second_part} ;
+
+    preproc = () ;
+
+The abstract parser will contain a rule of of the form::
+
+    def preproc(self, ast):
+        return ast
+
+License
+=======
+
+**Grako** is copyrighted:
+
+    (C) ResQSoft Inc. 2012-2013
+    (C) Juancarlo Añez 2012-2013
+
+You may use the tool under the terms of the `GNU General Public License (GPL) version 3`_ as described in the `LICENSE.txt`_ file.
+
+
+.. _`GNU General Public License (GPL) version 3`:  http://www.gnu.org/licenses/gpl.html
+.. _`LICENSE.txt`_: LICENSE.txt
 
 -------------------------
 
