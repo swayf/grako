@@ -16,7 +16,8 @@ The generated parser consists of two classes:
  
     def _myrulename_(self):
 
-the naming is to emphasize that they should not be called directly, as the parsing/memoizing engine will do it when needed.
+
+    the naming convention is to emphasize that these methods should not be called directly, as the parsing/memoizing engine will do it when appropiate.
 
 * An abstract class with one method per grammar rule. Each method receives the as its single parameter the *Abstract Syntax Tree* (AST) built from the rule invocation::
 
