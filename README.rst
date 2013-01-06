@@ -28,7 +28,7 @@ The ASTs are dictionary-like objects that contain one keyed item for every named
 
 
 Using the Tool
---------------
+==============
 
 **Grako** is run from the commandline like this::
 
@@ -57,7 +57,7 @@ The *-h* and *--help* parameters provide full usage information::
 
 
 Using The Generated Parser
---------------------------
+==========================
 
 To use the generated parser, subclass the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
 
@@ -70,7 +70,7 @@ To use the generated parser, subclass the abstract parser, create an instance of
 
 
 The EBNF Grammar Syntax
------------------------
+=======================
 
 **Grako** uses a small variation over standard EBNF_. A grammar consists of a sequence of one or more rules of the form:
 
@@ -119,7 +119,7 @@ The expressions, in reverse order of precedence, can be:
 
 
 Whitespace
-----------
+==========
 
 By default, **Grako** generated parsers skip the usual whitespace charactes (``\t`` ``\v`` ``\n`` ``\r`` and the space), but you can change that behaviour by passing a ``whitespace`` parameter to your parser::
 
@@ -134,7 +134,7 @@ then you will have to handle whitespace in your grammar as it's often done in PE
 
 
 Case Sensitivity
-----------------
+================
 
 If your language is case insensitive, you can tell your parser so using the ``ignorecase`` parameter::
 
@@ -144,13 +144,13 @@ The change will affect both token and pattern matching.
 
 
 Comments
---------
+========
 
 There's no support for dealing with comments in this version of **Grako**.
 
 
 Semantic Actions
-----------------
+================
 
 There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars, and provide for poor modularization from the parser execution perspective.
 
