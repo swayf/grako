@@ -115,7 +115,7 @@ The expressions, in reverse order of precedence, can be:
 **Warning**::
 
     Only elements that have a name assigned will be part of the generated
-    AST. Other elements are simply discarded.
+    AST. Other elements are simply discarded after they have been parsed.
 
 
 Whitespace
