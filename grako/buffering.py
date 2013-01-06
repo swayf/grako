@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
+import six
+from six.moves import xrange
 # FIXME: There could be a file buffer using random access
 import re as regexp
 from bisect import bisect as bisect
@@ -45,7 +47,7 @@ class Buffer(object):
     def lookahead(self):
         if self.atend():
             return ''
-        return self.text[self.pos:self.pos + 20].encode('string-escape') + '...'
+        return self.text[self.pos:self.pos + 20] + '...'
 #        p = bisect(self.linecache, PosLine(self.pos, 0))
 #        start, _line = self.linecache[p]
 #        return self.text[self.pos:start]
@@ -93,7 +95,7 @@ class Buffer(object):
 
     def matchre(self, pattern, ignorecase=False):
         self.eatwhitespace()
-        if isinstance(pattern, basestring):
+        if isinstance(pattern, six.string_types):
             re = regexp.compile(pattern, regexp.IGNORECASE if ignorecase else 0)
         else:
             re = pattern

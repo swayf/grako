@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
+from six.moves import xrange
 import re
 import logging
 from copy import deepcopy
@@ -132,7 +133,7 @@ class TokenGrammar(_Grammar):
         return "'%s'" % self.token
 
     def render_fields(self, fields):
-        fields.update(token=self.token.encode('string-escape'))
+        fields.update(token=self.token)
 
     template = "exp = self._token('{token}') # @UnusedVariable"
 
@@ -157,7 +158,7 @@ class PatternGrammar(_Grammar):
         return '?/%s/?' % self.pattern
 
     def render_fields(self, fields):
-        fields.update(pattern=self.pattern.encode('string-escape'))
+        fields.update(pattern=self.pattern)
 
     template = '''\
                 exp = self._pattern(r'{pattern}') # @UnusedVariable

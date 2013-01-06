@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
+from six.moves import xrange
 import os
 import random
 import unittest
@@ -12,7 +13,8 @@ class BufferingTests(unittest.TestCase):
 
     def setUp(self):
         testfile = os.path.join(BASEDIR, 'etc/test_text')
-        self.text = open(testfile).read()
+        with open(testfile) as f:
+            self.text = f.read()
         self.buf = Buffer(self.text, whitespace='')
 
     def test_pos_consistency(self):
