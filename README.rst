@@ -72,7 +72,7 @@ To use the generated parser, subclass the abstract parser, create an instance of
 The EBNF Grammar Syntax
 -----------------------
 
-**Grako** uses a small variation over standard EBNF_. A grammar consists of a sequence of one or more rules of the form::
+**Grako** uses a small variation over standard EBNF_. A grammar consists of a sequence of one or more rules of the form:
 
     ``name = expre ;``
 
