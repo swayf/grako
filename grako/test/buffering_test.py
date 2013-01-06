@@ -7,17 +7,18 @@ BASEDIR = os.path.normpath(os.path.join(THISDIR, '../..'))
 
 class BufferingTests(unittest.TestCase):
 
-    def test_buffering_pos(self):
+    def setUp(self):
         testfile = os.path.join(BASEDIR, 'etc/test_text')
-        text = open(testfile).read()
-        buf = Buffer(text, whitespace='')
+        self.text = open(testfile).read()
+        self.buf = Buffer(self.text, whitespace='')
+
+    def test_pos_consistency(self):
         line = col = 0
-        for p, c in enumerate(text):
-            bp, bl, bc, _ = buf.line_info(p)
-            d = buf.next()
-#            print 'tx', p, line, col, c.encode('string-escape')
-#            print 'bu', bp, bl, bc, d.encode('string-escape')
-            self.assertEqual(bp, p)
+        for p, c in enumerate(self.text):
+            bl, bc, _ = self.buf.line_info(p)
+            d = self.buf.next()
+#            print 'tx', line, col, c.encode('string-escape')
+#            print 'bu', bl, bc, d.encode('string-escape')
             self.assertEqual(bl, line)
             self.assertEqual(bc, col)
             self.assertEqual(d, c)
@@ -26,6 +27,14 @@ class BufferingTests(unittest.TestCase):
                 line += 1
             else:
                 col += 1
+    def test_next_consisntency(self):
+        while not self.buf.atend():
+            bl, bc, _ = self.buf.line_info()
+#            print 'li', bl, bc
+#            print 'bu', self.buf.line, self.buf.col
+            self.assertEqual(bl, self.buf.line)
+            self.assertEqual(bc, self.buf.col)
+            self.buf.next()
 
 def suite():
     pass

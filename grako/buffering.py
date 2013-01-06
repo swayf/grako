@@ -15,11 +15,11 @@ LineInfo = namedtuple('LineInfo', ['line', 'col', 'text'])
 class Buffer(object):
     def __init__(self, text, whitespace=None):
         self.text = text
+        self.linecache = self._build_line_cache()
+        self.whitespace = set(whitespace if whitespace else '\t \r\n')
         self.pos = 0
         self.col = 0
         self.line = 0
-        self.linecache = self._build_line_cache()
-        self.whitespace = set(whitespace if whitespace else '\t \r\n')
 
     @property
     def pos(self):
@@ -53,14 +53,16 @@ class Buffer(object):
             return None
         c = self.current()
         self._pos += 1
-        if c == '\n':
+        if c != '\n':
+            self.col += 1
+        else:
             self.col = 0
             self.line += 1
         return c
 
     def goto(self, p):
         self._pos = max(0, min(len(self.text), p))
-        self.line, self.col = self.line_info(p)
+        self.line, self.col, _ = self.line_info(p)
 
     def move(self, n):
         self.goto(self.pos + n)
