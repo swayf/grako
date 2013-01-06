@@ -1,4 +1,5 @@
 import os
+import random
 import unittest
 from ..buffering import Buffer
 
@@ -35,6 +36,15 @@ class BufferingTests(unittest.TestCase):
             self.assertEqual(bl, self.buf.line)
             self.assertEqual(bc, self.buf.col)
             self.buf.next()
+
+    def test_goto_consistency(self):
+        for _ in xrange(100):
+            self.buf.goto(random.randrange(len(self.text)))
+            bl, bc, _ = self.buf.line_info()
+#            print 'li', bl, bc
+#            print 'bu', self.buf.line, self.buf.col
+            self.assertEqual(bl, self.buf.line)
+            self.assertEqual(bc, self.buf.col)
 
 def suite():
     pass
