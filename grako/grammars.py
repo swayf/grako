@@ -91,21 +91,12 @@ class _DecoratorGrammar(_Grammar):
     def __str__(self):
         return str(self.exp)
 
+    template = '{exp}'
+
+
 class GroupGrammar(_DecoratorGrammar):
     def __str__(self):
         return '(%s)' % str(self.exp).strip()
-
-    def render_fields(self, fields):
-        fields.update(
-                      n=self.counter(),
-                      exp=indent(render(self.exp))
-                      )
-
-    template = '''\
-                def group{n}():
-                {exp}
-                    return exp
-                exp = group{n}() # @UnusedVariable'''
 
 
 class TokenGrammar(_Grammar):
@@ -241,17 +232,17 @@ class ChoiceGrammar(_Grammar):
             return super(ChoiceGrammar, self).render()
 
     option_template = '''\
-                    with self._choice():
+                    with self._choice_context():
                     {option}
                         return exp\
                     '''
 
     template = '''\
                 def choice{n}():
-                    p = self._pos
+                    exp = None
                 {options}
                     self.error('no viable option')
-                exp = choice{n}()
+                exp = choice{n}()\
                 '''
 
 
@@ -396,9 +387,18 @@ class NamedGrammar(_DecoratorGrammar):
     def __str__(self):
         return '%s:%s' % (self.name, str(self.exp))
 
+    def render_fields(self, fields):
+        fields.update(
+                      n=self.counter(),
+                      exp=indent(render(self.exp))
+                      )
     template = '''
+                def {name}{n}():
                 {exp}
-                self._add_ast_node('{name}', exp)'''
+                    return exp
+                exp = {name}{n}()
+                self._add_ast_node('{name}', exp)\
+                '''
 
 
 class SpecialGrammar(_Grammar):

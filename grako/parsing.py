@@ -140,19 +140,33 @@ class Parser(object):
             self.ast.add(name, node)
         return node
 
-    @contextmanager
-    def _choice(self):
-        p = self._pos
-        try:
-            exp = yield  # @UnusedVariable
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            self._goto(p)
-
     def error(self, item, etype=FailedParse):
         raise etype(self._buffer, item)
 
     def trace(self, msg, *params):
         if self.verbose:
             print(msg % params, file=sys.stderr)
+
+    @contextmanager
+    def _choice_context(self):
+        p = self._pos
+        try:
+            yield
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            self._goto(p)
+
+
+    @contextmanager
+    def _repeat_context(self, target):
+        result = []
+        while True:
+            p = self._pos
+            try:
+                exp = yield result
+                if exp is not None:
+                    result.append(exp)
+            except FailedParse:
+                self._goto(p)
+        yield result
