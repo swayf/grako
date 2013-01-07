@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
+from contextlib import contextmanager
 from .util import memoize
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
@@ -138,6 +139,16 @@ class Parser(object):
         if name is not None:  # and node:
             self.ast.add(name, node)
         return node
+
+    @contextmanager
+    def _choice(self):
+        p = self._pos
+        try:
+            exp = yield  # @UnusedVariable
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            self._goto(p)
 
     def error(self, item, etype=FailedParse):
         raise etype(self._buffer, item)

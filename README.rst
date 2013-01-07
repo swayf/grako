@@ -188,5 +188,18 @@ The tool uses the docopt_ 0.5.0 library for command-line argument processing, an
 .. _docopt: https://github.com/halst/docopt/
 .. _`MIT License`:  http://mit-license.org/
 
+
+Credits
+=======
+
+These must be mentioned as contributors of thoughts, ideas, or code to the **Grako** project:
+
+    **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
+
+.. _`blog post`: http://dietbuddha.blogspot.com/2012/12/52python-encapsulating-exceptions-with.html 
+.. _`Python Weekly`: http://www.pythonweekly.com/ 
+
+There are several more, which will dutifully be credited, in time.
+
 -------------------------
 
