@@ -247,14 +247,15 @@ class ChoiceGrammar(_Grammar):
                     except FailedCut as e:
                         raise e.nested
                     except FailedParse:
-                        pass\
+                        self._goto(p)\
                     '''
 
     template = '''\
-                def option{n}():
+                def choice{n}():
+                    p = self._pos
                 {options}
                     self.error('no viable option')
-                exp = option{n}()
+                exp = choice{n}()
                 '''
 
 
