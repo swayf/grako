@@ -241,13 +241,9 @@ class ChoiceGrammar(_Grammar):
             return super(ChoiceGrammar, self).render()
 
     option_template = '''\
-                    try:
+                    with self._choice():
                     {option}
-                        return exp
-                    except FailedCut as e:
-                        raise e.nested
-                    except FailedParse:
-                        self._goto(p)\
+                        return exp\
                     '''
 
     template = '''\
