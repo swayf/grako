@@ -130,16 +130,10 @@ class GrakoParserBase(Parser):
         raise FailedParse(self._buffer, 'element')
 
     def _sequence_(self):
-        while True:
-            p = self._pos
-            try:
-                self._call('element', 'sequence')
-            except FailedCut:
-                self._goto(p)
-                raise
-            except FailedParse:
-                self._goto(p)
-                break
+        f = lambda : self._call('element', 'sequence')
+        for _ in self._repeat_iterator(f):
+            pass
+
 
 
     def _choice_(self):

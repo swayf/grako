@@ -157,16 +157,22 @@ class Parser(object):
         except FailedParse:
             self._goto(p)
 
-
     @contextmanager
-    def _repeat_context(self, target):
-        result = []
-        while True:
-            p = self._pos
-            try:
-                exp = yield result
-                if exp is not None:
-                    result.append(exp)
-            except FailedParse:
-                self._goto(p)
-        yield result
+    def _repeat_context(self):
+        p = self._pos
+        try:
+            yield
+        except FailedParse:
+            self._goto(p)
+            raise
+
+    def _repeat_iterator(self, f):
+        while 1:
+            with self._repeat_context():
+                try:
+                    yield f()
+                except FailedCut as e:
+                    raise e.nested
+                except FailedParse:
+                    raise StopIteration()
+
