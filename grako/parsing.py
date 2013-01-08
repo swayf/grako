@@ -170,7 +170,9 @@ class Parser(object):
         while 1:
             with self._repeat_context():
                 try:
-                    yield f()
+                    value = f()
+                    if value is not None:
+                        yield value
                 except FailedCut as e:
                     raise e.nested
                 except FailedParse:
