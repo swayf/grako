@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
+from contextlib import contextmanager
 from .util import memoize
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
@@ -145,3 +146,37 @@ class Parser(object):
     def trace(self, msg, *params):
         if self.verbose:
             print(msg % params, file=sys.stderr)
+
+    @contextmanager
+    def _choice_context(self):
+        p = self._pos
+        try:
+            yield
+        except FailedCut as e:
+            raise e.nested
+        except FailedParse:
+            self._goto(p)
+
+    @contextmanager
+    def _repeat_context(self):
+        p = self._pos
+        try:
+            yield
+        except FailedParse:
+            self._goto(p)
+            raise
+
+    def _repeat_iterator(self, f):
+        while 1:
+            with self._repeat_context():
+                try:
+                    value = f()
+                    if value is not None:
+                        yield value
+                except FailedCut as e:
+                    raise e.nested
+                except FailedParse:
+                    raise StopIteration()
+
+    def _repeat(self, f):
+        return list(self._repeat_iterator(f))

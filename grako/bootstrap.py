@@ -19,27 +19,18 @@ class GrakoParserBase(Parser):
         self._token('()', 'void')
 
     def _token_(self):
-        p = self._pos
-        try:
+        with self._choice_context():
             self._token("'")
             self._pattern(r"(?:[^'\\]|\\')*", 'token')
             self._token("'")
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+
+        with self._choice_context():
             self._token('"')
             self._pattern(r'(?:[^"\\]|\\")*', 'token')
             self._token('"')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
+
         raise FailedParse(self._buffer, '<"> or' + "<'>")
 
     def _word_(self):
@@ -84,92 +75,40 @@ class GrakoParserBase(Parser):
         self._pattern(r'(.*)\)?', 'special')
 
     def _atom_(self):
-        p = self._pos
-        try:
+        with self._choice_context():
             self._call('void', 'atom')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('cut', 'atom')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('token', 'atom')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('call', 'atom')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('pattern', 'atom')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
         raise FailedParse(self._buffer, 'atom')
 
 
     def _term_(self):
-        p = self._pos
-        try:
+        with self._choice_context():
             self._call('atom', 'term')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('subexp', 'term')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('repeat', 'term')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('optional', 'term')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('special', 'term')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
         raise FailedParse(self._buffer, 'term')
 
     def _named_(self):
@@ -182,43 +121,18 @@ class GrakoParserBase(Parser):
             raise FailedCut(self._buffer, e)
 
     def _element_(self):
-        p = self._pos
-        try:
+        with self._choice_context():
             self._call('named', 'element')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
-        try:
+        with self._choice_context():
             self._call('term', 'element')
             return
-        except FailedCut as e:
-            raise e.nested
-        except FailedParse:
-            pass
-        self._goto(p)
         raise FailedParse(self._buffer, 'element')
 
     def _sequence_(self):
-#        p = self._pos
-#        try:
-#            self._call('element', 'sequence')
-#        except FailedParse:
-#            self._goto(p)
-#            raise
-        while True:
-            p = self._pos
-            try:
-                self._call('element', 'sequence')
-            except FailedCut:
-                self._goto(p)
-                raise
-            except FailedParse:
-                self._goto(p)
-                break
-
+        f = lambda : self._call('element', 'sequence')
+        for _ in self._repeat_iterator(f):
+            pass
 
     def _choice_(self):
         self._call('sequence', 'options')
