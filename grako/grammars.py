@@ -273,7 +273,7 @@ class RepeatGrammar(_DecoratorGrammar):
 
     def render_fields(self, fields):
         fields.update(n=self.counter(),
-                      innerexp=indent(render(self.exp), 3))
+                      innerexp=indent(render(self.exp)))
 
     def render(self):
         if {()} in self.exp.firstset:
@@ -282,18 +282,10 @@ class RepeatGrammar(_DecoratorGrammar):
 
     template = '''
                 def repeat{n}():
-                    result = []
-                    while True:
-                        p = self._pos
-                        try:
                 {innerexp}
-                            if exp is not None:
-                                result.append(exp)
-                        except FailedParse:
-                            self._goto(p)
-                            break
-                    return result
-                exp = repeat{n}() # @UnusedVariable'''
+                    return exp
+                exp = self._repeat(repeat{n}) # @UnusedVariable\
+                '''
 
 
 class RepeatOneGrammar(RepeatGrammar):
@@ -312,23 +304,17 @@ class RepeatOneGrammar(RepeatGrammar):
 
     def render_fields(self, fields):
         fields.update(n=self.counter(),
-                      exp=indent(render(self.exp)),
-                      innerexp=indent(render(self.exp), 3))
+                      exp=render(self.exp),
+                      innerexp=indent(render(self.exp)))
 
     template = '''
-                def repeat{n}():
                 {exp}
-                    result = [exp]
-                    while True:
-                        p = self._pos
-                        try:
+                first = exp
+                def repeat{n}():
                 {innerexp}
-                            result.append(exp)
-                        except FailedParse:
-                            self._goto(p)
-                            break
-                    return result
-                exp = repeat{n}() # @UnusedVariable'''
+                    return exp
+                exp = [first] + self._repeat(repeat{n}) # @UnusedVariable\
+                '''
 
 
 class OptionalGrammar(_DecoratorGrammar):
@@ -390,14 +376,11 @@ class NamedGrammar(_DecoratorGrammar):
     def render_fields(self, fields):
         fields.update(
                       n=self.counter(),
-                      exp=indent(render(self.exp))
+                      exp=render(self.exp)
                       )
     template = '''
-                def {name}{n}():
                 {exp}
-                    return exp
-                exp = {name}{n}()
-                self._add_ast_node('{name}', exp)\
+                self.ast['{name}'].append(exp)\
                 '''
 
 

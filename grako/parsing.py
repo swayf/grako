@@ -178,3 +178,5 @@ class Parser(object):
                 except FailedParse:
                     raise StopIteration()
 
+    def _repeat(self, f):
+        return list(self._repeat_iterator(f))

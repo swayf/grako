@@ -134,8 +134,6 @@ class GrakoParserBase(Parser):
         for _ in self._repeat_iterator(f):
             pass
 
-
-
     def _choice_(self):
         self._call('sequence', 'options')
         while True:
