@@ -110,7 +110,15 @@ The expressions, in reverse order of precedence, can be:
         after this point.
 
     ``name:e``
-        Add the result of ``e`` to the AST using ``name`` as key.
+        Add the result of ``e`` to the AST using ``name`` as key. If more than one item is
+        added with the same ``name``, the entry is converted to a list.
+    
+    ``namei+:e``
+        Add the result of ``e`` to the AST using ``name`` as key. Force the entry to be 
+        a list even if only one element is added.
+
+    ``<EOF>```
+        Verify thad the end of the input text has been reached.
 
 **Warning**::
 
