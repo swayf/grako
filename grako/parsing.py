@@ -22,11 +22,13 @@ class Parser(object):
         self._bufferClass = bufferClass
         self._buffer = None
         self._ast_stack = []
+        self._concrete_stack = []
         self._rule_stack = []
 
     def parse(self, rule_name):
         self._buffer = self._bufferClass(self.text, self.whitespace)
         self._push_ast()
+        self._concrete_stack.append([])
         self._call(rule_name, rule_name)
         return self.ast
 
@@ -35,7 +37,7 @@ class Parser(object):
         return self._ast_stack[-1]
 
     def result(self):
-        return self.ast['$'][0]
+        return self.ast
 
     def rulestack(self):
         return '.'.join(self._rule_stack)
@@ -86,10 +88,16 @@ class Parser(object):
     def _invoke_rule(self, name, pos):
         rule = self._find_rule(name)
         self._push_ast()
+        self._concrete_stack.append([])
         try:
             rule()
             node = self.ast
+            if not node:
+                node = self._concrete_stack[-1]
+                if len(node) == 1:
+                    node = node[0]
         finally:
+            self._concrete_stack.pop()
             self._pop_ast()
         semantic_rule = self._find_semantic_rule(name)
         if semantic_rule:
@@ -144,6 +152,7 @@ class Parser(object):
     def _add_ast_node(self, name, node, force_list):
         if name is not None:  # and node:
             self.ast.add(name, node, force_list)
+        self._concrete_stack[-1].append(node)
         return node
 
     def error(self, item, etype=FailedParse):
