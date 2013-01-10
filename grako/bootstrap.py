@@ -137,7 +137,8 @@ class GrakoParserBase(Parser):
         raise FailedParse(self._buffer, 'element')
 
     def _sequence_(self):
-        f = lambda : self._call('element', 'sequence', True)
+        self._call('element', 'sequence', True)
+        f = lambda : self._call('element', 'sequence')
         for _ in self._repeat_iterator(f):
             pass
 
