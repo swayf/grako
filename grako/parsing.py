@@ -3,23 +3,29 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 from contextlib import contextmanager
 from .util import memoize
-from .buffering import Buffer
+from . import buffering
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
 
 class Parser(object):
-    def __init__(self, text, whitespace=None, comments_re=None, ignorecase=False, verbose=False):
+    def __init__(self, text,
+                        whitespace=None,
+                        comments_re=None,
+                        ignorecase=False,
+                        verbose=False,
+                        bufferClass=buffering.Buffer):
         self.text = text
         self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
         self.comments_re = comments_re
         self.ignorecase = ignorecase
         self.verbose = verbose
+        self._bufferClass = bufferClass
         self._buffer = None
         self._ast_stack = []
         self._rule_stack = []
 
     def parse(self, rule_name):
-        self._buffer = Buffer(self.text, self.whitespace)
+        self._buffer = self._bufferClass(self.text, self.whitespace)
         self._push_ast()
         self._call(rule_name, rule_name)
         return self.ast
