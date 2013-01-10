@@ -27,8 +27,7 @@ class Renderer(object):
     def render(self):
         fields = {k:v for k, v in vars(self).items() if not k.startswith('_')}
         self.render_fields(fields)
-        for k, v in fields.items():
-            fields[k] = render(v)
+        fields = {k:render(v) for k, v in fields.items()}
         try:
             return trim(self.template).format(**fields)
         except KeyError as e:
