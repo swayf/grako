@@ -47,6 +47,9 @@ class GrakoParserBase(Parser):
     def _cut_(self):
         self._token('!', 'cut')
 
+    def _eof_(self):
+        self._token('<EOF>')
+
     def _subexp_(self):
         self._token('(')
         self._call('expre', 'exp')
@@ -89,6 +92,9 @@ class GrakoParserBase(Parser):
             return
         with self._choice_context():
             self._call('pattern', 'atom')
+            return
+        with self._choice_context():
+            self._call('eof', 'atom')
             return
         raise FailedParse(self._buffer, 'atom')
 
@@ -169,7 +175,7 @@ class GrakoParserBase(Parser):
                 self._goto(p)
                 break
         self._next_token()
-        self._eof()
+        self._check_eof()
 
 
 class AbstractGrakoParser(GrakoParserBase):
@@ -183,6 +189,9 @@ class AbstractGrakoParser(GrakoParserBase):
         return ast
 
     def cut(self, ast):
+        return ast
+
+    def void(self, ast):
         return ast
 
     def subexp(self, ast):
@@ -241,6 +250,12 @@ class GrakoParser(AbstractGrakoParser):
         return ast
 
     def cut(self, ast):
+        return ast
+
+    def eof(self, ast):
+        return ast
+
+    def void(self, ast):
         return ast
 
     def subexp(self, ast):
@@ -308,6 +323,12 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
 
     def cut(self, ast):
         return CutGrammar()
+
+    def eof(self, ast):
+        return EOFGrammar()
+
+    def void(self, ast):
+        return VOIDGrammar()
 
     def subexp(self, ast):
         return GroupGrammar(ast.exp)

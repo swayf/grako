@@ -1,4 +1,4 @@
-grammar = rules:{rule}+ ;
+grammar = rules:{rule}+ <EOF> ;
 
 rule = name:word '=' ! rhs:expre ('.' | ';') ! ;
 
@@ -22,7 +22,7 @@ optional = '[' ! optional:expre ']' ! ;
 
 special = '?(' ! special:?/(.*)/? ')?' ! ;
 
-atom = atom:(cut | token | call | pattern) ;
+atom = atom:(cut | token | call | pattern | eof) ;
 
 call = call:word ;
 
@@ -35,3 +35,5 @@ token = ('"' token:?/([^"]|\\")*/? '"' | "'" token:?/([^']|\\')*/? "'") ;
 word = word:?/[-_A-Za-z0-9]+/? ;
 
 pattern = '?/' ! pattern:?/(.*?)(?=/\?)/? '/?' ;
+
+eof = '<EOF>' ;

@@ -68,12 +68,21 @@ class _Grammar(Renderer):
         return set()
 
 
+class VOIDGrammar(_Grammar):
+    def __str__(self):
+        return '()'
+
+
 class EOFGrammar(_Grammar):
     def parse(self, ctx):
+        ctx.buf.eatwhitespace()
         if not ctx.buf.atend():
             raise FailedParse(ctx.buf, '<EOF>')
 
-    template = 'self._eol()'
+    def __str__(self):
+        return '<EOF>'
+
+    template = 'self._check_eof()'
 
 
 class _DecoratorGrammar(_Grammar):
@@ -123,9 +132,9 @@ class TokenGrammar(_Grammar):
         return "'%s'" % self.token
 
     def render_fields(self, fields):
-        fields.update(token=self.token)
+        fields.update(token=repr(self.token))
 
-    template = "exp = self._token('{token}') # @UnusedVariable"
+    template = "exp = self._token({token}) # @UnusedVariable"
 
 
 class PatternGrammar(_Grammar):
@@ -148,10 +157,10 @@ class PatternGrammar(_Grammar):
         return '?/%s/?' % self.pattern
 
     def render_fields(self, fields):
-        fields.update(pattern=self.pattern)
+        fields.update(pattern=repr(self.pattern))
 
     template = '''\
-                exp = self._pattern(r'{pattern}') # @UnusedVariable
+                exp = self._pattern({pattern}) # @UnusedVariable
                 '''
 
 
@@ -372,6 +381,8 @@ class NamedGrammar(_DecoratorGrammar):
         return value
 
     def __str__(self):
+        if self.force_list:
+            return '%s+:%s' % (self.name, str(self.exp))
         return '%s:%s' % (self.name, str(self.exp))
 
     def render_fields(self, fields):
@@ -496,9 +507,6 @@ class Grammar(Renderer):
                 start_rule = ctx.rules[start]
                 tree = start_rule.parse(ctx)
                 ctx.add_ast_node(start, tree, False)
-                ctx.buf.eatwhitespace()
-                if not ctx.buf.atend():
-                    raise FailedParse(ctx.buf, '<EOF>')
                 log.info('SUCCESS grammar')
                 return ctx.ast
             except FailedCut as e:

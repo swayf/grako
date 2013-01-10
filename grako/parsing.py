@@ -57,11 +57,6 @@ class Parser(object):
             while self._buffer.matchre(self.comments_re):
                 pass
 
-    def _eof(self):
-        self._next_token()
-        if not self._buffer.atend():
-            raise FailedParse(self._buffer, '<EOF>')
-
     def _next_token(self):
         self._eatcomments()
         self._eatwhitespace()
@@ -92,10 +87,10 @@ class Parser(object):
         try:
             rule()
             node = self.ast
-            if not node:
-                node = self._concrete_stack[-1]
-                if len(node) == 1:
-                    node = node[0]
+#            if not node:
+#                node = self._concrete_stack[-1]
+#                if len(node) == 1:
+#                    node = node[0]
         finally:
             self._concrete_stack.pop()
             self._pop_ast()
@@ -195,3 +190,8 @@ class Parser(object):
 
     def _repeat(self, f):
         return list(self._repeat_iterator(f))
+
+    def _check_eof(self):
+        self._next_token()
+        if not self._buffer.atend():
+            raise FailedParse(self._buffer, 'expecting end of file')
