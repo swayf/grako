@@ -113,6 +113,7 @@ class GrakoParserBase(Parser):
 
     def _named_(self):
         self._call('word', 'name')
+        self._try('+', 'force_list')
         self._token(':')
         try:
             self._call('term', 'value')
@@ -332,7 +333,7 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
         return ast.term[0]
 
     def named(self, ast):
-        return NamedGrammar(ast.name[0], ast.value[0])
+        return NamedGrammar(ast.name[0], ast.value[0], 'force_list' in ast)
 
     def element(self, ast):
         return ast.element[0]

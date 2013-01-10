@@ -10,7 +10,7 @@ sequence = elements:element {[','] elements:element} ;
 
 element = element:(named | term) ;
 
-named = name:word ':' value:term ;
+named = name:word force_list:['+'] ':' value:term ;
 
 term = term:(void | subexp | repeat | optional | special | atom) ;
 

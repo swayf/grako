@@ -45,9 +45,9 @@ class Context(object):
     def pop_ast(self):
         return self._ast_stack.pop()
 
-    def add_ast_node(self, name, node):
+    def add_ast_node(self, name, node, force_list):
         if name is not None and node:
-            self.ast.add(name, node)
+            self.ast.add(name, node, force_list)
         return node
 
 class _Grammar(Renderer):
@@ -360,14 +360,15 @@ class CutGrammar(_Grammar):
 
 
 class NamedGrammar(_DecoratorGrammar):
-    def __init__(self, name, exp):
+    def __init__(self, name, exp, force_list):
         super(NamedGrammar, self).__init__(exp)
         assert isinstance(exp, _Grammar), str(exp)
         self.name = name
+        self.force_list = force_list
 
     def parse(self, ctx):
         value = self.exp.parse(ctx)
-        ctx.add_ast_node(self.name, value)
+        ctx.add_ast_node(self.name, value, self.force_list)
         return value
 
     def __str__(self):
@@ -380,7 +381,7 @@ class NamedGrammar(_DecoratorGrammar):
                       )
     template = '''
                 {exp}
-                self.ast['{name}'].append(exp)\
+                self.ast.add('{name}', exp, {force_list})
                 '''
 
 
@@ -421,6 +422,9 @@ class RuleRefGrammar(_Grammar):
 
 
 class RuleGrammar(NamedGrammar):
+    def __init__(self, name, exp):
+        super(RuleGrammar, self).__init__(name, exp, False)
+
     def parse(self, ctx):
         ctx._rule_stack.append(self.name)
         ctx.push_ast()
@@ -491,7 +495,7 @@ class Grammar(Renderer):
                 ctx = Context(self.rules, text)
                 start_rule = ctx.rules[start]
                 tree = start_rule.parse(ctx)
-                ctx.add_ast_node(start, tree)
+                ctx.add_ast_node(start, tree, False)
                 ctx.buf.eatwhitespace()
                 if not ctx.buf.atend():
                     raise FailedParse(ctx.buf, '<EOF>')

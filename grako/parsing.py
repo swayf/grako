@@ -64,7 +64,7 @@ class Parser(object):
         self._eatcomments()
         self._eatwhitespace()
 
-    def _call(self, name, node_name=None):
+    def _call(self, name, node_name=None, force_list=True):
         self._rule_stack.append(name)
         self._next_token()
         pos = self._pos
@@ -72,7 +72,7 @@ class Parser(object):
             self.trace('%s <<\n\t%s', self.rulestack(), self._buffer.lookahead())
             result, newpos = self._invoke_rule(name, pos)
             self.trace('SUCCESS %s', self.rulestack())
-            self._add_ast_node(node_name, result)
+            self._add_ast_node(node_name, result, force_list)
             self._goto(newpos)
             return result
         except FailedParse:
@@ -96,31 +96,31 @@ class Parser(object):
             node = semantic_rule(node)
         return (node, self._pos)
 
-    def _token(self, token, node_name=None):
+    def _token(self, token, node_name=None, force_list=True):
         self._next_token()
         self.trace('match <%s> \n\t%s', token, self._buffer.lookahead())
         if self._buffer.match(token, self.ignorecase) is None:
             self.trace('failed <%s>', token)
             raise FailedToken(self._buffer, token)
-        self._add_ast_node(node_name, token)
+        self._add_ast_node(node_name, token, force_list)
         return token
 
-    def _try(self, token, node_name=None):
+    def _try(self, token, node_name=None, force_list=True):
         self._next_token()
         self.trace('try <%s> \n\t%s', token, self._buffer.lookahead())
         if self._buffer.match(token, self.ignorecase) is not None:
-            self._add_ast_node(node_name, token)
+            self._add_ast_node(node_name, token, force_list)
             return True
 
 
-    def _pattern(self, pattern, node_name=None):
+    def _pattern(self, pattern, node_name=None, force_list=True):
         self._next_token()
         self.trace('match %s\n\t%s', pattern, self._buffer.lookahead())
         token = self._buffer.matchre(pattern, self.ignorecase)
         if token is None:
             self.trace('failed %s', pattern)
             raise FailedPattern(self._buffer, pattern)
-        self._add_ast_node(node_name, token)
+        self._add_ast_node(node_name, token, force_list)
         return token
 
     def _find_rule(self, name):
@@ -141,9 +141,9 @@ class Parser(object):
     def _pop_ast(self):
         return self._ast_stack.pop()
 
-    def _add_ast_node(self, name, node):
+    def _add_ast_node(self, name, node, force_list):
         if name is not None:  # and node:
-            self.ast.add(name, node)
+            self.ast.add(name, node, force_list)
         return node
 
     def error(self, item, etype=FailedParse):

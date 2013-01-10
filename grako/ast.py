@@ -9,12 +9,17 @@ class AST(Mapping):
     def __init__(self, **kwargs):
         self._elements = OrderedDict(**kwargs)
 
-    def add(self, key, value):
+    def add(self, key, value, force_list=True):
         previous = self._elements.get(key, None)
         if previous is None:
-            self._elements[key] = [value]
-        else:
+            if force_list:
+                self._elements[key] = [value]
+            else:
+                self._elements[key] = value
+        elif isinstance(previous, list):
             previous.append(value)
+        else:
+            self._elements[key] = [previous, value]
 
     def update(self, *args, **kwargs):
         for dct in args:
