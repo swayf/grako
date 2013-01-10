@@ -19,14 +19,14 @@ def main():
     g = GrakoParser('Grako', text)
     g.parse()
 #    print(g.ast)
-#    generated_grammar0 = str(g.ast['grammar'][0])
+#    generated_grammar0 = str(g.ast['grammar'])
     open('tmp/0.ebnf', 'w').write(text)
 
     print('-' * 20, 'phase 1 - parse with parser generator')
     text = open('tmp/0.ebnf').read()
     g = GrakoGrammarGenerator('Grako', text)
     g.parse()
-    generated_grammar1 = str(g.ast['grammar'][0])
+    generated_grammar1 = str(g.ast['grammar'])
     open('tmp/1.ebnf', 'w').write(generated_grammar1)
 #    print(generated_grammar1)
 
@@ -35,7 +35,7 @@ def main():
     text = open('tmp/1.ebnf').read()
     g = GrakoGrammarGenerator('Grako', text)
     g.parse()
-    generated_grammar2 = str(g.ast['grammar'][0])
+    generated_grammar2 = str(g.ast['grammar'])
 #    print(generated_grammar2)
     open('tmp/2.ebnf', 'w').write(generated_grammar2)
     assert generated_grammar2 == generated_grammar1
@@ -44,7 +44,7 @@ def main():
     text = open('tmp/2.ebnf').read()
     g = GrakoGrammarGenerator('Grako', text)
     g.parse()
-    generated_grammar3 = str(g.ast['grammar'][0])
+    generated_grammar3 = str(g.ast['grammar'])
 #    print(generated_grammar3)
     open('tmp/3.ebnf', 'w').write(generated_grammar3)
     assert generated_grammar3 == generated_grammar2
@@ -53,7 +53,7 @@ def main():
     text = open('tmp/3.ebnf').read()
     g = GrakoGrammarGenerator('Grako', text)
     g.parse()
-    parser = g.ast['grammar'][0]
+    parser = g.ast['grammar']
 #    pprint(parser.first_sets, indent=2, depth=3)
     generated_grammar4 = str(parser)
 #    print(generated_grammar4)

@@ -9,7 +9,7 @@ class AST(Mapping):
     def __init__(self, **kwargs):
         self._elements = OrderedDict(**kwargs)
 
-    def add(self, key, value, force_list=True):
+    def add(self, key, value, force_list=False):
         previous = self._elements.get(key, None)
         if previous is None:
             if force_list:

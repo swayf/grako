@@ -64,7 +64,7 @@ class Parser(object):
         self._eatcomments()
         self._eatwhitespace()
 
-    def _call(self, name, node_name=None, force_list=True):
+    def _call(self, name, node_name=None, force_list=False):
         self._rule_stack.append(name)
         self._next_token()
         pos = self._pos
@@ -96,7 +96,7 @@ class Parser(object):
             node = semantic_rule(node)
         return (node, self._pos)
 
-    def _token(self, token, node_name=None, force_list=True):
+    def _token(self, token, node_name=None, force_list=False):
         self._next_token()
         self.trace('match <%s> \n\t%s', token, self._buffer.lookahead())
         if self._buffer.match(token, self.ignorecase) is None:
@@ -105,7 +105,7 @@ class Parser(object):
         self._add_ast_node(node_name, token, force_list)
         return token
 
-    def _try(self, token, node_name=None, force_list=True):
+    def _try(self, token, node_name=None, force_list=False):
         self._next_token()
         self.trace('try <%s> \n\t%s', token, self._buffer.lookahead())
         if self._buffer.match(token, self.ignorecase) is not None:
@@ -113,7 +113,7 @@ class Parser(object):
             return True
 
 
-    def _pattern(self, pattern, node_name=None, force_list=True):
+    def _pattern(self, pattern, node_name=None, force_list=False):
         self._next_token()
         self.trace('match %s\n\t%s', pattern, self._buffer.lookahead())
         token = self._buffer.matchre(pattern, self.ignorecase)

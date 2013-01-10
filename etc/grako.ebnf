@@ -1,12 +1,12 @@
-grammar = {rules:rule}+ ;
+grammar = rules:{rule}+ ;
 
 rule = name:word '=' ! rhs:expre ('.' | ';') ! ;
 
 expre = expre:choice ;
 
-choice = options:sequence {'|' ! options:sequence} ;
+choice = options+:sequence {'|' ! options:sequence} ;
 
-sequence = elements:element {[','] elements:element} ;
+sequence = elements+:element {[','] elements:element} ;
 
 element = element:(named | term) ;
 
