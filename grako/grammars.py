@@ -206,7 +206,7 @@ class SequenceGrammar(_Grammar):
                 {seq}
                 except FailedParse as e:
                     if cut_seen:
-                        raise FailedCut(e)
+                        self.error(e, FailedCut)
                     raise\
                 '''
 
