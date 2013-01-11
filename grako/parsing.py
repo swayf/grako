@@ -123,6 +123,7 @@ class Parser(object):
         if token is None:
             self.trace('failed %s', pattern)
             raise FailedPattern(self._buffer, pattern)
+        self.trace('matched %s', token)
         self._add_ast_node(node_name, token, force_list)
         return token
 

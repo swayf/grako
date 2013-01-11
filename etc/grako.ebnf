@@ -1,5 +1,7 @@
 grammar = rules:{rule}+ <EOF> ;
 
+(* a comment *)
+
 rule = name:word '=' ! rhs:expre ('.' | ';') ! ;
 
 expre = expre:choice ;

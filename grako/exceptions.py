@@ -76,3 +76,9 @@ class FailedChoice(FailedParse):
     @property
     def message(self):
         return 'no viable option'
+
+
+class FailedReservedWord(FailedParse):
+    @property
+    def message(self):
+        return "'%s' is a reserved word" % self.item

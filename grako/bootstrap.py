@@ -6,10 +6,15 @@ from .parsing import *  # @UnusedWildImport
 
 __all__ = ['GrakoParser', 'GrakoGrammarGenerator']
 
+COMMENTS_RE = r'\(\*.*?\*\)'
+
 class GrakoParserBase(Parser):
 
     def __init__(self, grammar_name, text, verbose=False):
-        super(GrakoParserBase, self).__init__(text, ignorecase=True, verbose=verbose)
+        super(GrakoParserBase, self).__init__(text,
+                comments_re=COMMENTS_RE,
+                ignorecase=True,
+                verbose=verbose)
         self.grammar_name = grammar_name
 
     def parse(self, rule='grammar'):
