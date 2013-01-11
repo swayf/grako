@@ -144,7 +144,7 @@ class Parser(object):
     def _pop_ast(self):
         return self._ast_stack.pop()
 
-    def _add_ast_node(self, name, node, force_list):
+    def _add_ast_node(self, name, node, force_list=False):
         if name is not None:  # and node:
             self.ast.add(name, node, force_list)
         self._concrete_stack[-1].append(node)
