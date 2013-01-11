@@ -248,7 +248,7 @@ class ChoiceGrammar(_Grammar):
 
     template = '''\
                 def choice{n}():
-                    exp = None
+                    exp = None #@UnusedVariable
                 {options}
                     self.error('no viable option')
                 exp = choice{n}()\
