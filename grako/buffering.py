@@ -51,10 +51,7 @@ class Buffer(object):
     def lookahead(self):
         if self.atend():
             return ''
-        return self.text[self.pos:self.pos + 20] + '...'
-#        p = bisect(self._linecache, PosLine(self.pos, 0))
-#        start, _line = self._linecache[p]
-#        return self.text[self.pos:start]
+        return (self.text[self.pos:self.pos + 20] + '...').encode('unicode-escape')
 
     def next(self):
         if self.atend():
