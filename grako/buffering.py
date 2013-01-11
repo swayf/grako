@@ -10,17 +10,24 @@ __all__ = ['Buffer']
 RETYPE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
-LineInfo = namedtuple('LineInfo', ['line', 'col', 'text'])
+LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
 
 class Buffer(object):
-    def __init__(self, text, whitespace=None, verbose=False):
+    def __init__(self, text, filename='unknown', whitespace=None, verbose=False):
         self.text = text
-        self.linecache = self._build_line_cache()
+        self.filename = filename
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
         self.verbose = verbose
-        self.pos = 0
+        self._pos = 0
         self.col = 0
         self.line = 0
+        self._fileinfo = self.get_fileinfo(text, filename)
+        self._linecache = []
+        self._preprocess()
+        self._build_line_cache()
+
+    def _preprocess(self):
+        pass
 
     @property
     def pos(self):
@@ -45,8 +52,8 @@ class Buffer(object):
         if self.atend():
             return ''
         return self.text[self.pos:self.pos + 20] + '...'
-#        p = bisect(self.linecache, PosLine(self.pos, 0))
-#        start, _line = self.linecache[p]
+#        p = bisect(self._linecache, PosLine(self.pos, 0))
+#        start, _line = self._linecache[p]
 #        return self.text[self.pos:start]
 
     def next(self):
@@ -63,7 +70,7 @@ class Buffer(object):
 
     def goto(self, p):
         self._pos = max(0, min(len(self.text), p))
-        self.line, self.col, _ = self.line_info(p)
+        self.line, self.col = self.line_info(p)[:2]
 
     def move(self, n):
         self.goto(self.pos + n)
@@ -99,6 +106,9 @@ class Buffer(object):
             self.move(len(token))
             return token
 
+    def get_fileinfo(self, text, filename):
+        return [filename] * len(text.splitlines())
+
     def _build_line_cache(self):
         cache = [PosLine(-1, 0)]
         n = 0
@@ -107,13 +117,19 @@ class Buffer(object):
                 n += 1
                 cache.append(PosLine(i , n))
         cache.append(PosLine(len(self.text), n + 1))
-        return cache
+        self._linecache = cache
 
     def line_info(self, pos=None):
         if pos is None:
             pos = self.pos
-        p = bisect(self.linecache, PosLine(pos, 0))
-        start, line = self.linecache[p - 1]
+        n = bisect(self._linecache, PosLine(pos, 0))
+        start, line = self._linecache[n - 1]
         col = pos - start - 1
-        text = self.text[start:self.linecache[p].pos]
-        return LineInfo(line, col, text)
+        text = self.text[start:self._linecache[n].pos]
+        return LineInfo(line, col, start, text)
+
+    def get_line(self, n):
+        start, line = self._linecache[n][:2]
+        assert line == n
+        end, _ = self._linecache[n + 1]
+        return self.text[start + 1:end]
