@@ -13,8 +13,8 @@ PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
 
 class Buffer(object):
-    def __init__(self, text, filename='unknown', whitespace=None, verbose=False):
-        self.text = text
+    def __init__(self, text, filename='unknown', whitespace=None, encoding='utf-8', verbose=False):
+        self.text = unicode(text, encoding)
         self.filename = filename
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
         self.verbose = verbose
@@ -128,7 +128,9 @@ class Buffer(object):
         text = self.text[start:self._linecache[n].pos]
         return LineInfo(line, col, start, text)
 
-    def get_line(self, n):
+    def get_line(self, n=None):
+        if n is None:
+            n = self.line
         start, line = self._linecache[n][:2]
         assert line == n
         end, _ = self._linecache[n + 1]
