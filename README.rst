@@ -126,6 +126,9 @@ The expressions, in reverse order of precedence, can be:
     ``<EOF>```
         Verify thad the end of the input text has been reached.
 
+     ``(*`` comment ``*)``
+        Comments may appear anywhere in the text.
+
 **Warning**::
 
     Only elements that have a name assigned will be part of the generated
