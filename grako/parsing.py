@@ -180,8 +180,8 @@ class Parser(object):
         p = self._pos
         try:
             yield
-        except FailedCut:
-            raise
+        except FailedCut as e:
+            raise e.nested
         except FailedParse:
             self._goto(p)
 
@@ -202,6 +202,8 @@ class Parser(object):
                     value = f()
                     if value is not None:
                         yield value
+                except FailedCut:
+                    raise
                 except FailedParse:
                     self._goto(p)
                     raise StopIteration()

@@ -264,10 +264,7 @@ class ChoiceGrammar(_Grammar):
                     exp = None #@UnusedVariable
                 {options}
                     self.error('no viable option')
-                try:
-                    exp = choice{n}() #@UnusedVariable
-                except FailedCut as e:
-                    raise e.nested\
+                exp = choice{n}() #@UnusedVariable\
                 '''
 
 
@@ -347,6 +344,8 @@ class OptionalGrammar(_DecoratorGrammar):
         p = ctx.pos
         try:
             return self.exp.parse(ctx)
+        except FailedCut:
+            raise
         except FailedParse:
             ctx.goto(p)
             return None
