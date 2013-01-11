@@ -168,6 +168,16 @@ class Parser(object):
             self._goto(p)
 
     @contextmanager
+    def _sequence_context(self):
+        cut_seen = False
+        try:
+            yield
+        except FailedParse as e:
+            if cut_seen:
+                raise FailedCut(e)
+            raise
+
+    @contextmanager
     def _repeat_context(self):
         p = self._pos
         try:
