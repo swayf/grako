@@ -50,6 +50,10 @@ class Context(object):
             self.ast.add(name, node, force_list)
         return node
 
+    def next_token(self):
+        self.buf.eatwhitespace()
+
+
 class _Grammar(Renderer):
     def __init__(self):
         super(_Grammar, self).__init__()
@@ -68,9 +72,11 @@ class _Grammar(Renderer):
         return set()
 
 
-class VOIDGrammar(_Grammar):
+class VoidGrammar(_Grammar):
     def __str__(self):
         return '()'
+
+    template = 'pass'
 
 
 class EOFGrammar(_Grammar):
@@ -115,6 +121,7 @@ class TokenGrammar(_Grammar):
 
     def parse(self, ctx):
         log.debug('token <%s>\n\t%s', self.token, ctx.buf.lookahead())
+        ctx.next_token()
         result = ctx.buf.match(self.token)
         if result is None:
             raise FailedToken(ctx.buf, self.token)
@@ -191,7 +198,7 @@ class SequenceGrammar(_Grammar):
         return ' '.join(str(s).strip() for s in self.sequence)
 
     def render_fields(self, fields):
-        fields.update(seq=indent('\n'.join(trim(render(s)) for s in self.sequence)))
+        fields.update(seq=indent('\n'.join(render(s) for s in self.sequence)))
 
     template = '''
                 with self._sequence_context():
@@ -252,7 +259,7 @@ class ChoiceGrammar(_Grammar):
                     exp = None #@UnusedVariable
                 {options}
                     self.error('no viable option')
-                exp = choice{n}()\
+                exp = choice{n}() #@UnusedVariable\
                 '''
 
 
@@ -346,14 +353,9 @@ class OptionalGrammar(_DecoratorGrammar):
         fields.update(exp=indent(render(self.exp)))
 
     template = '''\
-            p = self._pos
-            exp = None
-            try:
-            {exp}
-            except FailedParse:
-                self._goto(p)\
-            '''
-
+                with self._choice_context():
+                {exp}
+                '''
 
 
 class CutGrammar(_Grammar):
@@ -417,6 +419,8 @@ class RuleRefGrammar(_Grammar):
     def parse(self, ctx):
         try:
             rule = ctx.rules[self.name]
+            if self.name[0].islower():
+                ctx.next_token()
             return rule.parse(ctx)
         except KeyError:
             raise FailedRef(ctx.buf, self.name)
@@ -442,6 +446,8 @@ class RuleGrammar(NamedGrammar):
         ctx.push_ast()
         log.debug('%s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
         try:
+            if self.name[0].islower():
+                ctx.next_token()
             _tree, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
             ctx.goto(newpos)
             log.debug('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())

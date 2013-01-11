@@ -100,7 +100,13 @@ The expressions, in reverse order of precedence, can be:
         Match the text within the quotation marks.
 
     ``?/<regexp>/?``
-        Match the Python_ regular expression ``<regexp>``.
+        Match the Python_ regular expression ``<regexp>`` at the current text position. These
+        matches do not consume spaces or comments. For that, place the ``regexp`` as the 
+        only term in their own rule.
+
+    ``rulename``
+        Invoke the rule named ``rulename``. Note that rules that begin with an uppercase character
+        don't advance the input over whitespace and comments.
 
     ``()``
         The empty expression. Match nothing.

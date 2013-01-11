@@ -329,7 +329,7 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
         return EOFGrammar()
 
     def void(self, ast):
-        return VOIDGrammar()
+        return VoidGrammar()
 
     def subexp(self, ast):
         return GroupGrammar(ast.exp)

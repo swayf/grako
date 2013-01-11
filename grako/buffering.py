@@ -73,7 +73,6 @@ class Buffer(object):
             self.next()
 
     def match(self, token, ignorecase=False):
-        self.eatwhitespace()
         if self.atend():
             if token is None:
                 return True
@@ -90,7 +89,6 @@ class Buffer(object):
             self.goto(p)
 
     def matchre(self, pattern, ignorecase=False):
-        self.eatwhitespace()
         if isinstance(pattern, RETYPE):
             re = pattern
         else:
