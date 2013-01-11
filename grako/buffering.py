@@ -4,8 +4,6 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import re as regexp
 from bisect import bisect as bisect
 from collections import namedtuple
-import logging
-log = logging.getLogger('grako.buffering')
 
 __all__ = ['Buffer']
 
@@ -15,10 +13,11 @@ PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['line', 'col', 'text'])
 
 class Buffer(object):
-    def __init__(self, text, whitespace=None):
+    def __init__(self, text, whitespace=None, verbose=False):
         self.text = text
         self.linecache = self._build_line_cache()
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
+        self.verbose = verbose
         self.pos = 0
         self.col = 0
         self.line = 0
@@ -86,7 +85,6 @@ class Buffer(object):
         else:
             result = all(c == self.next() for c in token)
         if result:
-            log.debug("matched '%s' at %d - %s", token, self.pos, self.lookahead())
             return token
         else:
             self.goto(p)
@@ -97,11 +95,9 @@ class Buffer(object):
             re = pattern
         else:
             re = regexp.compile(pattern, regexp.IGNORECASE if ignorecase else 0)
-        log.debug("matching'%s' at %d - %s", re.pattern, self.pos, self.lookahead())
         matched = re.match(self.text, self.pos)
         if matched:
             token = matched.group()
-            log.debug("matched '%s' at %d - %s", token, self.pos, self.lookahead())
             self.move(len(token))
             return token
 
