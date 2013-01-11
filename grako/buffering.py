@@ -14,6 +14,7 @@ LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
 
 class Buffer(object):
     def __init__(self, text, filename='unknown', whitespace=None, encoding='utf-8', verbose=False):
+        self.original_text = text
         self.text = unicode(text, encoding)
         self.filename = filename
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
