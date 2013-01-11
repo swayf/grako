@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
+import re
 from contextlib import contextmanager
 from .util import memoize
 from . import buffering
@@ -54,7 +55,8 @@ class Parser(object):
 
     def _eatcomments(self):
         if self.comments_re is not None:
-            while self._buffer.matchre(self.comments_re):
+            opts = re.MULTILINE if '\n' in self.comments_re else 0
+            while self._buffer.matchre(self.comments_re, opts):
                 pass
 
     def _next_token(self):
@@ -171,20 +173,10 @@ class Parser(object):
         p = self._pos
         try:
             yield
-        except FailedCut as e:
-            raise e.nested
+        except FailedCut:
+            raise
         except FailedParse:
             self._goto(p)
-
-    @contextmanager
-    def _sequence_context(self):
-        cut_seen = False
-        try:
-            yield
-        except FailedParse as e:
-            if cut_seen:
-                raise FailedCut(e)
-            raise
 
     @contextmanager
     def _repeat_context(self):

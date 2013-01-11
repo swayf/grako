@@ -201,8 +201,13 @@ class SequenceGrammar(_Grammar):
         fields.update(seq=indent('\n'.join(render(s) for s in self.sequence)))
 
     template = '''
-                with self._sequence_context():
-                {seq}\
+                cut_seen = False #@UnusedVariable
+                try:
+                {seq}
+                except FailedParse as e:
+                    if cut_seen:
+                        raise FailedCut(e)
+                    raise\
                 '''
 
 
@@ -259,7 +264,10 @@ class ChoiceGrammar(_Grammar):
                     exp = None #@UnusedVariable
                 {options}
                     self.error('no viable option')
-                exp = choice{n}() #@UnusedVariable\
+                try:
+                    exp = choice{n}() #@UnusedVariable
+                except FailedCut as e:
+                    raise e.nested\
                 '''
 
 

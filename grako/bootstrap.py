@@ -6,7 +6,7 @@ from .parsing import *  # @UnusedWildImport
 
 __all__ = ['GrakoParser', 'GrakoGrammarGenerator']
 
-COMMENTS_RE = r'\(\*.*?\*\)'
+COMMENTS_RE = r'\(\*(?:.|\n)*?\*\)'
 
 class GrakoParserBase(Parser):
 
