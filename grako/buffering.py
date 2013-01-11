@@ -51,7 +51,8 @@ class Buffer(object):
     def lookahead(self):
         if self.atend():
             return ''
-        return (self.text[self.pos:self.pos + 20] + '...').encode('unicode-escape')
+        txt = (self.text[self.pos:self.pos + 20] + '...').encode('unicode-escape')
+        return '<%d:%d>%s' % (self.line + 1, self.col + 1, txt)
 
     def next(self):
         if self.atend():
