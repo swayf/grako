@@ -27,11 +27,14 @@ class Parser(object):
         self._rule_stack = []
 
     def parse(self, rule_name):
-        self._buffer = self._bufferClass(self.text, self.whitespace)
-        self._push_ast()
-        self._concrete_stack.append([])
-        self._call(rule_name, rule_name)
-        return self.ast
+        try:
+            self._buffer = self._bufferClass(self.text, self.whitespace)
+            self._push_ast()
+            self._concrete_stack.append([])
+            self._call(rule_name, rule_name)
+            return self.ast
+        finally:
+            del self._ast_stack[1:]
 
     @property
     def ast(self):
@@ -60,8 +63,12 @@ class Parser(object):
                 pass
 
     def _next_token(self):
-        self._eatcomments()
-        self._eatwhitespace()
+        p = None
+        while self._pos != p:
+            p = self._pos
+            self._eatwhitespace()
+            self._eatcomments()
+
 
     def _call(self, name, node_name=None, force_list=False):
         self._rule_stack.append(name)
