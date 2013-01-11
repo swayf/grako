@@ -209,6 +209,12 @@ class Parser(object):
     def _repeat(self, f):
         return list(self._repeat_iterator(f))
 
+    def _eof(self):
+        return self._buffer.atend()
+
+    def _eol(self):
+        return self._buffer.ateol()
+
     def _check_eof(self):
         self._next_token()
         if not self._buffer.atend():
