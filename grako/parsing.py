@@ -197,13 +197,13 @@ class Parser(object):
     def _repeat_iterator(self, f):
         while 1:
             with self._repeat_context():
+                p = self._pos
                 try:
                     value = f()
                     if value is not None:
                         yield value
-                except FailedCut as e:
-                    raise e.nested
                 except FailedParse:
+                    self._goto(p)
                     raise StopIteration()
 
     def _repeat(self, f):
