@@ -123,8 +123,8 @@ The expressions, in reverse order of precedence, can be:
         Add the result of ``e`` to the AST using ``name`` as key. Force the entry to be 
         a list even if only one element is added.
 
-    ``<EOF>```
-        Verify thad the end of the input text has been reached.
+    ``$``
+        The *end of text* symbol. Verify thad the end of the input text has been reached.
 
      ``(*`` comment ``*)``
         Comments may appear anywhere in the text.

@@ -86,7 +86,7 @@ class EOFGrammar(_Grammar):
             raise FailedParse(ctx.buf, '<EOF>')
 
     def __str__(self):
-        return '<EOF>'
+        return '$'
 
     template = 'self._check_eof()'
 

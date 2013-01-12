@@ -53,7 +53,7 @@ class GrakoParserBase(Parser):
         self._token('!', 'cut')
 
     def _eof_(self):
-        self._token('<EOF>')
+        self._token('$')
 
     def _subexp_(self):
         self._token('(')

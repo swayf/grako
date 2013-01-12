@@ -1,4 +1,4 @@
-grammar = rules:{rule}+ <EOF> ;
+grammar = rules:{rule}+ $ ;
 
 (* a comment *)
 
@@ -38,4 +38,4 @@ word = word:?/[-_A-Za-z0-9]+/? ;
 
 pattern = '?/' ! pattern:?/(.*?)(?=/\?)/? '/?' ;
 
-eof = '<EOF>' ;
+eof = '$' ;
