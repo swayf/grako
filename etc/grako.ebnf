@@ -24,7 +24,9 @@ optional = '[' >> optional:expre ']' >> ;
 
 special = '?(' >> special:?/(.*)/? ')?' >> ;
 
-atom = atom:(cut | token | call | pattern | eof) ;
+atom = atom:(not | cut | token | call | pattern | eof) ;
+
+not = '!' knot:atom ;
 
 call = call:word ;
 

@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import re
 import logging
 from copy import deepcopy
+from keyword import iskeyword
 from .util import memoize, simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
@@ -419,6 +420,8 @@ class SpecialGrammar(_Grammar):
 
 class RuleRefGrammar(_Grammar):
     def __init__(self, name):
+        if iskeyword(name):
+            name += '_'
         super(RuleRefGrammar, self).__init__()
         self.name = name
 
@@ -445,6 +448,8 @@ class RuleRefGrammar(_Grammar):
 
 class RuleGrammar(NamedGrammar):
     def __init__(self, name, exp):
+        if iskeyword(name):
+            name += '_'
         super(RuleGrammar, self).__init__(name, exp, False)
 
     def parse(self, ctx):
