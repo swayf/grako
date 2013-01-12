@@ -237,8 +237,11 @@ class ChoiceGrammar(_Grammar):
         template = trim(self.option_template)
         options = [template.format(option=indent(render(o))) for o in self.options]
         options = '\n'.join(o for o in options)
+        firstset = ' '.join(str(repr(f[0])) for f in self.firstset)
         fields.update(n=self.counter(),
-                      options=indent(options))
+                      options=indent(options),
+                      error='expecting one of: ' + firstset if firstset else 'no available options'
+                      )
 
     def render(self):
         if len(self.options) == 1:
@@ -252,13 +255,13 @@ class ChoiceGrammar(_Grammar):
                         return _e\
                     '''
 
-    template = '''\
+    template = """\
                 def choice{n}():
                     _e = None
                 {options}
-                    self.error('no viable option')
+                    self.error("{error}")
                 _e = choice{n}() \
-                '''
+                """
 
 
 class RepeatGrammar(_DecoratorGrammar):
