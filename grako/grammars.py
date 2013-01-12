@@ -141,7 +141,7 @@ class TokenGrammar(_Grammar):
     def render_fields(self, fields):
         fields.update(token=repr(self.token))
 
-    template = "exp = self._token({token}) # @UnusedVariable"
+    template = "_e = self._token({token}) # @UnusedVariable"
 
 
 class PatternGrammar(_Grammar):
@@ -167,7 +167,7 @@ class PatternGrammar(_Grammar):
         fields.update(pattern=repr(self.pattern))
 
     template = '''\
-                exp = self._pattern({pattern}) # @UnusedVariable
+                _e = self._pattern({pattern}) # @UnusedVariable
                 '''
 
 
@@ -251,15 +251,15 @@ class ChoiceGrammar(_Grammar):
     option_template = '''\
                     with self._option():
                     {option}
-                        return exp\
+                        return _e\
                     '''
 
     template = '''\
                 def choice{n}():
-                    exp = None #@UnusedVariable
+                    _e = None #@UnusedVariable
                 {options}
                     self.error('no viable option')
-                exp = choice{n}() #@UnusedVariable\
+                _e = choice{n}() #@UnusedVariable\
                 '''
 
 
@@ -300,8 +300,8 @@ class RepeatGrammar(_DecoratorGrammar):
     template = '''
                 def repeat{n}():
                 {innerexp}
-                    return exp
-                exp = self._repeat(repeat{n}) # @UnusedVariable\
+                    return _e
+                _e = self._repeat(repeat{n}) # @UnusedVariable\
                 '''
 
 
@@ -327,8 +327,8 @@ class RepeatOneGrammar(RepeatGrammar):
     template = '''
                 def repeat{n}():
                 {innerexp}
-                    return exp
-                exp = self._repeat(repeat{n}, plus=True) # @UnusedVariable\
+                    return _e
+                _e = self._repeat(repeat{n}, plus=True) # @UnusedVariable\
                 '''
 
 
@@ -391,11 +391,12 @@ class NamedGrammar(_DecoratorGrammar):
     def render_fields(self, fields):
         fields.update(
                       n=self.counter(),
-                      exp=render(self.exp)
+                      exp=render(self.exp),
+                      force_list=', force_list=True' if self.force_list else ''
                       )
     template = '''
                 {exp}
-                self.ast.add('{name}', exp, {force_list})
+                self.ast.add('{name}', _e{force_list})
                 '''
 
 
@@ -434,7 +435,7 @@ class RuleRefGrammar(_Grammar):
     def __str__(self):
         return self.name
 
-    template = '''exp = self._call("{name}") # @UnusedVariable'''
+    template = '''_e = self._call("{name}") # @UnusedVariable'''
 
 
 class RuleGrammar(NamedGrammar):
