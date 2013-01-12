@@ -14,7 +14,7 @@ element = element:(named | term) ;
 
 named = name:word force_list:['+'] ':' value:term ;
 
-term = term:(void | subexp | repeat | optional | special | atom) ;
+term = term:(void | subexp | repeat | optional | special | knot | atom) ;
 
 subexp = '(' >> subexp:expre ')' >> ;
 
@@ -24,9 +24,10 @@ optional = '[' >> optional:expre ']' >> ;
 
 special = '?(' >> special:?/(.*)/? ')?' >> ;
 
-atom = atom:(not | cut | token | call | pattern | eof) ;
+knot = '!' knot:term ;
 
-not = '!' knot:atom ;
+atom = atom:( cut | token | call | pattern | eof) ;
+
 
 call = call:word ;
 
