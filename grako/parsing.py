@@ -250,8 +250,6 @@ class Parser(object):
             yield
         except FailedParse as e:
             if self._cut_stack[-1]:
-                print('CUT SEEN')
-                print(self._cut_stack)
                 self.error(e, FailedCut)
             else:
                 raise
