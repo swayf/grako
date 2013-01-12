@@ -141,7 +141,7 @@ class TokenGrammar(_Grammar):
     def render_fields(self, fields):
         fields.update(token=repr(self.token))
 
-    template = "_e = self._token({token}) # @UnusedVariable"
+    template = "_e = self._token({token})"
 
 
 class PatternGrammar(_Grammar):
@@ -166,9 +166,7 @@ class PatternGrammar(_Grammar):
     def render_fields(self, fields):
         fields.update(pattern=repr(self.pattern))
 
-    template = '''\
-                _e = self._pattern({pattern}) # @UnusedVariable
-                '''
+    template = '_e = self._pattern({pattern})'
 
 
 class SequenceGrammar(_Grammar):
@@ -256,10 +254,10 @@ class ChoiceGrammar(_Grammar):
 
     template = '''\
                 def choice{n}():
-                    _e = None #@UnusedVariable
+                    _e = None
                 {options}
                     self.error('no viable option')
-                _e = choice{n}() #@UnusedVariable\
+                _e = choice{n}() \
                 '''
 
 
@@ -301,7 +299,7 @@ class RepeatGrammar(_DecoratorGrammar):
                 def repeat{n}():
                 {innerexp}
                     return _e
-                _e = self._repeat(repeat{n}) # @UnusedVariable\
+                _e = self._repeat(repeat{n})\
                 '''
 
 
@@ -328,7 +326,7 @@ class RepeatOneGrammar(RepeatGrammar):
                 def repeat{n}():
                 {innerexp}
                     return _e
-                _e = self._repeat(repeat{n}, plus=True) # @UnusedVariable\
+                _e = self._repeat(repeat{n}, plus=True)\
                 '''
 
 
@@ -435,7 +433,7 @@ class RuleRefGrammar(_Grammar):
     def __str__(self):
         return self.name
 
-    template = '''_e = self._call("{name}") # @UnusedVariable'''
+    template = "_e = self._call('{name}')"
 
 
 class RuleGrammar(NamedGrammar):
