@@ -2,11 +2,11 @@ grammar = rules:{rule}+ $ ;
 
 (* a comment *)
 
-rule = name:word '=' ! rhs:expre ('.' | ';') ! ;
+rule = name:word '=' >> rhs:expre ('.' | ';') >> ;
 
 expre = expre:choice ;
 
-choice = options+:sequence {'|' ! options:sequence} ;
+choice = options+:sequence {'|' >> options:sequence} ;
 
 sequence = elements+:element {[','] elements:element} ;
 
@@ -16,13 +16,13 @@ named = name:word force_list:['+'] ':' value:term ;
 
 term = term:(void | subexp | repeat | optional | special | atom) ;
 
-subexp = '(' ! subexp:expre ')' ! ;
+subexp = '(' >> subexp:expre ')' >> ;
 
-repeat = '{' ! repeat:expre '}' ! plus:['-' | '+'] ! ;
+repeat = '{' >> repeat:expre '}' >> plus:['-' | '+'] >> ;
 
-optional = '[' ! optional:expre ']' ! ;
+optional = '[' >> optional:expre ']' >> ;
 
-special = '?(' ! special:?/(.*)/? ')?' ! ;
+special = '?(' >> special:?/(.*)/? ')?' >> ;
 
 atom = atom:(cut | token | call | pattern | eof) ;
 
@@ -30,12 +30,12 @@ call = call:word ;
 
 void = void:'()' ;
 
-cut = cut:'!' ;
+cut = cut:'>>' ;
 
 token = ('"' token:?/([^"]|\\")*/? '"' | "'" token:?/([^']|\\')*/? "'") ;
 
 word = word:?/[-_A-Za-z0-9]+/? ;
 
-pattern = '?/' ! pattern:?/(.*?)(?=/\?)/? '/?' ;
+pattern = '?/' >> pattern:?/(.*?)(?=/\?)/? '/?' ;
 
 eof = '$' ;

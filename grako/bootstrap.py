@@ -50,7 +50,7 @@ class GrakoParserBase(Parser):
         self._token('/?')
 
     def _cut_(self):
-        self._token('!', 'cut')
+        self._token('>>', 'cut')
 
     def _eof_(self):
         self._token('$')

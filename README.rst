@@ -111,9 +111,9 @@ The expressions, in reverse order of precedence, can be:
     ``()``
         The empty expression. Match nothing.
 
-    ``!``
+    ``>>``
         The cut expression. Prevent other options to be evaluated
-        after this point.
+        after this point if the current one fails to parse.
 
     ``name:e``
         Add the result of ``e`` to the AST using ``name`` as key. If more than one item is
