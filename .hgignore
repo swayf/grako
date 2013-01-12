@@ -1,4 +1,4 @@
 \.hgingore$
-\.(pyc|pyo|swp)$
+\.(pyc|pyo|swp|orig)$
 ^\.
 ^tmp/
