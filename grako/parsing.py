@@ -223,8 +223,11 @@ class Parser(object):
                     self._goto(p)
                     raise StopIteration()
 
-    def _repeat(self, f):
-        return list(self._repeat_iterator(f))
+    def _repeat(self, f, plus=False):
+        if plus:
+            return [f()] + list(self._repeat_iterator(f))
+        else:
+            return list(self._repeat_iterator(f))
 
     def _eof(self):
         return self._buffer.atend()

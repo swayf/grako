@@ -325,12 +325,10 @@ class RepeatOneGrammar(RepeatGrammar):
                       innerexp=indent(render(self.exp)))
 
     template = '''
-                {exp}
-                first = exp
                 def repeat{n}():
                 {innerexp}
                     return exp
-                exp = [first] + self._repeat(repeat{n}) # @UnusedVariable\
+                exp = self._repeat(repeat{n}, plus=True) # @UnusedVariable\
                 '''
 
 
