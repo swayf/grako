@@ -52,7 +52,7 @@ class BufferingTests(unittest.TestCase):
     def test_line_consistency(self):
         lines = self.text.splitlines()
         for n, line in enumerate(lines):
-            self.assertEquals(line, self.buf.get_line(n))
+            self.assertEqual(line, self.buf.get_line(n))
 
 def suite():
     pass
