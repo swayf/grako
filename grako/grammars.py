@@ -201,11 +201,11 @@ class SequenceGrammar(_Grammar):
         fields.update(seq=indent('\n'.join(render(s) for s in self.sequence)))
 
     template = '''
-                cut_seen = False #@UnusedVariable
+                cut = False #@UnusedVariable
                 try:
                 {seq}
                 except FailedParse as e:
-                    if cut_seen:
+                    if cut:
                         self.error(e, FailedCut)
                     raise\
                 '''
@@ -375,7 +375,7 @@ class CutGrammar(_Grammar):
     def __str__(self):
         return '!'
 
-    template = 'cut_seen = True # @UnusedVariable'
+    template = 'cut = True # @UnusedVariable'
 
 
 class NamedGrammar(_DecoratorGrammar):
