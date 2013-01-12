@@ -44,7 +44,10 @@ class Parser(object):
         return self.ast
 
     def rulestack(self):
-        return '.'.join(self._rule_stack)
+        stack = '.'.join(self._rule_stack)
+        if len(stack) > 60:
+            stack = '...' + stack[-60:]
+        return stack
 
     @property
     def _pos(self):
@@ -76,14 +79,14 @@ class Parser(object):
             self._next_token()
         pos = self._pos
         try:
-            self.trace('%s <<\n\t->%s', self.rulestack(), self._buffer.lookahead())
+            self.trace_event('ENTER ')
             result, newpos = self._invoke_rule(name, pos)
-            self.trace('SUCCESS %s', self.rulestack())
+#            self.trace_event('SUCCESS')
             self._add_ast_node(node_name, result, force_list)
             self._goto(newpos)
             return result
         except FailedParse:
-            self.trace('FAILED %s', self.rulestack())
+            self.trace_event('FAILED')
             self._goto(pos)
             raise
         finally:
@@ -111,36 +114,35 @@ class Parser(object):
 
     def _token(self, token, node_name=None, force_list=False):
         self._next_token()
-        self.trace('match <%s> \n\t->%s', token, self._buffer.lookahead())
+#        self.trace_event('match')
         if self._buffer.match(token, self.ignorecase) is None:
-            self.trace('failed <%s>', token)
+#            self.trace_event('failed <%s>' % token)
             raise FailedToken(self._buffer, token)
+        self.trace_match(token)
         self._add_ast_node(node_name, token, force_list)
         return token
 
     def _try(self, token, node_name=None, force_list=False):
         self._next_token()
-        self.trace('try <%s> \n\t->%s', token, self._buffer.lookahead())
         if self._buffer.match(token, self.ignorecase) is not None:
+            self.trace_match(token)
             self._add_ast_node(node_name, token, force_list)
             return True
 
 
     def _pattern(self, pattern, node_name=None, force_list=False):
-        self.trace('match %s\n\t->%s', pattern, self._buffer.lookahead())
         token = self._buffer.matchre(pattern, self.ignorecase)
         if token is None:
-            self.trace('failed %s', pattern)
             raise FailedPattern(self._buffer, pattern)
-        self.trace('matched %s', token)
+        self.trace_match(token)
         self._add_ast_node(node_name, token, force_list)
         return token
 
     def _try_pattern(self, pattern, node_name=None, force_list=False):
-        self.trace('match %s\n\t->%s', pattern, self._buffer.lookahead())
         token = self._buffer.matchre(pattern, self.ignorecase)
         if token is None:
-            self.trace('failed %s', pattern)
+            return None
+        self.trace_match(token)
         self._add_ast_node(node_name, token, force_list)
         return token
 
@@ -175,12 +177,21 @@ class Parser(object):
         if self.verbose:
             print(msg % params, file=sys.stderr)
 
+    def trace_event(self, event):
+        if self.verbose:
+            self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
+
+    def trace_match(self, token):
+        if False and self.verbose:
+            self.trace('matched <%s>\n\t%s', token, self._buffer.lookahead())
+
     @contextmanager
     def _choice_context(self):
         p = self._pos
         try:
             yield
         except FailedCut as e:
+            self._goto(p)
             raise e.nested
         except FailedParse:
             self._goto(p)
@@ -203,6 +214,7 @@ class Parser(object):
                     if value is not None:
                         yield value
                 except FailedCut:
+                    self._goto(p)
                     raise
                 except FailedParse:
                     self._goto(p)
