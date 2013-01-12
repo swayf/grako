@@ -25,6 +25,7 @@ class Parser(object):
         self._ast_stack = []
         self._concrete_stack = []
         self._rule_stack = []
+        self._cut_stack = [False]
 
     def parse(self, rule_name):
         try:
@@ -186,7 +187,7 @@ class Parser(object):
             self.trace('matched <%s>\n\t%s', token, self._buffer.lookahead())
 
     @contextmanager
-    def _choice_context(self):
+    def _option(self):
         p = self._pos
         try:
             yield
@@ -195,6 +196,8 @@ class Parser(object):
             raise e.nested
         except FailedParse:
             self._goto(p)
+
+    _optional = _option
 
     @contextmanager
     def _repeat_context(self):
@@ -233,3 +236,22 @@ class Parser(object):
         self._next_token()
         if not self._buffer.atend():
             raise FailedParse(self._buffer, 'expecting end of file')
+
+    def _cut(self):
+        self._cut_stack[-1] = True
+
+    @contextmanager
+    def _sequence(self):
+        self._cut_stack.append(False)
+        try:
+            yield
+        except FailedParse as e:
+            if self._cut_stack[-1]:
+                print('CUT SEEN')
+                print(self._cut_stack)
+                self.error(e, FailedCut)
+            else:
+                raise
+        finally:
+            self._cut_stack.pop()
+

@@ -201,13 +201,8 @@ class SequenceGrammar(_Grammar):
         fields.update(seq=indent('\n'.join(render(s) for s in self.sequence)))
 
     template = '''
-                cut = False #@UnusedVariable
-                try:
-                {seq}
-                except FailedParse as e:
-                    if cut:
-                        self.error(e, FailedCut)
-                    raise\
+                with self._sequence():
+                {seq}\
                 '''
 
 
@@ -254,7 +249,7 @@ class ChoiceGrammar(_Grammar):
             return super(ChoiceGrammar, self).render()
 
     option_template = '''\
-                    with self._choice_context():
+                    with self._option():
                     {option}
                         return exp\
                     '''
@@ -360,8 +355,8 @@ class OptionalGrammar(_DecoratorGrammar):
         fields.update(exp=indent(render(self.exp)))
 
     template = '''\
-                with self._choice_context():
-                {exp}
+                with self._optional():
+                {exp}\
                 '''
 
 
@@ -375,7 +370,7 @@ class CutGrammar(_Grammar):
     def __str__(self):
         return '!'
 
-    template = 'cut = True # @UnusedVariable'
+    template = 'self._cut()'
 
 
 class NamedGrammar(_DecoratorGrammar):

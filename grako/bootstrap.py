@@ -24,13 +24,13 @@ class GrakoParserBase(Parser):
         self._token('()', 'void')
 
     def _token_(self):
-        with self._choice_context():
+        with self._option():
             self._token("'")
             self._pattern(r"(?:[^'\\]|\\')*", 'token')
             self._token("'")
             return
 
-        with self._choice_context():
+        with self._option():
             self._token('"')
             self._pattern(r'(?:[^"\\]|\\")*', 'token')
             self._token('"')
@@ -83,41 +83,41 @@ class GrakoParserBase(Parser):
         self._pattern(r'(.*)\)?', 'special')
 
     def _atom_(self):
-        with self._choice_context():
+        with self._option():
             self._call('void', 'atom')
             return
-        with self._choice_context():
+        with self._option():
             self._call('cut', 'atom')
             return
-        with self._choice_context():
+        with self._option():
             self._call('token', 'atom')
             return
-        with self._choice_context():
+        with self._option():
             self._call('call', 'atom')
             return
-        with self._choice_context():
+        with self._option():
             self._call('pattern', 'atom')
             return
-        with self._choice_context():
+        with self._option():
             self._call('eof', 'atom')
             return
         raise FailedParse(self._buffer, 'atom')
 
 
     def _term_(self):
-        with self._choice_context():
+        with self._option():
             self._call('atom', 'term')
             return
-        with self._choice_context():
+        with self._option():
             self._call('subexp', 'term')
             return
-        with self._choice_context():
+        with self._option():
             self._call('repeat', 'term')
             return
-        with self._choice_context():
+        with self._option():
             self._call('optional', 'term')
             return
-        with self._choice_context():
+        with self._option():
             self._call('special', 'term')
             return
         raise FailedParse(self._buffer, 'term')
@@ -133,10 +133,10 @@ class GrakoParserBase(Parser):
             raise FailedCut(self._buffer, e)
 
     def _element_(self):
-        with self._choice_context():
+        with self._option():
             self._call('named', 'element')
             return
-        with self._choice_context():
+        with self._option():
             self._call('term', 'element')
             return
         raise FailedParse(self._buffer, 'element')
