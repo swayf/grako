@@ -82,6 +82,10 @@ class GrakoParserBase(Parser):
         self._token('?(')
         self._pattern(r'(.*)\)?', 'special')
 
+    def _kif_(self):
+        self._token('&')
+        self._call('term', 'kif')
+
     def _knot_(self):
         self._token('!')
         self._call('term', 'knot')
@@ -123,6 +127,9 @@ class GrakoParserBase(Parser):
             return
         with self._option():
             self._call('special', 'term')
+            return
+        with self._option():
+            self._call('kif', 'term')
             return
         with self._option():
             self._call('knot', 'term')
@@ -219,6 +226,9 @@ class AbstractGrakoParser(GrakoParserBase):
     def special(self, ast):
         return ast
 
+    def kif(self, ast):
+        return ast
+
     def knot(self, ast):
         return ast
 
@@ -287,6 +297,9 @@ class GrakoParser(AbstractGrakoParser):
         return ast
 
     def special(self, ast):
+        return ast
+
+    def kif(self, ast):
         return ast
 
     def knot(self, ast):
@@ -365,6 +378,9 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
 
     def special(self, ast):
         return SpecialGrammar(ast.special)
+
+    def kif(self, ast):
+        return LookaheadGrammar(ast.knot)
 
     def knot(self, ast):
         return LookaheadNotGrammar(ast.knot)

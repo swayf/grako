@@ -170,6 +170,26 @@ class PatternGrammar(_Grammar):
     template = '_e = self._pattern({pattern})'
 
 
+class LookaheadGrammar(_DecoratorGrammar):
+    def __str__(self):
+        return '!' + self.exp
+
+    def parse(self, ctx):
+        p = ctx.pos
+        try:
+            super(LookaheadNotGrammar, self).parse(ctx)
+        finally:
+            ctx.goto(p)
+
+    def render_fields(self, fields):
+        fields.update(exp=indent(render(self.exp)))
+
+    template = '''\
+                with self._if():
+                {exp}\
+                '''
+
+
 class LookaheadNotGrammar(_DecoratorGrammar):
     def __str__(self):
         return '!' + self.exp

@@ -257,6 +257,14 @@ class Parser(object):
             self._cut_stack.pop()
 
     @contextmanager
+    def _if(self):
+        p = self._pos
+        try:
+            yield
+        finally:
+            self._goto(p)
+
+    @contextmanager
     def _not(self):
         p = self._pos
         try:
@@ -265,6 +273,5 @@ class Parser(object):
             self._goto(p)
             pass
         else:
-            print('FAILED LOOKAHEAD')
             self._goto(p)
             self.error('', etype=FailedLookahead)

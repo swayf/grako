@@ -14,7 +14,7 @@ element = element:(named | term) ;
 
 named = name:word force_list:['+'] ':' value:term ;
 
-term = term:(void | subexp | repeat | optional | special | knot | atom) ;
+term = term:(void | subexp | repeat | optional | special | kif | knot | atom) ;
 
 subexp = '(' >> subexp:expre ')' >> ;
 
@@ -23,6 +23,8 @@ repeat = '{' >> repeat:expre '}' >> plus:['-' | '+'] >> ;
 optional = '[' >> optional:expre ']' >> ;
 
 special = '?(' >> special:?/(.*)/? ')?' >> ;
+
+kif =  '&' kif:term ;
 
 knot = '!' knot:term ;
 

@@ -96,9 +96,12 @@ The expressions, in reverse order of precedence, can be:
     ``{ e }+`` or ``{ e }-``
         Match ``e`` one or more times.
 
+     ``&e``
+        Positive lookahead. Try parsing ``e``, but do not consume any inpu.
+
      ``!e``
-        Negative lookahead. Try parsing ``e`` and fail if the parse succeeds.
-        Don't consume any input in any case.
+        Negative lookahead. Try parsing ``e`` and fail if the parse succeeds, and
+        do not consume any input in any case.
 
     ``'text'`` or ``"text"``
         Match the text within the quotation marks.
