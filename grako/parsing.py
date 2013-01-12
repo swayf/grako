@@ -215,9 +215,6 @@ class Parser(object):
                 value = f()
                 if value is not None:
                     yield value
-            except FailedCut:
-                self._goto(p)
-                raise
             except FailedParse:
                 self._goto(p)
                 raise StopIteration()
@@ -264,7 +261,7 @@ class Parser(object):
             self._goto(p)
 
     @contextmanager
-    def _not(self):
+    def _ifnot(self):
         p = self._pos
         try:
             yield

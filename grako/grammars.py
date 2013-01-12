@@ -208,7 +208,7 @@ class LookaheadNotGrammar(_DecoratorGrammar):
         fields.update(exp=indent(render(self.exp)))
 
     template = '''\
-                with self._not():
+                with self._ifnot():
                 {exp}\
                 '''
 
