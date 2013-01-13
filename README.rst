@@ -123,23 +123,24 @@ The expressions, in reverse order of precedence, can be:
         Match ``e`` one or more times.
 
     ``&e``
-        Positive lookahead. Try parsing ``e``, but do not consume any inpu.
+        Positive lookahead. Try parsing ``e``, but do not consume any input.
 
     ``!e``
-        Negative lookahead. Try parsing ``e`` and fail if the parse succeeds, and
-        do not consume any input in any case.
+        Negative lookahead. Try parsing ``e`` and fail if the parse succeeds. 
+        Do not consume any input whichever the outcome.
 
     ``'text'`` or ``"text"``
         Match the text within the quotation marks.
 
     ``?/<regexp>/?``
         Match the Python_ regular expression ``<regexp>`` at the current text 
-        position. Unlike others, these matches do not advance over whitespace or 
-        comments. For that, place the ``regexp`` as the only term in their own rule.
+        position. Unlike other expressions, this one does not advance over whitespace or 
+        comments. For that, place the ``regexp`` as the only term in its own rule.
 
     ``rulename``
-        Invoke the rule named ``rulename``. Note that rules that begin with an 
-        uppercase first character don't advance the input over whitespace and comments.
+        Invoke the rule named ``rulename``. To help with lexical aspects of grammars,
+        rules with names that begin with an uppercase letter will not advance the 
+        input over whitespace and comments.
 
     ``()``
         The empty expression. Match nothing.
