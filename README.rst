@@ -255,7 +255,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
     **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under two thousand lines of code, would not have been possible without Python_.
 
-    My students at *Universidad Católica Andrés Bello* inspired me to think about how grammar-based parser generation could be made more apporachable.
+    **My students** at *Universidad Católica Andrés Bello* inspired me to think about how grammar-based parser generation could be made more apporachable.
 
     **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
     
