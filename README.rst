@@ -23,17 +23,21 @@ The generated parser consists of these classes:
     def myrulename(self, ast):
         return ast
 
-The methods in the base parser class return the same AST received as parameter, but derived classes can override the methods to have them return anythin you like (like a *Semantic Tree*). You can use the base class as a template for your own parser.
+The methods in the base parser class return the same AST received as parameter, but derived classes can override the methods to have them return anything you like (like a *Semantic Tree*). You can use the base class as a template for your own parser.
        
-The default ASTs are dictionary-like objects that contain one item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. AST entries are single values if only one item was added to a name, and lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if a single item was added. 
+The default ASTs are dictionary-like objects that contain one item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
 
-When there are no named items in a rule, the AST consists of the return values of elements parsed by the rule, either a single item or a list. This default behavior makes it easier to writ esimple rules. You will have an AST returned from::
+AST entries are single values if only one item was added to a name, and lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if a single item was added. 
+
+When there are no named items in a rule, the AST consists of the return values of elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules. You will have an AST created for::
 
     number = ?/[0-9]+/?
 
 without having to write::
     
     number = number:?/[0-9]+/?
+
+When a rule has named elementes, the unnamed ones are excluded from the AST (ignored).
 
 
 Using the Tool
@@ -68,22 +72,25 @@ The *-h* and *--help* parameters provide full usage information::
 Using The Generated Parser
 ==========================
 
-To use the generated parser, subclass the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
+To use the generated parser, subclass the base or the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
 
-    class MyParser(MyAbstractParser):
+    class MyParser(MyParserBase):
         pass
 
     parser = MyParser('text to parse')
     result = parser.parse('start')
     print result
 
+The generated parsers have named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
 
 The EBNF Grammar Syntax
 =======================
 
-**Grako** uses a small variation over standard EBNF_. A grammar consists of a sequence of one or more rules of the form:
+**Grako** uses a variation of the standard EBNF_ syntax. A grammar consists of a sequence of one or more rules of the form:
 
     ``name = expre ;``
+
+If a *name* collides with a Python_ keyword, an underscore (``_``) will be appended to it on the generated parser.
 
 The expressions, in reverse order of precedence, can be:
 
@@ -103,7 +110,9 @@ The expressions, in reverse order of precedence, can be:
         Match ``e`` zero or more times.
 
     ``{ e }+`` or ``{ e }-``
+
         Match ``e`` one or more times.
+
 
      ``&e``
         Positive lookahead. Try parsing ``e``, but do not consume any inpu.
