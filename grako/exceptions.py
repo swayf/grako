@@ -5,6 +5,10 @@ class GrammarError(Exception):
     pass
 
 
+class MissingSemanticFor(Exception):
+    pass
+
+
 class FailedParseBase(Exception):
     def __init__(self, buf, item):
         self.buf = buf
@@ -34,6 +38,7 @@ class FailedToken(FailedParse):
     def message(self):
         return "expecting '%s'" % self.token
 
+
 class FailedPattern(FailedParse):
     def __init__(self, buf, pattern):
         super(FailedPattern, self).__init__(buf, pattern)
@@ -61,6 +66,7 @@ class FailedRef(FailedParseBase):
     @property
     def message(self):
         return "could not resolve reference to rule '%s'" % self.name
+
 
 class FailedCut(FailedParse):
     def __init__(self, buf, nested):
