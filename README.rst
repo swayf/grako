@@ -176,7 +176,7 @@ When a rule has named elementes, the unnamed ones are excluded from the AST (ign
 Whitespace
 ==========
 
-By default, **Grako** generated parsers skip the usual whitespace charactes (``\t`` ``\v`` ``\n`` ``\r`` and the space), but you can change that behaviour by passing a ``whitespace`` parameter to your parser::
+By default, **Grako** generated parsers skip the usual whitespace charactes (``\t`` ``\v`` ``\n`` ``\r`` and `` ``), but you can change that behaviour by passing a ``whitespace`` parameter to your parser::
 
     parser = MyParser(text, whitespace='\t ')
 
