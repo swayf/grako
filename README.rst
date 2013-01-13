@@ -55,28 +55,27 @@ Using the Tool
 
 **Grako** is run from the commandline like this::
 
-    $ python -m Grako
+    $ python -m grako
 
 The *-h* and *--help* parameters provide full usage information::
 
-    $ python -m Grako --help
-    Parse and translate an EBNF grammar into a Python parser for 
-    the described language.
+        $ python -m grako -h
+        usage: grako [-h] [-m name] [-o outfile] [-v] grammar
 
-    Usage: Grako <grammar.ebnf> [<name>] [options]
-           Grako (-h|--help)
+        Parse a grammar and generate a parser in Python for the described language.
 
-    Arguments:
-        <grammar.ebnf>  The EBNF grammar to generate a parser for.
-        <name>          Optional name. It defaults to the base name
-                        of the grammar file.
+        positional arguments:
+          grammar               The file name of the grammar to generate a parser for
 
-    Options:
-        -o <filename>   write output to <filename>
-        -v              produce verbose output
-        -h, --help      show this help
-    $
+        optional arguments:
+          -h, --help            show this help message and exit
+          -m name, --name name  An optional name for the grammar. It defaults to the
+                                basename of the grammar file's name
+          -o outfile, --outfile outfile
+                                specify where the output should go (default is stdout)
+          -v, --verbose         produce verbose output
 
+        $
 
 
 Using The Generated Parser
@@ -240,11 +239,6 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 
 .. _`GNU General Public License (GPL) version 3`:  http://www.gnu.org/licenses/gpl.html
 
-The tool uses the docopt_ 0.5.0 library for command-line argument processing, and that is copyright 2012 by **Vladimir Keleshev**, and used under an `MIT License`_.
-
-.. _docopt: https://github.com/halst/docopt/
-.. _`MIT License`:  http://mit-license.org/
-
 
 Credits
 =======
@@ -256,6 +250,8 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
     Other parser generators like `PEG.js`_ by **David Majda** inspired the work in **Grako**.
 
     **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
+
+    **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. Without Python_. A tool like **Grako**, at under two thousand lines of code, would not have been possible without Python_.
 
     My students at *Universidad Católica Andrés Bello* inspired me to think about how grammar-based parser generation could be made more apporachable.
 
