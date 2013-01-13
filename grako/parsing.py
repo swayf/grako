@@ -35,6 +35,8 @@ class Parser(object):
         self._concrete_stack = []
         self._rule_stack = []
         self._cut_stack = [False]
+        if not self.verbose:
+            self.trace_event = lambda x: ()
 
     def parse(self, rule_name):
         try:
