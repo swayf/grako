@@ -599,8 +599,15 @@ class Grammar(Renderer):
                 from grako.parsing import * # @UnusedWildImport
                 from grako.exceptions import * # @UnusedWildImport
 
-                class {name}ParserBase(Parser):
+                class {name}ParserRoot(Parser):
                 {rules}
-                class Abstract{name}Parser({name}ParserBase):
+
+
+                class {name}ParserAbstract(AbstractParserMixin, {name}ParserRoot):
+                    pass
+
+
+                class {name}ParserBase({name}ParserRoot):
                 {abstract_rules}
+
                 '''

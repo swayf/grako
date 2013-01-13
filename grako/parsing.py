@@ -8,6 +8,15 @@ from . import buffering
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
 
+
+class AbstractParserMixin(object):
+    def _find_semantic_rule(self, name):
+        result = getattr(self, name, None)
+        if result is None or not isinstance(result, type(self._find_rule)):
+            raise MissingSemanticFor(name)
+        return result
+
+
 class Parser(object):
     def __init__(self, text,
                         whitespace=None,
