@@ -73,10 +73,11 @@ class GrakoParserBase(Parser):
         self._token('{')
         self._call('expre', 'repeat')
         self._token('}')
-        try:
-            self._call('plus', 'plus')
-        except FailedParse:
-            pass
+        if not self._try('*'):
+            try:
+                self._call('plus', 'plus')
+            except FailedParse:
+                pass
 
     def _special_(self):
         self._token('?(')
