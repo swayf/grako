@@ -110,14 +110,12 @@ The expressions, in reverse order of precedence, can be:
         Match ``e`` zero or more times.
 
     ``{ e }+`` or ``{ e }-``
-
         Match ``e`` one or more times.
 
-
-     ``&e``
+    ``&e``
         Positive lookahead. Try parsing ``e``, but do not consume any inpu.
 
-     ``!e``
+    ``!e``
         Negative lookahead. Try parsing ``e`` and fail if the parse succeeds, and
         do not consume any input in any case.
 
