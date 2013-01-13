@@ -5,12 +5,32 @@ Grako
 
 **Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs a memoizing_ PEG_ parser in Python_.
 
+I wrote **Grako** to address the shortcommings I have encountered over the years while working with other parser generation tools:
+
+* To deal with programming languages in which important statement words (can't call them keywords) may be used as identifiers in programs, the parser must be able to lead the lexer. The parser also must lead the lexer to parse languages like Ruby_.
+
+* When ambiguity is the norm in the parsed language, an LL or LR grammar becomes contaminated with miriads of lookaheads (just to make the parser greedy). PEG_ parsers address ambiguity from the onset, and memoization makes backtracking very efficient.
+
+* Semantic actions, like AST creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser language, and translation's target language. 
+  
+* It is easy to recruit help on the base programming language (Python_), but, as the grammar language becomes more complex, it becomes increasingly find who can maintain a grammar. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course. If it's hard to explain to an university student, it is probably too complicated.
+
+* Pre-processing (like handling includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar. 
+
+* Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, semantic actions, or in the parser generator.
+
+* Python_ is a great language for working in language parsing and translation.
+
 .. _EBNF: http://en.wikipedia.org/wiki/Ebnf 
 .. _memoizing: http://en.wikipedia.org/wiki/Memoization 
 .. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar 
 .. _Python: http://python.org
+.. _Ruby: http://www.ruby-lang.org/
 
-The generated parser consists of these classes:
+The Generated Parsers
+=====================
+
+A **Grako** generated parser consists of the following classes:
 
 * A root class derived from ``Parser`` wich implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overriden, etc)::
  
@@ -35,16 +55,16 @@ Using the Tool
 
 **Grako** is run from the commandline like this::
 
-    $ python -m grako
+    $ python -m Grako
 
 The *-h* and *--help* parameters provide full usage information::
 
-    $ python -m grako --help
+    $ python -m Grako --help
     Parse and translate an EBNF grammar into a Python parser for 
     the described language.
 
-    Usage: grako <grammar.ebnf> [<name>] [options]
-           grako (-h|--help)
+    Usage: Grako <grammar.ebnf> [<name>] [options]
+           Grako (-h|--help)
 
     Arguments:
         <grammar.ebnf>  The EBNF grammar to generate a parser for.
@@ -233,13 +253,13 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
     **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004. 
 
-    Other parser generators like `PEG.js`_ by **David Majda** inspired the work in **GRAKO**.
+    Other parser generators like `PEG.js`_ by **David Majda** inspired the work in **Grako**.
 
     **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
     My students at *Universidad Católica Andrés Bello* inspired me to think about how grammar-based parser generation could be made more apporachable.
 
-    **GRAKO** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
+    **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
     
 .. _`blog post`: http://dietbuddha.blogspot.com/2012/12/52python-encapsulating-exceptions-with.html 
 .. _`Python Weekly`: http://www.pythonweekly.com/ 
