@@ -19,13 +19,12 @@ class Buffer(object):
         self.filename = filename
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
         self.verbose = verbose
-        self._pos = 0
-        self.col = 0
-        self.line = 0
         self._fileinfo = self.get_fileinfo(text, filename)
         self._linecache = []
         self._preprocess()
+        self._len = len(self.text)
         self._build_line_cache()
+        self._pos = 0
 
     def _preprocess(self):
         pass
@@ -36,46 +35,54 @@ class Buffer(object):
 
     @pos.setter
     def pos(self, p):
-        self.goto(p)
+        self._pos = max(0, min(len(self.text), p))
+
+    @property
+    def line(self):
+        return self.line_info().line
+
+    @property
+    def col(self):
+        return self.line_info().col
+
+    def goto(self, p):
+        self._pos = max(0, min(len(self.text), p))
 
     def atend(self):
-        return self.pos >= len(self.text)
+        return self._pos >= self._len
 
     def ateol(self):
-        return self.atend() or self.current() in '\r\n'
+        return (
+                self._pos >= self._len
+                or self.text[self._pos] in '\r\n'
+                )
 
     def current(self):
         if self.atend():
             return None
-        return self.text[self.pos]
+        return self.text[self._pos]
 
     def lookahead(self):
         if self.atend():
             return ''
-        txt = (self.text[self.pos:self.pos + 80].split('\n')[0]).encode('unicode-escape')
+        txt = (self.text[self._pos:self._pos + 80].split('\n')[0]).encode('unicode-escape')
         return '<%d:%d>%s' % (self.line + 1, self.col + 1, txt)
 
     def next(self):
-        if self.atend():
+        if self._pos >= self._len:
             return None
-        c = self.current()
-        self._pos += 1
-        if c != '\n':
-            self.col += 1
-        else:
-            self.col = 0
-            self.line += 1
-        return c
-
-    def goto(self, p):
-        self._pos = max(0, min(len(self.text), p))
-        self.line, self.col = self.line_info(p)[:2]
+        try:
+            return self.text[self._pos]
+        finally:
+            self._pos += 1
 
     def move(self, n):
-        self.goto(self.pos + n)
+        self.goto(self._pos + n)
 
     def eatwhitespace(self):
-        while not self.atend() and self.current() in self.whitespace:
+        while (self._pos < self._len
+               and self.current() in self.whitespace
+               ):
             self.next()
 
     def match(self, token, ignorecase=False):
@@ -84,7 +91,7 @@ class Buffer(object):
                 return True
             return None
 
-        p = self.pos
+        p = self._pos
         if ignorecase:
             result = all(c == self.next().lower() for c in token.lower())
         else:
@@ -99,7 +106,7 @@ class Buffer(object):
             re = pattern
         else:
             re = regexp.compile(pattern, regexp.IGNORECASE if ignorecase else 0)
-        matched = re.match(self.text, self.pos)
+        matched = re.match(self.text, self._pos)
         if matched:
             token = matched.group()
             self.move(len(token))
@@ -120,7 +127,7 @@ class Buffer(object):
 
     def line_info(self, pos=None):
         if pos is None:
-            pos = self.pos
+            pos = self._pos
         n = bisect(self._linecache, PosLine(pos, 0))
         start, line = self._linecache[n - 1]
         col = pos - start - 1
