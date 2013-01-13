@@ -62,8 +62,9 @@ The *-h* and *--help* parameters provide full usage information::
         $ python -m grako -h
         usage: grako [-h] [-m name] [-o outfile] [-v] grammar
 
-        Parse a grammar and generate a parser in Python for the described language.
-
+        Grako (for grammar compiler) takes grammars in a variation of EBNF as input, 
+        and outputs a memoizing PEG parser in Python.
+        
         positional arguments:
           grammar               The file name of the grammar to generate a parser for
 
