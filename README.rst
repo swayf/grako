@@ -229,11 +229,11 @@ The tool uses the docopt_ 0.5.0 library for command-line argument processing, an
 Credits
 =======
 
-These must be mentioned as contributors of thoughts, ideas, or code to the **Grako** project:
+The following must be mentioned as contributors of thoughts, ideas, code, *and funding* to the **Grako** project:
 
     **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004. 
 
-    Other parser generators like ``PEG.js`` by **David Majda** inspired the work in **GRAKO**.
+    Other parser generators like `PEG.js`_ by **David Majda** inspired the work in **GRAKO**.
 
     **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
