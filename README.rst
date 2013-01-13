@@ -29,16 +29,6 @@ The default ASTs are dictionary-like objects that contain one item for every nam
 
 AST entries are single values if only one item was added to a name, and lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if a single item was added. 
 
-When there are no named items in a rule, the AST consists of the return values of elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules. You will have an AST created for::
-
-    number = ?/[0-9]+/?
-
-without having to write::
-    
-    number = number:?/[0-9]+/?
-
-When a rule has named elementes, the unnamed ones are excluded from the AST (ignored).
-
 
 Using the Tool
 ==============
@@ -135,28 +125,32 @@ The expressions, in reverse order of precedence, can be:
         The empty expression. Match nothing.
 
     ``>>``
-        The cut expression. Prevent other options to be evaluated
-        after this point if the current one fails to parse.
+        The cut expression. After this point, prevent other options from being
+        considered even if the current option fails to parse.
 
     ``name:e``
         Add the result of ``e`` to the AST using ``name`` as key. If more than one item is
         added with the same ``name``, the entry is converted to a list.
     
-    ``namei+:e``
+    ``name+:e``
         Add the result of ``e`` to the AST using ``name`` as key. Force the entry to be 
         a list even if only one element is added.
 
     ``$``
         The *end of text* symbol. Verify thad the end of the input text has been reached.
 
-     ``(*`` comment ``*)``
+    ``(*`` *comment* ``*)``
         Comments may appear anywhere in the text.
 
-**Warning**::
+When there are no named items in a rule, the AST consists of the return values of elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules. You will have an AST created for::
 
-    Only elements that have a name assigned will be part of the generated
-    AST. Other elements are simply discarded after they have been parsed.
+    number = ?/[0-9]+/?
 
+without having to write::
+    
+    number = number:?/[0-9]+/?
+
+When a rule has named elementes, the unnamed ones are excluded from the AST (ignored).
 
 Whitespace
 ==========
@@ -169,7 +163,7 @@ If you pass no whitespace characters::
 
     parser = MyParser(text, whitespace='')
 
-then you will have to handle whitespace in your grammar as it's often done in PEG_.
+then you will have to handle whitespace in your grammar as it's often done in PEG_ parsers.
 
 
 
@@ -186,7 +180,9 @@ The change will affect both token and pattern matching.
 Comments
 ========
 
-There's no support for dealing with comments in this version of **Grako**.
+Parsers will skip over comments specified as a regular expression using the ``comments_re`` paramenter::
+    
+    parser = MyParser(text, comments_re="\(\*.*?\*\)")
 
 
 Semantic Actions
@@ -217,6 +213,7 @@ License
 **Grako** is copyright 2012-2013 by `ResQSoft Inc.`_ and  `Juancarlo Añez`_
 
 .. _`ResQSoft Inc.`:  http://www.resqsoft.com/
+.. _ResQSoft:  http://www.resqsoft.com/
 .. _`Juancarlo Añez`: mailto:apalala@gmail.com
 
 You may use the tool under the terms of the `GNU General Public License (GPL) version 3`_ as described in the enclosed **LICENSE.txt** file.
@@ -234,10 +231,20 @@ Credits
 
 These must be mentioned as contributors of thoughts, ideas, or code to the **Grako** project:
 
+    **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004. 
+
+    Other parser generators like ``PEG.js`` by **David Majda** inspired the work in **GRAKO**.
+
     **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
+    My students at *Universidad Católica Andrés Bello* inspired me to think about how grammar-based parser generation could be made more apporachable.
+
+    **GRAKO** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
+    
 .. _`blog post`: http://dietbuddha.blogspot.com/2012/12/52python-encapsulating-exceptions-with.html 
 .. _`Python Weekly`: http://www.pythonweekly.com/ 
+.. _introduced: http://dl.acm.org/citation.cfm?id=964001.964011
+.. _`PEG.js`: http://pegjs.majda.cz/
 
 There are several more, which will dutifully be credited, in time.
 
