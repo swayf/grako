@@ -24,7 +24,10 @@ from .buffering import Buffer
 from .parsing import Parser
 from .bootstrap import GrakoGrammarGenerator
 
-DESCRIPTION = ' Parse a grammar and generate a Python parser for the described language.'
+DESCRIPTION = ('Grako (for grammar compiler) takes grammars'
+               ' in a variation of EBNF as input, and outputs a memoizing'
+               ' PEG parser in Python.'
+               )
 argparser = argparse.ArgumentParser(prog='grako',
                                     description=DESCRIPTION
                                     )
