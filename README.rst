@@ -13,11 +13,11 @@ I wrote **Grako** to address the shortcommings I have encountered over the years
 
 * Semantic actions, like AST creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser language, and translation's target language. 
   
-* It is easy to recruit help on the base programming language (Python_), but, as the grammar language becomes more complex, it becomes increasingly find who can maintain a grammar. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course. If it's hard to explain to an university student, it is probably too complicated.
-
 * Pre-processing (like handling includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar. 
 
-* Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, semantic actions, or in the parser generator.
+* It is easy to recruit help on the base programming language (Python_), but, as the grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a grammar. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
+
+* Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself.
 
 * Python_ is a great language for working in language parsing and translation.
 
