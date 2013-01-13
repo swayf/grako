@@ -262,7 +262,5 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _introduced: http://dl.acm.org/citation.cfm?id=964001.964011
 .. _`PEG.js`: http://pegjs.majda.cz/
 
-There are several more, which will dutifully be credited, in time.
-
 -------------------------
 
