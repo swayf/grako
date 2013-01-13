@@ -10,21 +10,30 @@ Grako
 .. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar 
 .. _Python: http://python.org
 
-The generated parser consists of two classes:
+The generated parser consists of these classes:
 
-* A base class derived from ``Parser`` wich implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overriden, etc)::
+* A root class derived from ``Parser`` wich implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overriden, etc)::
  
     def _myrulename_(self):
 
-* An abstract class with one method per grammar rule. Each method receives the as its single parameter the *Abstract Syntax Tree* (AST) built from the rule invocation::
+* An *abstract* parser class that inherits from the root parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
+
+* An base class with one semantic method per grammar rule. Each method receives the as its single parameter the *Abstract Syntax Tree* (AST) built from the rule invocation.::
 
     def myrulename(self, ast):
         return ast
 
-The methods in the abstract parser class return the same AST received as parameter, but derived classes can override the methods to have them return something different (like a *Concrete Syntax Tree*).
+The methods in the base parser class return the same AST received as parameter, but derived classes can override the methods to have them return anythin you like (like a *Semantic Tree*). You can use the base class as a template for your own parser.
        
-The ASTs are dictionary-like objects that contain one keyed item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``.
+The default ASTs are dictionary-like objects that contain one item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. AST entries are single values if only one item was added to a name, and lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if a single item was added. 
 
+When there are no named items in a rule, the AST consists of the return values of elements parsed by the rule, either a single item or a list. This default behavior makes it easier to writ esimple rules. You will have an AST returned from::
+
+    number = ?/[0-9]+/?
+
+without having to write::
+    
+    number = number:?/[0-9]+/?
 
 
 Using the Tool
