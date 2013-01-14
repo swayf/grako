@@ -491,10 +491,11 @@ class RuleRefGrammar(_Grammar):
 
 
 class RuleGrammar(NamedGrammar):
-    def __init__(self, name, exp):
+    def __init__(self, name, exp, ast_name=None):
         if iskeyword(name):
             name += '_'
         super(RuleGrammar, self).__init__(name, exp, False)
+        self.ast_name = ast_name
 
     def parse(self, ctx):
         ctx._rule_stack.append(self.name)
@@ -506,7 +507,10 @@ class RuleGrammar(NamedGrammar):
             _tree, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
             ctx.goto(newpos)
             log.debug('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
-            return ctx.ast
+            if self.ast_name:
+                return AST({self.ast_name:ctx.ast})
+            else:
+                return ctx.ast
         except FailedParse:
             log.debug('FAIL %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
             raise
@@ -529,13 +533,20 @@ class RuleGrammar(NamedGrammar):
         return '%s = %s ;' % (self.name, str(self.exp).strip())
 
     def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
+        if self.ast_name:
+            ast_name_clause = 'self.ast = AST(%s=self.ast)\n' % self.ast_name
+        else:
+            ast_name_clause = ''
+        fields.update(
+                      exp=indent(render(self.exp)),
+                      ast_name_clause=ast_name_clause
+                      )
 
     template = '''
                 def _{name}_(self):
                     _e = None
                 {exp}
-
+                    {ast_name_clause}
                 '''
 
 class Grammar(Renderer):

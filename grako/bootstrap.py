@@ -138,9 +138,10 @@ class GrakoParserBase(Parser):
         raise FailedParse(self._buffer, 'term')
 
     def _named_(self):
-        self._call('word', 'name')
+        name = self._call('word')
         if not self._try('+:', 'force_list'):
             self._token(':')
+        self.ast.add('name', name)
         try:
             self._call('term', 'value')
             return
@@ -180,6 +181,13 @@ class GrakoParserBase(Parser):
         self._call('choice', 'expre')
 
     def _rule_(self):
+        p = self._pos
+        try:
+            ast_name = self._call('word')
+            self._token(':')
+            self.ast.add('ast_name', ast_name)
+        except FailedParse:
+            self._goto(p)
         self._call('word', 'name')
         self._token('=')
         self._call('expre', 'rhs')
@@ -412,10 +420,11 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
         return ast.expre
 
     def rule(self, ast):
+        ast_name = ast.ast_name
         name = ast.name
         rhs = ast.rhs
         if not name in self.rules:
-            rule = RuleGrammar(name, rhs)
+            rule = RuleGrammar(name, rhs, ast_name)
             self.rules[name] = rule
         else:
             rule = self.rules[name]

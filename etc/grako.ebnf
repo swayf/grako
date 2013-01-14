@@ -2,7 +2,7 @@ grammar = rules:{rule}+ $ ;
 
 (* a comment *)
 
-rule = name:word '=' >> rhs:expre ('.' | ';') >> ;
+rule:rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
 
 expre = expre:choice ;
 

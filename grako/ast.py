@@ -6,8 +6,8 @@ import json
 __all__ = ['AST']
 
 class AST(Mapping):
-    def __init__(self, **kwargs):
-        self._elements = OrderedDict(**kwargs)
+    def __init__(self, *args, **kwargs):
+        self._elements = OrderedDict(*args, **kwargs)
         self.__setattr__ = self._setter
 
     def add(self, key, value, force_list=False):
@@ -52,7 +52,7 @@ class AST(Mapping):
         self.add(key, value)
 
     def __getattr__(self, key):
-        return self._elements[key]
+        return self.__getitem__(key)
 
     def _setter(self, key, value):
         self.add(key, value)

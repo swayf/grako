@@ -54,6 +54,10 @@ class Parser(object):
     def ast(self):
         return self._ast_stack[-1]
 
+    @ast.setter
+    def ast(self, value):
+        self._ast_stack[-1] = value
+
     def result(self):
         return self.ast
 
