@@ -34,7 +34,7 @@ class Parser(object):
         self._bufferClass = bufferClass
         self._buffer = None
         self._ast_stack = []
-        self._concrete_stack = []
+        self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         if not self._verbose:
@@ -44,7 +44,7 @@ class Parser(object):
         try:
             self._buffer = self._bufferClass(self.text, self.whitespace)
             self._push_ast()
-            self._concrete_stack.append([])
+            self._concrete_stack = [None]
             self._call(rule_name, rule_name)
             return self.ast
         finally:
@@ -60,6 +60,27 @@ class Parser(object):
 
     def result(self):
         return self.ast
+
+    def _push_cst(self):
+        self._concrete_stack.append(None)
+#        self._concrete_stack.append([])
+
+    @property
+    def cst(self):
+        return self._concrete_stack[-1]
+
+    def _add_cst_node(self, node):
+#        self._concrete_stack[-1].append(node)
+        previous = self._concrete_stack[-1]
+        if previous is None:
+            self._concrete_stack[-1] = node
+        elif isinstance(previous, list):
+            previous.append(node)
+        else:
+            self._concrete_stack[-1] = [previous, node]
+
+    def _pop_cst(self):
+        return self._concrete_stack.pop()
 
     def rulestack(self):
         stack = '.'.join(self._rule_stack)
@@ -114,7 +135,7 @@ class Parser(object):
     def _invoke_rule(self, name, pos):
         rule = self._find_rule(name)
         self._push_ast()
-        self._concrete_stack.append([])
+        self._push_cst()
         try:
             rule()
             node = self.ast
@@ -123,11 +144,9 @@ class Parser(object):
                     node['rule'] = name
                     node['pos'] = pos
             else:
-                node = self._concrete_stack[-1]
-                if len(node) == 1:
-                    node = node[0]
+                node = self.cst
         finally:
-            self._concrete_stack.pop()
+            self._pop_cst()
             self._pop_ast()
         semantic_rule = self._find_semantic_rule(name)
         if semantic_rule:
@@ -189,7 +208,7 @@ class Parser(object):
     def _add_ast_node(self, name, node, force_list=False):
         if name is not None:  # and node:
             self.ast.add(name, node, force_list)
-        self._concrete_stack[-1].append(node)
+        self._add_cst_node(node)
         return node
 
     def error(self, item, etype=FailedParse):
