@@ -18,7 +18,7 @@ class Buffer(object):
         self.text = text
         self.filename = filename
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
-        self.verbose = verbose
+        self._verbose = verbose
         self._fileinfo = self.get_fileinfo(text, filename)
         self._linecache = []
         self._preprocess()
