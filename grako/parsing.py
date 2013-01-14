@@ -22,20 +22,22 @@ class Parser(object):
                         whitespace=None,
                         comments_re=None,
                         ignorecase=False,
+                        simple=False,
                         verbose=False,
                         bufferClass=buffering.Buffer):
         self.text = text
         self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
         self.comments_re = comments_re
         self.ignorecase = ignorecase
-        self.verbose = verbose
+        self._simple = simple
+        self._verbose = verbose
         self._bufferClass = bufferClass
         self._buffer = None
         self._ast_stack = []
         self._concrete_stack = []
         self._rule_stack = []
         self._cut_stack = [False]
-        if not self.verbose:
+        if not self._verbose:
             self.trace_event = lambda x: ()
 
     def parse(self, rule_name):
@@ -113,8 +115,9 @@ class Parser(object):
             rule()
             node = self.ast
             if node:
-                node['rule'] = name
-                node['pos'] = pos
+                if not self._simple:
+                    node['rule'] = name
+                    node['pos'] = pos
             else:
                 node = self._concrete_stack[-1]
                 if len(node) == 1:
@@ -189,15 +192,15 @@ class Parser(object):
         raise etype(self._buffer, item)
 
     def trace(self, msg, *params):
-        if self.verbose:
+        if self._verbose:
             print(msg % params, file=sys.stderr)
 
     def trace_event(self, event):
-        if self.verbose:
+        if self._verbose:
             self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
 
     def trace_match(self, token):
-        if False and self.verbose:
+        if False and self._verbose:
             self.trace('matched <%s>\n\t%s', token, self._buffer.lookahead())
 
     @contextmanager
