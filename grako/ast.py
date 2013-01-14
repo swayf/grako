@@ -8,6 +8,7 @@ __all__ = ['AST']
 class AST(Mapping):
     def __init__(self, **kwargs):
         self._elements = OrderedDict(**kwargs)
+        self.__setattr__ = self._setter
 
     def add(self, key, value, force_list=False):
         previous = self._elements.get(key, None)
@@ -44,17 +45,17 @@ class AST(Mapping):
 
     def __getitem__(self, key):
         if key not in self._elements:
-            self._elements[key] = list()
+            return None
         return self._elements[key]
 
     def __setitem__(self, key, value):
-        self._elements[key] = value
+        self.add(key, value)
 
     def __getattr__(self, key):
-        return self.__getitem__(key)
-        if key in self._elements:
-            return self.__getitem__(key)
-        raise KeyError(key)
+        return self._elements[key]
+
+    def _setter(self, key, value):
+        self.add(key, value)
 
     @staticmethod
     def serializable(obj):
