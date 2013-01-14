@@ -226,7 +226,10 @@ The abstract parser will contain a rule of of the form::
     def preproc(self, ast):
         return ast
 
+Warning
+=======
 
+The ``grako.model`` package is still under development. It's not usable in it's current state.
 
 License
 =======
