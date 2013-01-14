@@ -112,7 +112,10 @@ class Parser(object):
         try:
             rule()
             node = self.ast
-            if not node:
+            if node:
+                node['rule'] = name
+                node['pos'] = pos
+            else:
                 node = self._concrete_stack[-1]
                 if len(node) == 1:
                     node = node[0]
