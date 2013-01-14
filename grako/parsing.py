@@ -34,7 +34,7 @@ class Parser(object):
         self._bufferClass = bufferClass
         self._buffer = None
         self._ast_stack = []
-        self._concrete_stack = []
+        self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         if not self._verbose:
@@ -44,7 +44,7 @@ class Parser(object):
         try:
             self._buffer = self._bufferClass(self.text, self.whitespace)
             self._push_ast()
-            self._concrete_stack.append([])
+            self._concrete_stack = [None]
             self._call(rule_name, rule_name)
             return self.ast
         finally:
@@ -60,6 +60,25 @@ class Parser(object):
 
     def result(self):
         return self.ast
+
+    def _new_cst(self):
+        self._concrete_stack.append(None)
+
+    @property
+    def cst(self):
+        return self._concrete_stack[-1]
+
+    def _add_cst_node(self, node):
+        previous = self._concrete_stack[-1]
+        if previous is None:
+            self._concrete_stack[-1] = node
+        elif isinstance(previous, list):
+            previous.append(node)
+        else:
+            self._concrete_stack[-1] = [previous, node]
+
+    def _pop_cst(self):
+        return self._concrete_stack.pop()
 
     def rulestack(self):
         stack = '.'.join(self._rule_stack)
@@ -98,11 +117,13 @@ class Parser(object):
         pos = self._pos
         try:
             self.trace_event('ENTER ')
-            result, newpos = self._invoke_rule(name, pos)
+            node, newpos = self._invoke_rule(name, pos)
 #            self.trace_event('SUCCESS')
-            self._add_ast_node(node_name, result, force_list)
+            self._add_cst_node(node)
+            if node_name:
+                self._add_ast_node(node_name, node, force_list)
             self._goto(newpos)
-            return result
+            return node
         except FailedParse:
             self.trace_event('FAILED')
             self._goto(pos)
@@ -114,7 +135,8 @@ class Parser(object):
     def _invoke_rule(self, name, pos):
         rule = self._find_rule(name)
         self._push_ast()
-        self._concrete_stack.append([])
+        self._new_cst()
+        node = None
         try:
             rule()
             node = self.ast
@@ -122,13 +144,11 @@ class Parser(object):
                 if not self._simple:
                     node['rule'] = name
                     node['pos'] = pos
-            else:
-                node = self._concrete_stack[-1]
-                if len(node) == 1:
-                    node = node[0]
         finally:
-            self._concrete_stack.pop()
             self._pop_ast()
+            cst = self._pop_cst()
+            if not node:
+                node = cst
         semantic_rule = self._find_semantic_rule(name)
         if semantic_rule:
             node = semantic_rule(node)
@@ -189,7 +209,6 @@ class Parser(object):
     def _add_ast_node(self, name, node, force_list=False):
         if name is not None:  # and node:
             self.ast.add(name, node, force_list)
-        self._concrete_stack[-1].append(node)
         return node
 
     def error(self, item, etype=FailedParse):
@@ -272,6 +291,15 @@ class Parser(object):
                 raise
         finally:
             self._cut_stack.pop()
+
+    @contextmanager
+    def _group(self):
+        self._new_cst()
+        try:
+            yield
+        finally:
+            cst = self._pop_cst()
+            self._add_cst_node(cst)
 
     @contextmanager
     def _if(self):
