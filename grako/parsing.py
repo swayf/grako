@@ -74,7 +74,7 @@ class Parser(object):
         previous = self._concrete_stack[-1]
         if previous is None:
             self._concrete_stack[-1] = node
-        elif previous == node:
+        elif previous == node:  # FIXME: Don't know how this happens, but it does
             return
         elif isinstance(previous, list):
             previous.append(node)
@@ -299,9 +299,10 @@ class Parser(object):
         self._push_cst()
         try:
             yield
+            node = self.cst
         finally:
-            node = self._pop_cst()
-            self._add_cst_node(node)
+            self._pop_cst()
+        self._add_cst_node(node)
 
     @contextmanager
     def _if(self):
