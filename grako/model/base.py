@@ -2,9 +2,7 @@
 """
 import os.path
 import weakref
-from collections import defaultdict
 from ..rendering import Renderer
-from .java import javaid, capfirst  # @UnusedImport
 
 EOLCOL = 50
 
@@ -56,41 +54,17 @@ class Context(object):
         that are used anonymously.
     """
 
-    def __init__(self, text, filename, eol_comments=True):
+    def __init__(self, buf, eol_comments=True):
         super(Context, self).__init__()
-        self.filename = filename
-        self.text = text.split('\n')
+        self.buf = buf
         self.eol_comments = eol_comments
 
-        self.globals = []
-        self.locals = []
-        self.parameters = []
-        self.objects = []
-
         self._symbols = dict()
-        self.redefine_count = defaultdict(int)
-        self._view_stack = []
-
-    def get_text(self, init, stop=None):
-        """ Get the source code text in the specified range.
-        """
-        iline, ipos = init
-        if not stop:
-            return self.text[iline][ipos:]
-
-        sline, spos = stop
-        if iline == sline:
-            return self.text[iline][ipos:1 + spos - ipos]
-
-        lines = self.text[iline, 1 + sline - iline]
-        lines[0] = lines[0][ipos:]
-        lines[-1] = lines[-1][:1 + spos]
-        return '\n'.join(lines)
 
     def basename(self):
         """ Base name of the original source code file.
         """
-        return os.path.splitext(os.path.basename(self.filename))[0]
+        return os.path.splitext(os.path.basename(self.buf.filename))[0]
 
     def add_symbol(self, name, node):
         """ Add a symbol to the symbol table.
@@ -119,24 +93,6 @@ class Context(object):
             self.globals.append(symbol)
         return symbol
 
-    def current_view(self):
-        """ The topmost view in the view stack.
-        """
-        if self._view_stack:
-            return self._view_stack[-1]
-        return '<view>'
-
-    def push_view(self, r):
-        """ Push a view into the view stack.
-        """
-        self._view_stack.append(r)
-
-    def pop_view(self):
-        """ Pop the topmost view from the view stack.
-        """
-        return self._view_stack.pop()
-
-
 class Node(Renderer):
     """ Base class for model nodes, in charge of the rendering infrastructure.
 
@@ -149,14 +105,10 @@ class Node(Renderer):
     inline = True
     template = '$name'
 
-    def __init__(self, context, pos, name, children, lineno, comments):
+    def __init__(self, context, children):
         super(Node, self).__init__()
         self._context = context
-        self.pos = pos
-        self.name = name
         self._children = children
-        self.lineno = lineno
-        self._comments = comments
         self._parent = None
         self.text = self._text()
         if context.eol_comments and self.line:
@@ -348,8 +300,6 @@ class SymbolNode(Node):
         super(SymbolNode, self).__postinit__()
         self.value = self.children[0]
         self.ident = self._ident()
-        self.java_id = javaid(self.ident)
-        self.class_id = capfirst(self.java_id)
         self.type = None
         self._record = None
         self._redefined = None
