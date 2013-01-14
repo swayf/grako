@@ -61,7 +61,7 @@ class Parser(object):
     def result(self):
         return self.ast
 
-    def _new_cst(self):
+    def _push_cst(self):
         self._concrete_stack.append(None)
 
     @property
@@ -69,9 +69,13 @@ class Parser(object):
         return self._concrete_stack[-1]
 
     def _add_cst_node(self, node):
+        if node is None:
+            return
         previous = self._concrete_stack[-1]
         if previous is None:
             self._concrete_stack[-1] = node
+        elif previous == node:
+            return
         elif isinstance(previous, list):
             previous.append(node)
         else:
@@ -117,13 +121,11 @@ class Parser(object):
         pos = self._pos
         try:
             self.trace_event('ENTER ')
-            node, newpos = self._invoke_rule(name, pos)
+            result, newpos = self._invoke_rule(name, pos)
 #            self.trace_event('SUCCESS')
-            self._add_cst_node(node)
-            if node_name:
-                self._add_ast_node(node_name, node, force_list)
+            self._add_ast_node(node_name, result, force_list)
             self._goto(newpos)
-            return node
+            return result
         except FailedParse:
             self.trace_event('FAILED')
             self._goto(pos)
@@ -135,8 +137,7 @@ class Parser(object):
     def _invoke_rule(self, name, pos):
         rule = self._find_rule(name)
         self._push_ast()
-        self._new_cst()
-        node = None
+        self._push_cst()
         try:
             rule()
             node = self.ast
@@ -144,11 +145,11 @@ class Parser(object):
                 if not self._simple:
                     node['rule'] = name
                     node['pos'] = pos
+            else:
+                node = self.cst
         finally:
+            self._pop_cst()
             self._pop_ast()
-            cst = self._pop_cst()
-            if not node:
-                node = cst
         semantic_rule = self._find_semantic_rule(name)
         if semantic_rule:
             node = semantic_rule(node)
@@ -209,6 +210,7 @@ class Parser(object):
     def _add_ast_node(self, name, node, force_list=False):
         if name is not None:  # and node:
             self.ast.add(name, node, force_list)
+        self._add_cst_node(node)
         return node
 
     def error(self, item, etype=FailedParse):
@@ -294,12 +296,12 @@ class Parser(object):
 
     @contextmanager
     def _group(self):
-        self._new_cst()
+        self._push_cst()
         try:
             yield
         finally:
-            cst = self._pop_cst()
-            self._add_cst_node(cst)
+            node = self._pop_cst()
+            self._add_cst_node(node)
 
     @contextmanager
     def _if(self):
