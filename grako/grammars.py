@@ -402,6 +402,7 @@ class OptionalGrammar(_DecoratorGrammar):
         fields.update(exp=indent(render(self.exp)))
 
     template = '''\
+                _e = None
                 with self._optional():
                 {exp}\
                 '''
