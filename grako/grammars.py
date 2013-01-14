@@ -532,6 +532,7 @@ class RuleGrammar(NamedGrammar):
 
     template = '''
                 def _{name}_(self):
+                    _e = None
                 {exp}
 
                 '''
