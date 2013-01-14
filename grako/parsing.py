@@ -63,17 +63,19 @@ class Parser(object):
 
     def _push_cst(self):
         self._concrete_stack.append(None)
-#        self._concrete_stack.append([])
 
     @property
     def cst(self):
         return self._concrete_stack[-1]
 
     def _add_cst_node(self, node):
-#        self._concrete_stack[-1].append(node)
+        if node is None:
+            return
         previous = self._concrete_stack[-1]
         if previous is None:
             self._concrete_stack[-1] = node
+        elif previous == node:  # FIXME: Don't know how this happens, but it does
+            return
         elif isinstance(previous, list):
             previous.append(node)
         else:
@@ -291,6 +293,16 @@ class Parser(object):
                 raise
         finally:
             self._cut_stack.pop()
+
+    @contextmanager
+    def _group(self):
+        self._push_cst()
+        try:
+            yield
+            node = self.cst
+        finally:
+            self._pop_cst()
+        self._add_cst_node(node)
 
     @contextmanager
     def _if(self):

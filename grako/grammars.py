@@ -114,6 +114,15 @@ class GroupGrammar(_DecoratorGrammar):
     def __str__(self):
         return '(%s)' % str(self.exp).strip()
 
+    def render_fields(self, fields):
+        fields.update(exp=indent(render(self.exp)))
+
+    template = '''\
+                with self._group():
+                {exp}
+                    _e = self.cst
+                '''
+
 
 class TokenGrammar(_Grammar):
     def __init__(self, token):
