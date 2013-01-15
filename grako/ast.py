@@ -66,6 +66,6 @@ class AST(Mapping):
     def __repr__(self):
         return repr(self._elements)
 
-    def __str__(self):
+    def json(self):
         return json.dumps(self._elements, indent=2, default=self.serializable)
 
