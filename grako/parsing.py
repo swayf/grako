@@ -32,7 +32,7 @@ class Parser(object):
         self._simple = simple
         self._verbose = verbose
         self._bufferClass = bufferClass
-        self._buffer = None
+        self._buffer = self._bufferClass(self.text, self.whitespace)
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
@@ -42,11 +42,9 @@ class Parser(object):
 
     def parse(self, rule_name):
         try:
-            self._buffer = self._bufferClass(self.text, self.whitespace)
             self._push_ast()
             self._concrete_stack = [None]
-            self._call(rule_name, rule_name)
-            return self.ast
+            return self._call(rule_name, rule_name)
         finally:
             del self._ast_stack[1:]
 
@@ -143,7 +141,7 @@ class Parser(object):
             node = self.ast
             if node:
                 if not self._simple:
-                    node['parseinfo'] = AST(rule=name, pos=pos)
+                    node.add('parseinfo', AST(rule=name, pos=pos))
             else:
                 node = self.cst
         finally:
