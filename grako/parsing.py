@@ -143,8 +143,7 @@ class Parser(object):
             node = self.ast
             if node:
                 if not self._simple:
-                    node['rule'] = name
-                    node['pos'] = pos
+                    node['parseinfo'] = AST(rule=name, pos=pos)
             else:
                 node = self.cst
         finally:
