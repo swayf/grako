@@ -1,5 +1,6 @@
 """ Base definitions for models of programs.
 """
+from __future__ import print_function, division, absolute_import, unicode_literals
 from ..rendering import Renderer
 
 EOLCOL = 50
@@ -52,12 +53,11 @@ class Context(object):
         that are used anonymously.
     """
 
-    def __init__(self, buf, eol_comments=True):
+    def __init__(self, buf, **kwargs):
         super(Context, self).__init__()
         self.buf = buf
-        self.eol_comments = eol_comments
-
         self._symbols = dict()
+        self.__dict__.update(kwargs)
 
 
 
@@ -71,7 +71,7 @@ class Node(Renderer):
     """
 
     inline = True
-    template = '$name'
+    template = ''
 
     def __init__(self, ctx, parseinfo=None):
         super(Node, self).__init__()
@@ -82,6 +82,19 @@ class Node(Renderer):
     def ctx(self):
         return self._ctx
 
+    @property
+    def parseinfo(self):
+        return self._parseinfo
+
+    @property
+    def line_info(self):
+        if self.parseinfo:
+            return self.ctx.buf.line_info(self.parseinfo.pos)
+
+    @property
+    def text(self):
+        if self.parseinfo:
+            return self.line_info.text
 
     def __str__(self):
         return self.render()
