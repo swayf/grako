@@ -63,7 +63,7 @@ def main():
     print('-' * 20, 'phase 5 - parse using the grammar model')
     text = open('tmp/4.ebnf').read()
     ast5 = parser.parse('grammar', text)
-    open('tmp/5.ast', 'w').write(str(ast5))
+    open('tmp/5.ast', 'w').write(ast5.json())
 #    print(ast5)
 
     print('-' * 20, 'phase 6 - generate parser code')
@@ -75,8 +75,8 @@ def main():
     print('-' * 20, 'phase 8 - compile using generated code')
     parser = GenParser(text, verbose=False)
     result = parser.parse('grammar')
-    assert result == parser.ast
-    open('tmp/8.ast', 'w').write(str(parser.ast))
+    assert result == parser.ast['grammar']
+    open('tmp/8.ast', 'w').write(parser.ast.json())
 #    print(ast5)
 #    print('=' * 20)
 #    print(result)
