@@ -18,6 +18,9 @@ def check(result):
 def dot(x, y, k):
     return set([ (a + b)[:k] for a in x for b in y])
 
+def urepr(obj):
+    return repr(obj).lstrip('u')
+
 class Context(object):
     def __init__(self, rules, text):
         self.rules = {rule.name :rule for rule in rules}
@@ -149,7 +152,7 @@ class TokenGrammar(_Grammar):
         return "'%s'" % self.token
 
     def render_fields(self, fields):
-        fields.update(token=repr(self.token))
+        fields.update(token=urepr(self.token))
 
     template = "_e = self._token({token})"
 
@@ -174,7 +177,7 @@ class PatternGrammar(_Grammar):
         return '?/%s/?' % self.pattern
 
     def render_fields(self, fields):
-        fields.update(pattern=repr(self.pattern))
+        fields.update(pattern=urepr(self.pattern))
 
     template = '_e = self._pattern({pattern})'
 
@@ -260,7 +263,7 @@ class SequenceGrammar(_Grammar):
 class ChoiceGrammar(_Grammar):
     def __init__(self, options):
         super(ChoiceGrammar, self).__init__()
-        assert isinstance(options, list), repr(options)
+        assert isinstance(options, list), urepr(options)
         self.options = options
 
     def parse(self, ctx):
@@ -290,14 +293,14 @@ class ChoiceGrammar(_Grammar):
         template = trim(self.option_template)
         options = [template.format(option=indent(render(o))) for o in self.options]
         options = '\n'.join(o for o in options)
-        firstset = ' '.join(str(repr(f[0])) for f in self.firstset if f)
+        firstset = ' '.join(str(urepr(f[0])) for f in self.firstset if f)
         if firstset:
             error = 'expecting one of: ' + firstset
         else:
             error = 'no available options'
         fields.update(n=self.counter(),
                       options=indent(options),
-                      error=repr(error)
+                      error=urepr(error)
                       )
 
     def render(self):
