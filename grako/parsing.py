@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 import re
 from contextlib import contextmanager
+from functools import wraps
 from .util import memoize
 from . import buffering
 from .exceptions import *  # @UnusedWildImport
@@ -229,7 +230,13 @@ class Parser(object):
     def _option(self):
         p = self._pos
         try:
-            yield
+            self._push_ast()
+            try:
+                yield
+                ast = self.ast
+            finally:
+                self._pop_ast()
+            self.ast.update(ast)
         except FailedCut as e:
             self._goto(p)
             raise e.nested

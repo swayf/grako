@@ -24,7 +24,7 @@ class AST(Mapping):
 
     def update(self, *args, **kwargs):
         for dct in args:
-            for k, v in dct:
+            for k, v in dct.items():
                 self.add(k, v)
         for k, v in kwargs.items():
             self.add(k, v)
