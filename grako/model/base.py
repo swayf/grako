@@ -5,7 +5,7 @@ from ..rendering import Renderer
 
 EOLCOL = 50
 
-def render(node, **kwargs):
+def render(node, **fields):
     """ Convert the given node to it's Java representation.
     """
     if node is None:
@@ -15,7 +15,7 @@ def render(node, **kwargs):
     elif node is False:
         return 'false'
     elif isinstance(node, list):
-        return ''.join(render(e, **kwargs) for e in node)
+        return ''.join(render(e, **fields) for e in node)
     else:
         return str(node)
 
