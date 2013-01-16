@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
+import sys
 import re
 import logging
 from copy import deepcopy
@@ -72,6 +73,9 @@ class _Grammar(Renderer):
             self._first_set = self._first(k, {})
         return self._first_set
 
+    def _validate(self, rules):
+        pass
+
     def _first(self, k, F):
         return set()
 
@@ -103,6 +107,9 @@ class _DecoratorGrammar(_Grammar):
 
     def parse(self, ctx):
         return self.exp.parse(ctx)
+
+    def _validate(self, rules):
+        self.exp._validate(rules)
 
     def _first(self, k, F):
         return self.exp._first(k, F)
@@ -201,7 +208,6 @@ class LookaheadGrammar(_DecoratorGrammar):
                 {exp}\
                 '''
 
-
 class LookaheadNotGrammar(_DecoratorGrammar):
     def __str__(self):
         return '!' + self.exp
@@ -242,6 +248,10 @@ class SequenceGrammar(_Grammar):
             result.append(tree)
         return [r for r in result if r is not None]
 
+    def _validate(self, rules):
+        for s in self.sequence:
+            s._validate(rules)
+
     def _first(self, k, F):
         result = {()}
         for s in self.sequence:
@@ -279,6 +289,9 @@ class ChoiceGrammar(_Grammar):
                 items.append(e.item)
         raise FailedParse(ctx.buf, 'one of {%s}' % ','.join(items))
 
+    def _validate(self, rules):
+        for o in self.options:
+            o._validate(rules)
 
     def _first(self, k, F):
         result = set()
@@ -492,6 +505,10 @@ class RuleRefGrammar(_Grammar):
         except FailedParse:
             raise
 
+    def _validate(self, rules):
+        if self.name not in rules:
+            raise GrammarError("reference to unknown rule '%s'" % self.name)
+
     def _first(self, k, F):
         self._first_set = F.get(self.name, set())
         return self._first_set
@@ -567,7 +584,13 @@ class Grammar(Renderer):
         assert isinstance(rules, list), str(rules)
         self.name = name
         self.rules = rules
+        self._validate()
         self._first_sets = self._calc_first_sets()
+
+    def _validate(self):
+        ruledict = {r.name for r in self.rules}
+        for rule in self.rules:
+            rule._validate(ruledict)
 
     @property
     def first_sets(self):
