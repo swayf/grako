@@ -45,9 +45,9 @@ A **Grako** generated parser consists of the following classes:
 
 The methods in the base parser class return the same AST received as parameter, but derived classes can override the methods to have them return anything you like (like a *Semantic Tree*). You can use the base class as a template for your own parser.
        
-The default ASTs are dictionary-like objects that contain one item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
+The default ASTs are either lists, or dict objects that contain one item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
 
-AST entries are single values if only one item was added to a name, and lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if a single item was added. 
+AST entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if a single item was added. 
 
 
 Using the Tool
@@ -89,14 +89,15 @@ To use the generated parser, subclass the base or the abstract parser, create an
 
     parser = MyParser('text to parse')
     result = parser.parse('start')
-    print result
+    print result # pasres() returns an AST by default
+    print result.jsons() # the AST can be converted to json
 
 The generated parsers have named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
 
 The EBNF Grammar Syntax
 =======================
 
-**Grako** uses a variation of the standard EBNF_ syntax. A grammar consists of a sequence of one or more rules of the form:
+**Grako** uses a variant of the standard EBNF_ syntax. A grammar consists of a sequence of one or more rules of the form:
 
     ``name = expre ;``
 
@@ -172,6 +173,12 @@ without having to write::
     number = number:?/[0-9]+/?
 
 When a rule has named elementes, the unnamed ones are excluded from the AST (ignored).
+
+It is also possible to add an AST name to a rule::
+
+    ast_name:rule = expre;
+
+That will make the default AST returned to be a dict with a single item with key ``ast_name`` and the value recovered from the right hand side of the rule.
 
 Whitespace
 ==========
