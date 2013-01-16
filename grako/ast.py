@@ -5,73 +5,55 @@ import json
 
 __all__ = ['AST']
 
-class AST(Mapping):
+class AST(dict):
+    """
+    A dictionary with attribute-style access. It maps attribute access to
+    the real dictionary.
+    """
+    # ActiveState Recipe:
+    # http://code.activestate.com/recipes/473786-dictionary-with-attribute-style-access/
+
     def __init__(self, *args, **kwargs):
-        self._elements = OrderedDict(*args, **kwargs)
-        self.__setattr__ = self._setter
+        dict.__init__(self, *args, **kwargs)
 
-    def add(self, key, value, force_list=False):
-        previous = self._elements.get(key, None)
-        if previous is None:
-            if force_list:
-                self._elements[key] = [value]
-            else:
-                self._elements[key] = value
-        elif isinstance(previous, list):
-            previous.append(value)
-        else:
-            self._elements[key] = [previous, value]
+    def __getstate__(self):
+        return self.__dict__.items()
 
-    def update(self, *args, **kwargs):
-        for dct in args:
-            for k, v in dct.items():
-                self.add(k, v)
-        for k, v in kwargs.items():
-            self.add(k, v)
+    def __setstate__(self, items):
+        for key, val in items:
+            self.__dict__[key] = val
 
-    @property
-    def first(self):
-        key = self._elements.keys[0]
-        return self._elements[key]
-
-    def keys(self):
-        return self._elements.keys()
-
-    def items(self):
-        return self._elements.items()
-
-    def __iter__(self):
-        return iter(self._elements)
-
-    def __contains__(self, key):
-        return key in self._elements
-
-    def __len__(self):
-        return len(self._elements)
-
-    def __getitem__(self, key):
-        if key not in self._elements:
-            return None
-        return self._elements[key]
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, dict.__repr__(self))
 
     def __setitem__(self, key, value):
         self.add(key, value)
 
-    def __getattr__(self, key):
-        return self.__getitem__(key)
+    def __getitem__(self, name):
+        if name in self:
+            return super(AST, self).__getitem__(name)
 
-    def _setter(self, key, value):
-        self.add(key, value)
+    def __delitem__(self, name):
+        return super(AST, self).__delitem__(name)
 
-    @staticmethod
-    def serializable(obj):
-        if isinstance(obj, AST):
-            return obj._elements
-        return obj
+    __getattr__ = __getitem__
+    __setattr__ = __setitem__
 
-    def __repr__(self):
-        return repr(self._elements)
+    def copy(self):
+        ch = AST(self)
+        return ch
+
+    def add(self, key, value, force_list=False):
+        previous = self[key]
+        if previous is None:
+            if force_list:
+                return super(AST, self).__setitem__(key, [value])
+            else:
+                return super(AST, self).__setitem__(key, value)
+        elif isinstance(previous, list):
+            previous.append(value)
+        else:
+            return super(AST, self).__setitem__(key, [previous, value])
 
     def json(self):
-        return json.dumps(self._elements, indent=2, default=self.serializable)
-
+        return json.dumps(self, indent=2)
