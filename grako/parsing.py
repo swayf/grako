@@ -56,15 +56,27 @@ class Parser(object):
     def ast(self, value):
         self._ast_stack[-1] = value
 
+    def _push_ast(self):
+        self._ast_stack.append(AST())
+
+    def _pop_ast(self):
+        return self._ast_stack.pop()
+
+    def _add_ast_node(self, name, node, force_list=False):
+        if name is not None:  # and node:
+            self.ast.add(name, node, force_list)
+        self._add_cst_node(node)
+        return node
+
     def result(self):
         return self.ast
-
-    def _push_cst(self):
-        self._concrete_stack.append(None)
 
     @property
     def cst(self):
         return self._concrete_stack[-1]
+
+    def _push_cst(self):
+        self._concrete_stack.append(None)
 
     def _add_cst_node(self, node):
         if node is None:
@@ -197,18 +209,6 @@ class Parser(object):
         if result is None or not isinstance(result, type(self._find_rule)):
             return None
         return result
-
-    def _push_ast(self):
-        self._ast_stack.append(AST())
-
-    def _pop_ast(self):
-        return self._ast_stack.pop()
-
-    def _add_ast_node(self, name, node, force_list=False):
-        if name is not None:  # and node:
-            self.ast.add(name, node, force_list)
-        self._add_cst_node(node)
-        return node
 
     def error(self, item, etype=FailedParse):
         raise etype(self._buffer, item)

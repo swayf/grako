@@ -31,8 +31,14 @@ class AST(Mapping):
 
     @property
     def first(self):
-        key = self.elements.keys[0]
-        return self.elements[key]
+        key = self._elements.keys[0]
+        return self._elements[key]
+
+    def keys(self):
+        return self._elements.keys()
+
+    def items(self):
+        return self._elements.items()
 
     def __iter__(self):
         return iter(self._elements)
