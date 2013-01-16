@@ -265,7 +265,11 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
     **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under two thousand lines of code, would not have been possible without Python_.
 
-    **My students** at *Universidad Católica Andrés Bello* inspired me to think about how grammar-based parser generation could be made more approachable.
+    **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
+
+    **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (programming languages in particular) are about.
+
+    **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew.
 
     **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
     
@@ -273,6 +277,8 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _`Python Weekly`: http://www.pythonweekly.com/ 
 .. _introduced: http://dl.acm.org/citation.cfm?id=964001.964011
 .. _`PEG.js`: http://pegjs.majda.cz/
+.. _UCAB: http://www.ucab.edu.ve/
+.. _USB: http://www.usb.ve/
 
 -------------------------
 
