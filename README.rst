@@ -17,7 +17,7 @@ I wrote **Grako** to address the shortcommings I have encountered over the years
 
 * It is easy to recruit help on the base programming language (Python_), but, as the grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a grammar. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
 
-* Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself.
+* Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself. And there's no way to trust generated code that you cannot understand.
 
 * Python_ is a great language for working in language parsing and translation.
 
