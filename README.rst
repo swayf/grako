@@ -263,6 +263,10 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
     **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
+    **Terence Parr** created ANTLR_, probably the most solid and professional parser generator out there. Ter, *ANTLR* ant the folks on the ANLTR forums helped me shape my ideas about **Grako**.
+
+    **JavaCC** looks like an abandoned project. I'll credit it properly when I have more information.
+
     **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under two thousand lines of code, would not have been possible without Python_.
 
     **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
@@ -279,6 +283,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _`PEG.js`: http://pegjs.majda.cz/
 .. _UCAB: http://www.ucab.edu.ve/
 .. _USB: http://www.usb.ve/
+.. _ANTLR: http://www.antlr.org/ 
 
 -------------------------
 
