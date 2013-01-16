@@ -89,7 +89,7 @@ To use the generated parser, subclass the base or the abstract parser, create an
 
     parser = MyParser('text to parse')
     result = parser.parse('start')
-    print result # pasres() returns an AST by default
+    print result # pasres() # parse() returns an AST by default
     print result.json() # the AST can be converted to json
 
 The generated parsers have named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
