@@ -43,8 +43,11 @@ class Parser(object):
 
     def parse(self, rule_name):
         try:
+            self._ast_stack = []
             self._push_ast()
             self._concrete_stack = [None]
+            self._rule_stack = []
+            self._cut_stack = [False]
             return self._call(rule_name, rule_name)
         finally:
             del self._ast_stack[1:]
@@ -285,18 +288,24 @@ class Parser(object):
     def _cut(self):
         self._cut_stack[-1] = True
 
+    def _push_cut(self):
+        self._cut_stack.append(False)
+
+    def _pop_cut(self):
+        return self._cut_stack.pop()
+
     @contextmanager
     def _sequence(self):
-        self._cut_stack.append(False)
+        self._push_cut()
         try:
             yield
         except FailedParse as e:
-            if self._cut_stack[-1]:
+            if self._cut():
                 self.error(e, FailedCut)
             else:
                 raise
         finally:
-            self._cut_stack.pop()
+            self._pop_cut()
 
     @contextmanager
     def _group(self):
