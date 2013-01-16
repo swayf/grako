@@ -55,5 +55,5 @@ class AST(dict):
         else:
             return super(AST, self).__setitem__(key, [previous, value])
 
-    def jsons(self, indent=2, **kwargs):
+    def json(self, indent=2, **kwargs):
         return json.dumps(self, indent=indent, **kwargs)
