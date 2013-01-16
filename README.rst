@@ -103,7 +103,16 @@ The EBNF Grammar Syntax
 
 If a *name* collides with a Python_ keyword, an underscore (``_``) will be appended to it on the generated parser.
 
-The expressions, in reverse order of precedence, can be:
+If you define more than one rule with the same name::
+    
+    ``name = expre1 ;``
+    ``name = expre2 ;``
+
+The result will be equivalent to applying the choice operator to the right-hand-side expressions::
+
+``name = expre1  | expre2 ;``
+
+The expressions, in reverse order of operator precedence, can be:
 
     ``e1 | e2``
         Match either ``e1`` or ``e2``.
