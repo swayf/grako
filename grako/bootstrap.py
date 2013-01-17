@@ -389,7 +389,7 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
         return SpecialGrammar(ast.special)
 
     def kif(self, ast):
-        return LookaheadGrammar(ast.knot)
+        return LookaheadGrammar(ast.kif)
 
     def knot(self, ast):
         return LookaheadNotGrammar(ast.knot)
