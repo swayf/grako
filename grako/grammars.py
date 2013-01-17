@@ -470,7 +470,7 @@ class NamedGrammar(_DecoratorGrammar):
                       )
     template = '''
                 {exp}
-                self.ast.add('{name}', _e{force_list})
+                self.ast.add('{name}', _e{force_list})\
                 '''
 
 

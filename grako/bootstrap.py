@@ -143,7 +143,7 @@ class GrakoParserBase(Parser):
             self._token(':')
         self.ast.add('name', name)
         try:
-            self._call('term', 'value')
+            self._call('element', 'value')
             return
         except FailedParse as e:
             raise FailedCut(self._buffer, e)

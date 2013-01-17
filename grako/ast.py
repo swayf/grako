@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
-from collections import OrderedDict, Mapping
+from collections import OrderedDict
 import json
 
 __all__ = ['AST']
@@ -47,13 +47,14 @@ class AST(dict):
         previous = self[key]
         if previous is None:
             if force_list:
-                return super(AST, self).__setitem__(key, [value])
+                super(AST, self).__setitem__(key, [value])
             else:
-                return super(AST, self).__setitem__(key, value)
+                super(AST, self).__setitem__(key, value)
         elif isinstance(previous, list):
             previous.append(value)
         else:
-            return super(AST, self).__setitem__(key, [previous, value])
+            super(AST, self).__setitem__(key, [previous, value])
+        return self
 
     def json(self, indent=2, **kwargs):
         return json.dumps(self, indent=indent, **kwargs)
