@@ -3,7 +3,6 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 import re
 from contextlib import contextmanager
-from functools import wraps
 from .util import memoize
 from . import buffering
 from .exceptions import *  # @UnusedWildImport
