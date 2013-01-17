@@ -6,7 +6,9 @@ from .util import trim
 def render(item, **fields):
     """ Render the given item
     """
-    if isinstance(item, Renderer):
+    if item is None:
+        return ''
+    elif isinstance(item, Renderer):
         return item.render(**fields)
     elif isinstance(item, list):
         return ''.join(render(e) for e in item)
