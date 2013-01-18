@@ -447,6 +447,8 @@ class CutGrammar(_Grammar):
 
 class NamedGrammar(_DecoratorGrammar):
     def __init__(self, name, exp, force_list):
+        if iskeyword(name):
+            name += '_'
         super(NamedGrammar, self).__init__(exp)
         assert isinstance(exp, _Grammar), str(exp)
         self.name = name
