@@ -30,12 +30,14 @@ class Renderer(object):
     def render_fields(self, fields):
         pass
 
-    def render(self, **fields):
+    def render(self, template=None, **fields):
+        if template is None:
+            template = self.template
         fields.update({k:v for k, v in vars(self).items() if not k.startswith('_')})
         self.render_fields(fields)
         fields = {k:render(v) for k, v in fields.items()}
         try:
-            return trim(self.template).format(**fields)
+            return trim(template).format(**fields)
         except KeyError as e:
             raise KeyError(str(e), type(self))
 
