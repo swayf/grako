@@ -12,7 +12,7 @@ sequence = elements+:element {[','] elements:element} ;
 
 element = element:(named | term) ;
 
-named = name:word force_list:['+'] ':' value:element ;
+named = name:qualified force_list:['+'] ':' value:element ;
 
 term = term:(void | subexp | repeat | optional | special | kif | knot | atom) ;
 
@@ -38,6 +38,8 @@ void = void:'()' ;
 cut = cut:'>>' ;
 
 token = ('"' token:?/([^"]|\\")*/? '"' | "'" token:?/([^']|\\')*/? "'") ;
+
+qualified = qualified:?/[-_A-Za-z0-9]+(?:\.[-_A-Za-z0-9]+)*/? ;
 
 word = word:?/[-_A-Za-z0-9]+/? ;
 

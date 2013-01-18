@@ -41,6 +41,9 @@ class GrakoParserBase(Parser):
     def _word_(self):
         self._pattern(r'[A-Za-z0-9_]+', 'word')
 
+    def _qualified_(self):
+        self._pattern(r'[A-Za-z0-9_]+(?:\.[-_A-Za-z0-9]+)*', 'qualified')
+
     def _call_(self):
         self._call('word', 'call')
 
@@ -138,13 +141,12 @@ class GrakoParserBase(Parser):
         raise FailedParse(self._buffer, 'term')
 
     def _named_(self):
-        name = self._call('word')
+        name = self._call('qualified')
         if not self._try('+:', 'force_list'):
             self._token(':')
         self.ast.add('name', name)
         try:
             self._call('element', 'value')
-            return
         except FailedParse as e:
             raise FailedCut(self._buffer, e)
 
@@ -355,6 +357,9 @@ class GrakoGrammarGenerator(AbstractGrakoParser):
 
     def word(self, ast):
         return ast.word
+
+    def qualified(self, ast):
+        return ast.qualified
 
     def call(self, ast):
         return RuleRefGrammar(ast.call)
