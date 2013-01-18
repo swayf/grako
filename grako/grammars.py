@@ -447,8 +447,6 @@ class CutGrammar(_Grammar):
 
 class NamedGrammar(_DecoratorGrammar):
     def __init__(self, name, exp, force_list):
-        if iskeyword(name):
-            name += '_'
         super(NamedGrammar, self).__init__(exp)
         assert isinstance(exp, _Grammar), str(exp)
         self.name = name
@@ -465,8 +463,12 @@ class NamedGrammar(_DecoratorGrammar):
         return '%s:%s' % (self.name, str(self.exp))
 
     def render_fields(self, fields):
+        name = self.name
+        if iskeyword(name):
+            name += '_'
         fields.update(
                       n=self.counter(),
+                      name=name,
                       exp=render(self.exp),
                       force_list=', force_list=True' if self.force_list else ''
                       )
@@ -490,8 +492,6 @@ class SpecialGrammar(_Grammar):
 
 class RuleRefGrammar(_Grammar):
     def __init__(self, name):
-        if iskeyword(name):
-            name += '_'
         super(RuleRefGrammar, self).__init__()
         self.name = name
 
@@ -517,13 +517,17 @@ class RuleRefGrammar(_Grammar):
     def __str__(self):
         return self.name
 
+    def render_fields(self, fields):
+        name = self.name
+        if iskeyword(name):
+            name += '_'
+        fields.update(name=name)
+
     template = "_e = self._call('{name}')"
 
 
 class RuleGrammar(NamedGrammar):
     def __init__(self, name, exp, ast_name=None):
-        if iskeyword(name):
-            name += '_'
         super(RuleGrammar, self).__init__(name, exp, False)
         self.ast_name = ast_name
 
@@ -563,11 +567,15 @@ class RuleGrammar(NamedGrammar):
         return '%s = %s ;' % (self.name, str(self.exp).strip())
 
     def render_fields(self, fields):
+        name = self.name
+        if iskeyword(name):
+            name += '_'
         if self.ast_name:
             ast_name_clause = 'self.ast = AST(%s=self.ast)\n' % self.ast_name
         else:
             ast_name_clause = ''
         fields.update(
+                      name=name,
                       exp=indent(render(self.exp)),
                       ast_name_clause=ast_name_clause
                       )
