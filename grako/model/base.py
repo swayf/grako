@@ -6,7 +6,7 @@ from ..rendering import Renderer
 EOLCOL = 50
 
 def render(node, **fields):
-    """ Convert the given node to it's Java representation.
+    """ Render a node using it's template or defaults
     """
     if node is None:
         return ''
