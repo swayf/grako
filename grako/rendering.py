@@ -30,11 +30,17 @@ class Renderer(object):
     def render_fields(self, fields):
         pass
 
-    def render(self, template=None, **fields):
-        fields.update({k:v for k, v in vars(self).items() if not k.startswith('_')})
-        self.render_fields(fields)
+    def render(self, template=None, **kwargs):
+        fields = ({k:v for k, v in vars(self).items() if not k.startswith('_')})
+
+        override = self.render_fields(fields)
         if template is None:
-            template = self.template
+            if override is not None:
+                template = override
+            else:
+                template = self.template
+
+        fields.update(kwargs)
         fields = {k:render(v) for k, v in fields.items()}
         try:
             return trim(template).format(**fields)
