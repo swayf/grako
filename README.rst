@@ -112,8 +112,8 @@ If a *name* collides with a Python_ keyword, an underscore (``_``) will be appen
 
 If you define more than one rule with the same name::
     
-    ``name = expre1 ;``
-    ``name = expre2 ;``
+    name = expre1 ;
+    name = expre2 ;
 
 The result will be equivalent to applying the choice operator to the right-hand-side expressions::
 
