@@ -115,9 +115,10 @@ If you define more than one rule with the same name::
     name = expre1 ;
     name = expre2 ;
 
-The result will be equivalent to applying the choice operator to the right-hand-side expressions::
+The result will be equivalent to applying the choice operator to the 
+right-hand-side expressions::
 
-``name = expre1  | expre2 ;``
+    name = expre1  | expre2 ;
 
 The expressions, in reverse order of operator precedence, can be:
 
