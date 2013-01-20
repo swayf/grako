@@ -97,9 +97,11 @@ The generated parsers have named arguments to specify whitespace characters, the
 The EBNF Grammar Syntax
 =======================
 
-**Grako** uses a variant of the standard EBNF_ syntax. A grammar consists of a sequence of one or more rules of the form:
+**Grako** uses a variant of the standard EBNF_ syntax. A grammar consists of a sequence of one or 
+more rules of the form::
 
     ``name = expre ;``
+
 or::
 
     ``name = expre .``
