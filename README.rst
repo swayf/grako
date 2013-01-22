@@ -74,7 +74,7 @@ The *-h* and *--help* parameters provide full usage information::
                                 basename of the grammar file's name
           -o outfile, --outfile outfile
                                 specify where the output should go (default is stdout)
-          -v, --verbose         produce verbose output
+          -t, --trace           produce verbose parsing output
 
         $
 

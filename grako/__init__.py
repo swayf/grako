@@ -2,19 +2,6 @@
 """
 Parse and translate an EBNF grammar into a Python parser for
 the described language.
-
-Usage: grako <grammar.ebnf> [<name>] [options]
-       grako (-h|--help)
-
-Arguments:
-    <grammar.ebnf>  The EBNF grammar to generate a parser for.
-    <name>          Optional name. It defaults to the base name
-                    of the grammar file.
-
-Options:
-    -o <filename>   write output to <filename>
-    -v              produce verbose output
-    -h, --help      show this help
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
@@ -45,8 +32,8 @@ argparser.add_argument('-o', '--outfile',
                        metavar='outfile',
                        help='specify where the output should go (default is stdout)'
                        )
-argparser.add_argument('-v', '--verbose',
-                       help='produce verbose output',
+argparser.add_argument('-t', '--trace',
+                       help='produce verbose parsing output',
                        action='store_true'
                        )
 
@@ -65,7 +52,7 @@ def main():
     if outfile and os.path.isfile(outfile):
         os.unlink(outfile)
     text = open(filename, 'r').read()
-    parser = GrakoGrammarGenerator(name, text, verbose=args.verbose)
+    parser = GrakoGrammarGenerator(name, text, trace=args.trace)
     grammar = parser.parse()
     text = grammar.render()
     if outfile:

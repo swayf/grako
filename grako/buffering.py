@@ -13,12 +13,12 @@ PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
 
 class Buffer(object):
-    def __init__(self, text, filename='unknown', whitespace=None, verbose=False):
+    def __init__(self, text, filename='unknown', whitespace=None, trace=False):
         self.original_text = text
         self.text = text
         self.filename = filename
         self.whitespace = set(whitespace if whitespace else '\t \r\n')
-        self._verbose = verbose
+        self._verbose = trace
         self._fileinfo = self.get_fileinfo(text, filename)
         self._linecache = []
         self._preprocess()

@@ -10,11 +10,11 @@ COMMENTS_RE = r'\(\*(?:.|\n)*?\*\)'
 
 class GrakoParserBase(Parser):
 
-    def __init__(self, grammar_name, text, verbose=False):
+    def __init__(self, grammar_name, text, trace=False):
         super(GrakoParserBase, self).__init__(text,
                 comments_re=COMMENTS_RE,
                 ignorecase=True,
-                verbose=verbose)
+                trace=trace)
         self.grammar_name = grammar_name
 
     def parse(self, rule='grammar'):
@@ -348,8 +348,8 @@ class GrakoParser(AbstractGrakoParser):
 
 class GrakoGrammarGenerator(AbstractGrakoParser):
 
-    def __init__(self, grammar_name, text, verbose=False):
-        super(GrakoGrammarGenerator, self).__init__(grammar_name, text, verbose=verbose)
+    def __init__(self, grammar_name, text, trace=False):
+        super(GrakoGrammarGenerator, self).__init__(grammar_name, text, trace=trace)
         self.rules = OrderedDict()
 
     def token(self, ast):

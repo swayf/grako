@@ -73,7 +73,7 @@ def main():
     print('-' * 20, 'phase 7 - import generated code')
     from gencode6 import GrakoParserBase as GenParser  # @UnresolvedImport
     print('-' * 20, 'phase 8 - compile using generated code')
-    parser = GenParser(text, verbose=False)
+    parser = GenParser(text, trace=False)
     result = parser.parse('grammar')
     assert result == parser.ast['grammar']
     open('tmp/8.ast', 'w').write(parser.ast.json())

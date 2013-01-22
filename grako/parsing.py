@@ -23,14 +23,14 @@ class Parser(object):
                         comments_re=None,
                         ignorecase=False,
                         simple=False,
-                        verbose=False,
+                        trace=False,
                         bufferClass=buffering.Buffer):
         self.text = text
         self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
         self.comments_re = comments_re
         self.ignorecase = ignorecase
         self._simple = simple
-        self._verbose = verbose
+        self._verbose = trace
         self._bufferClass = bufferClass
         self._buffer = self._bufferClass(self.text, self.whitespace)
         self._ast_stack = []
