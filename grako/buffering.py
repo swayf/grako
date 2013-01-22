@@ -17,7 +17,7 @@ class Buffer(object):
         self.original_text = text
         self.text = text
         self.filename = filename
-        self.whitespace = set(whitespace if whitespace else '\t \r\n')
+        self.whitespace = set(whitespace if whitespace else ' \t\n\r\f\v')
         self._verbose = trace
         self._fileinfo = self.get_fileinfo(text, filename)
         self._linecache = []
