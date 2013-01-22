@@ -259,7 +259,8 @@ The abstract parser will contain a rule of of the form::
 Warning
 =======
 
-The ``grako.model`` package is still under development. It's not usable in it's current state.
+The ``grako.model`` package is still under development. It's not usable in 
+it's current state.
 
 License
 =======
@@ -274,7 +275,18 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 
 .. _`GNU General Public License (GPL) version 3`:  http://www.gnu.org/licenses/gpl.html
 
-**If your project requires different licensing** please contact info@resqsoft.com.
+**If your project requires different licensing** please contact 
+`info@resqsoft.com`_.
+
+.. _`info@resqsoft.com`: mailto:info@resqsoft.com
+
+Contact
+=======
+
+For queries and comments about **Grako**, please use the `Grako Forum`_ 
+at *Google Groups*.
+
+.. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 
 Credits
 =======
