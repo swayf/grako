@@ -135,9 +135,9 @@ class Parser(object):
         try:
             self.trace_event('ENTER ')
             result, newpos = self._invoke_rule(name, pos)
-#            self.trace_event('SUCCESS')
-            self._add_ast_node(node_name, result, force_list)
             self._goto(newpos)
+            self.trace_event('SUCCESS')
+            self._add_ast_node(node_name, result, force_list)
             return result
         except FailedParse:
             self.trace_event('FAILED')
@@ -301,8 +301,7 @@ class Parser(object):
         except FailedParse as e:
             if self._cut():
                 self.error(e, FailedCut)
-            else:
-                raise
+            raise e
         finally:
             self._pop_cut()
 
