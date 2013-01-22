@@ -86,6 +86,16 @@ class Buffer(object):
             p += 1
         self._pos = p
 
+    def skip_to_eol(self):
+        p = self._pos
+        len = self._len
+        while p < len and self.text[p] != '\n':
+            p += 1
+        self._pos = p
+
+    def is_space(self):
+        return self.current() in self.whitespace
+
     def match(self, token, ignorecase=False):
         if self.atend():
             if token is None:
