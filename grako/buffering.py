@@ -13,12 +13,13 @@ PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
 
 class Buffer(object):
-    def __init__(self, text, filename='unknown', whitespace=None, trace=False):
+    def __init__(self, text, filename='unknown', whitespace=None, trace=False, nameguard=True):
         self.original_text = text
         self.text = text
         self.filename = filename
         self.whitespace = set(whitespace if whitespace else ' \t\n\r\f\v')
-        self._verbose = trace
+        self.trace = trace
+        self.nameguard = nameguard
         self._fileinfo = self.get_fileinfo(text, filename)
         self._linecache = []
         self._preprocess()
@@ -97,6 +98,9 @@ class Buffer(object):
         return self.current() in self.whitespace
 
     def match(self, token, ignorecase=False):
+        def check_nameguard():
+            return not (self.nameguard and token.isalnum() and self.current().isalnum())
+
         if self.atend():
             if token is None:
                 return True
@@ -107,7 +111,7 @@ class Buffer(object):
             result = all(c == self.next().lower() for c in token.lower())
         else:
             result = all(c == self.next() for c in token)
-        if result:
+        if result and check_nameguard():
             return token
         else:
             self.goto(p)

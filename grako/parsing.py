@@ -24,20 +24,23 @@ class Parser(object):
                         ignorecase=False,
                         simple=False,
                         trace=False,
+                        nameguard=True,
                         bufferClass=buffering.Buffer):
         self.text = text
         self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
         self.comments_re = comments_re
         self.ignorecase = ignorecase
         self._simple = simple
-        self._verbose = trace
+        self._trace = trace
         self._bufferClass = bufferClass
         self._buffer = self._bufferClass(self.text, self.whitespace)
+        self._buffer.nameguard = nameguard
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
-        if not self._verbose:
+        if not self._trace:
+            self.trace = lambda x: ()
             self.trace_event = lambda x: ()
 
     def parse(self, rule_name):
@@ -217,15 +220,14 @@ class Parser(object):
         raise etype(self._buffer, item)
 
     def trace(self, msg, *params):
-        if self._verbose:
+        if self._trace:
             print(msg % params, file=sys.stderr)
 
     def trace_event(self, event):
-        if self._verbose:
-            self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
+        self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
 
     def trace_match(self, token):
-        if False and self._verbose:
+        if False:
             self.trace('matched <%s>\n\t%s', token, self._buffer.lookahead())
 
     @contextmanager

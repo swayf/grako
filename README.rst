@@ -148,7 +148,13 @@ The expressions, in reverse order of operator precedence, can be:
         Do not consume any input whichever the outcome.
 
     ``'text'`` or ``"text"``
-        Match the text within the quotation marks.
+        Match the token text within the quotation marks. 
+        
+        **Note that** if *text* is alphanumeric, then Grako will check that the character 
+        following the token is not alphanumerc. This is done to prevent tokens like *IN* matching
+        when the text ahead is *INITIALIZE*. This feature can be turned off by passing 
+        ``nameguard=False`` to the `Parser` or the `Buffer`, or by using a pattern expression
+        (see below) instead of a token expression.
 
     ``?/<regexp>/?``
         Match the Python_ regular expression ``<regexp>`` at the current text 
