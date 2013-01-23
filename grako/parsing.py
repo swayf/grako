@@ -26,13 +26,14 @@ class Parser(object):
                         trace=False,
                         nameguard=True,
                         bufferClass=buffering.Buffer):
-        self.text = text
-        self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
+        if isinstance(text, buffering.Buffer):
+            self._buffer = text
+        else:
+            self._buffer = buffering.Buffer(text, whitespace, ignorecase=ignorecase)
         self.comments_re = comments_re
         self._simple = simple
         self._trace = trace
         self._bufferClass = bufferClass
-        self._buffer = self._bufferClass(self.text, self.whitespace, ignorecase=ignorecase)
         self._buffer.nameguard = nameguard
         self._ast_stack = []
         self._concrete_stack = [None]
