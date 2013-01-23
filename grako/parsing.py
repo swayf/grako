@@ -172,18 +172,16 @@ class Parser(object):
 
     def _token(self, token, node_name=None, force_list=False):
         self._next_token()
-#        self.trace_event('match')
         if self._buffer.match(token, self.ignorecase) is None:
-#            self.trace_event('failed <%s>' % token)
             raise FailedToken(self._buffer, token)
-        self.trace_match(token)
+        self.trace_match(token, node_name)
         self._add_ast_node(node_name, token, force_list)
         return token
 
     def _try(self, token, node_name=None, force_list=False):
         self._next_token()
         if self._buffer.match(token, self.ignorecase) is not None:
-            self.trace_match(token)
+            self.trace_match(token, node_name)
             self._add_ast_node(node_name, token, force_list)
             return True
 
@@ -192,7 +190,7 @@ class Parser(object):
         token = self._buffer.matchre(pattern, self.ignorecase)
         if token is None:
             raise FailedPattern(self._buffer, pattern)
-        self.trace_match(token)
+        self.trace_match(token, pattern)
         self._add_ast_node(node_name, token, force_list)
         return token
 
@@ -226,9 +224,9 @@ class Parser(object):
     def trace_event(self, event):
         self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
 
-    def trace_match(self, token):
-        if False:
-            self.trace('matched <%s>\n\t%s', token, self._buffer.lookahead())
+    def trace_match(self, token, name=''):
+        if False and self._trace:
+            self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 
     @contextmanager
     def _option(self):
