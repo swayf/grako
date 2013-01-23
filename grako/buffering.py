@@ -87,12 +87,19 @@ class Buffer(object):
             p += 1
         self._pos = p
 
-    def skip_to_eol(self):
+    def skip_to(self, c):
         p = self._pos
         len = self._len
-        while p < len and self.text[p] != '\n':
+        while p < len and self.text[p] != c:
             p += 1
         self._pos = p
+
+    def skip_past(self, c):
+        self.skip_to(c)
+        self.next()
+
+    def skip_to_eol(self):
+        self.skip_to('\n')
 
     def is_space(self):
         return self.current() in self.whitespace
