@@ -225,7 +225,7 @@ class Parser(object):
         self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
 
     def trace_match(self, token, name=''):
-        if False and self._trace:
+        if self._trace:
             self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 
     @contextmanager
@@ -263,6 +263,8 @@ class Parser(object):
                 value = f()
                 if value is not None:
                     yield value
+            except FailedCut as e:
+                raise e.nested
             except FailedParse:
                 self._goto(p)
                 raise StopIteration()
