@@ -29,11 +29,10 @@ class Parser(object):
         self.text = text
         self.whitespace = set(whitespace if whitespace else '\t\v\n\r ')
         self.comments_re = comments_re
-        self.ignorecase = ignorecase
         self._simple = simple
         self._trace = trace
         self._bufferClass = bufferClass
-        self._buffer = self._bufferClass(self.text, self.whitespace)
+        self._buffer = self._bufferClass(self.text, self.whitespace, ignorecase=ignorecase)
         self._buffer.nameguard = nameguard
         self._ast_stack = []
         self._concrete_stack = [None]
@@ -172,7 +171,7 @@ class Parser(object):
 
     def _token(self, token, node_name=None, force_list=False):
         self._next_token()
-        if self._buffer.match(token, self.ignorecase) is None:
+        if self._buffer.match(token) is None:
             raise FailedToken(self._buffer, token)
         self.trace_match(token, node_name)
         self._add_ast_node(node_name, token, force_list)
@@ -180,14 +179,14 @@ class Parser(object):
 
     def _try(self, token, node_name=None, force_list=False):
         self._next_token()
-        if self._buffer.match(token, self.ignorecase) is not None:
+        if self._buffer.match(token) is not None:
             self.trace_match(token, node_name)
             self._add_ast_node(node_name, token, force_list)
             return True
 
 
     def _pattern(self, pattern, node_name=None, force_list=False):
-        token = self._buffer.matchre(pattern, self.ignorecase)
+        token = self._buffer.matchre(pattern)
         if token is None:
             raise FailedPattern(self._buffer, pattern)
         self.trace_match(token, pattern)
@@ -195,7 +194,7 @@ class Parser(object):
         return token
 
     def _try_pattern(self, pattern, node_name=None, force_list=False):
-        token = self._buffer.matchre(pattern, self.ignorecase)
+        token = self._buffer.matchre(pattern)
         if token is None:
             return None
         self.trace_match(token)

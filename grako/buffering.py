@@ -13,11 +13,17 @@ PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
 
 class Buffer(object):
-    def __init__(self, text, filename='unknown', whitespace=None, trace=False, nameguard=True):
+    def __init__(self, text,
+                 filename='unknown',
+                 whitespace=None,
+                 ignorecase=False,
+                 trace=False,
+                 nameguard=True):
         self.original_text = text
         self.text = text
         self.filename = filename
         self.whitespace = set(whitespace if whitespace else ' \t\n\r\f\v')
+        self.ignorecase = ignorecase
         self.trace = trace
         self.nameguard = nameguard
         self._fileinfo = self.get_fileinfo(text, filename)
@@ -89,8 +95,8 @@ class Buffer(object):
 
     def skip_to(self, c):
         p = self._pos
-        len = self._len
-        while p < len and self.text[p] != c:
+        le = self._len
+        while p < le and self.text[p] != c:
             p += 1
         self._pos = p
 
@@ -104,9 +110,8 @@ class Buffer(object):
     def is_space(self):
         return self.current() in self.whitespace
 
-    def match(self, token, ignorecase=False):
-        def check_nameguard():
-            return not (self.nameguard and token.isalnum() and self.current().isalnum())
+    def match(self, token, ignorecase=None):
+        ignorecase = ignorecase if ignorecase is not None else self.ignorecase
 
         if self.atend():
             if token is None:
@@ -115,15 +120,19 @@ class Buffer(object):
 
         p = self.pos
         if ignorecase:
-            result = all(c == self.next().lower() for c in token.lower())
+            result = self.text[p:p + len(token)].lower() == token.lower()
         else:
-            result = all(c == self.next() for c in token)
-        if result and check_nameguard():
-            return token
-        else:
-            self.goto(p)
+            result = self.text[p:p + len(token)] == token
 
-    def matchre(self, pattern, ignorecase=False):
+        if result:
+            self.move(len(token))
+            check_nameguard = not (self.nameguard and token.isalnum() and self.current().isalnum())
+            if check_nameguard:
+                return token
+        self.goto(p)
+
+    def matchre(self, pattern, ignorecase=None):
+        ignorecase = ignorecase if ignorecase is not None else self.ignorecase
         if isinstance(pattern, RETYPE):
             re = pattern
         else:
