@@ -229,8 +229,9 @@ class Parser(object):
     def trace_event(self, event):
         self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
 
-    def trace_match(self, token, name=''):
+    def trace_match(self, token, name=None):
         if self._trace:
+            name = name if name else ''
             self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 
     def _eof(self):
