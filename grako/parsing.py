@@ -179,11 +179,14 @@ class Parser(object):
         return token
 
     def _try(self, token, node_name=None, force_list=False):
+        p = self._pos
         self._next_token()
-        if self._buffer.match(token) is not None:
-            self.trace_match(token, node_name)
-            self._add_ast_node(node_name, token, force_list)
-            return True
+        if self._buffer.match(token) is None:
+            self._goto(p)
+            return None
+        self.trace_match(token, node_name)
+        self._add_ast_node(node_name, token, force_list)
+        return token
 
 
     def _pattern(self, pattern, node_name=None, force_list=False):
@@ -195,8 +198,10 @@ class Parser(object):
         return token
 
     def _try_pattern(self, pattern, node_name=None, force_list=False):
+        p = self._pos
         token = self._buffer.matchre(pattern)
         if token is None:
+            self._goto(p)
             return None
         self.trace_match(token)
         self._add_ast_node(node_name, token, force_list)
@@ -311,6 +316,8 @@ class Parser(object):
                 value = f()
                 if value is not None:
                     yield value
+            except FailedCut:
+                raise
             except FailedParse:
                 self._goto(p)
                 raise StopIteration()
