@@ -76,3 +76,11 @@ def indent(text, indent=1):
         text = '\n'.join(lines)
     return text
 
+# this a decorator for decorators
+def decorator():
+    def _decorator(func):
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            return func(*args, **kwargs)
+        return wrapped
+    return _decorator
