@@ -229,8 +229,9 @@ class Parser(object):
     def trace_event(self, event):
         self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
 
-    def trace_match(self, token, name=''):
+    def trace_match(self, token, name=None):
         if self._trace:
+            name = name if name else ''
             self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 
     def _eof(self):
@@ -312,15 +313,20 @@ class Parser(object):
     def _repeat_iterator(self, f):
         while 1:
             p = self._pos
+            self._push_cut()
             try:
                 value = f()
                 if value is not None:
                     yield value
             except FailedCut:
                 raise
-            except FailedParse:
+            except FailedParse as e:
+                if self._is_cut_set():
+                    self.error(e, FailedCut)
                 self._goto(p)
                 raise StopIteration()
+            finally:
+                self._pop_cut()
 
     def _repeat(self, f, plus=False):
         if plus:
