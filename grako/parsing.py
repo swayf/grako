@@ -252,16 +252,27 @@ class Parser(object):
         return self._cut_stack.pop()
 
     @contextmanager
-    def _sequence(self):
+    def _option(self):
+        p = self._pos
         self._push_cut()
         try:
-            yield
+            self._push_ast()
+            try:
+                yield
+                ast = self.ast
+            finally:
+                self._pop_ast()
+            self.ast.update(ast)
+        except FailedCut:
+            raise
         except FailedParse as e:
             if self._is_cut_set():
                 self.error(e, FailedCut)
-            raise e
+            self._goto(p)
         finally:
             self._pop_cut()
+
+    _optional = _option
 
     @contextmanager
     def _group(self):
@@ -292,24 +303,6 @@ class Parser(object):
         else:
             self._goto(p)
             self.error('', etype=FailedLookahead)
-
-    @contextmanager
-    def _option(self):
-        p = self._pos
-        try:
-            self._push_ast()
-            try:
-                yield
-                ast = self.ast
-            finally:
-                self._pop_ast()
-            self.ast.update(ast)
-        except FailedCut:
-            raise
-        except FailedParse:
-            self._goto(p)
-
-    _optional = _option
 
     def _repeat_iterator(self, f):
         while 1:

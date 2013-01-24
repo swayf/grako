@@ -261,10 +261,9 @@ class SequenceGrammar(_Grammar):
         return ' '.join(str(s).strip() for s in self.sequence)
 
     def render_fields(self, fields):
-        fields.update(seq=indent('\n'.join(render(s) for s in self.sequence)))
+        fields.update(seq='\n'.join(render(s) for s in self.sequence))
 
     template = '''
-                with self._sequence():
                 {seq}\
                 '''
 
