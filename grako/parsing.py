@@ -251,8 +251,6 @@ class Parser(object):
         p = self._pos
         try:
             yield
-        except FailedCut:
-            raise
         except FailedParse:
             self._goto(p)
             raise
@@ -264,8 +262,6 @@ class Parser(object):
                 value = f()
                 if value is not None:
                     yield value
-            except FailedCut:
-                raise
             except FailedParse:
                 self._goto(p)
                 raise StopIteration()
@@ -287,6 +283,9 @@ class Parser(object):
         if not self._buffer.atend():
             raise FailedParse(self._buffer, 'expecting end of file')
 
+    def _is_cut_set(self):
+        return self._cut_stack[-1]
+
     def _cut(self):
         self._cut_stack[-1] = True
 
@@ -302,7 +301,7 @@ class Parser(object):
         try:
             yield
         except FailedParse as e:
-            if self._cut():
+            if self._is_cut_set():
                 self.error(e, FailedCut)
             raise e
         finally:
