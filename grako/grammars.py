@@ -282,8 +282,8 @@ class ChoiceGrammar(_Grammar):
             ctx.goto(pos)
             try:
                 return o.parse(ctx)
-            except FailedCut as e:
-                raise e.nested
+            except FailedCut:
+                raise
             except FailedParse as e:
                 items.append(e.item)
         raise FailedParse(ctx.buf, 'one of {%s}' % ','.join(items))

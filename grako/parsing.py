@@ -239,9 +239,8 @@ class Parser(object):
             finally:
                 self._pop_ast()
             self.ast.update(ast)
-        except FailedCut as e:
-            self._goto(p)
-            raise e.nested
+        except FailedCut:
+            raise
         except FailedParse:
             self._goto(p)
 
@@ -252,6 +251,8 @@ class Parser(object):
         p = self._pos
         try:
             yield
+        except FailedCut:
+            raise
         except FailedParse:
             self._goto(p)
             raise
@@ -263,8 +264,8 @@ class Parser(object):
                 value = f()
                 if value is not None:
                     yield value
-            except FailedCut as e:
-                raise e.nested
+            except FailedCut:
+                raise
             except FailedParse:
                 self._goto(p)
                 raise StopIteration()
