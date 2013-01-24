@@ -312,15 +312,20 @@ class Parser(object):
     def _repeat_iterator(self, f):
         while 1:
             p = self._pos
+            self._push_cut()
             try:
                 value = f()
                 if value is not None:
                     yield value
             except FailedCut:
                 raise
-            except FailedParse:
+            except FailedParse as e:
+                if self._is_cut_set():
+                    self.error(e, FailedCut)
                 self._goto(p)
                 raise StopIteration()
+            finally:
+                self._pop_cut()
 
     def _repeat(self, f, plus=False):
         if plus:
