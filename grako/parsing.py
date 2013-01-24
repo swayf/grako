@@ -228,50 +228,6 @@ class Parser(object):
         if self._trace:
             self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 
-    @contextmanager
-    def _option(self):
-        p = self._pos
-        try:
-            self._push_ast()
-            try:
-                yield
-                ast = self.ast
-            finally:
-                self._pop_ast()
-            self.ast.update(ast)
-        except FailedCut:
-            raise
-        except FailedParse:
-            self._goto(p)
-
-    _optional = _option
-
-    @contextmanager
-    def _repeat_context(self):
-        p = self._pos
-        try:
-            yield
-        except FailedParse:
-            self._goto(p)
-            raise
-
-    def _repeat_iterator(self, f):
-        while 1:
-            p = self._pos
-            try:
-                value = f()
-                if value is not None:
-                    yield value
-            except FailedParse:
-                self._goto(p)
-                raise StopIteration()
-
-    def _repeat(self, f, plus=False):
-        if plus:
-            return [f()] + list(self._repeat_iterator(f))
-        else:
-            return list(self._repeat_iterator(f))
-
     def _eof(self):
         return self._buffer.atend()
 
@@ -336,3 +292,39 @@ class Parser(object):
         else:
             self._goto(p)
             self.error('', etype=FailedLookahead)
+
+    @contextmanager
+    def _option(self):
+        p = self._pos
+        try:
+            self._push_ast()
+            try:
+                yield
+                ast = self.ast
+            finally:
+                self._pop_ast()
+            self.ast.update(ast)
+        except FailedCut:
+            raise
+        except FailedParse:
+            self._goto(p)
+
+    _optional = _option
+
+    def _repeat_iterator(self, f):
+        while 1:
+            p = self._pos
+            try:
+                value = f()
+                if value is not None:
+                    yield value
+            except FailedParse:
+                self._goto(p)
+                raise StopIteration()
+
+    def _repeat(self, f, plus=False):
+        if plus:
+            return [f()] + list(self._repeat_iterator(f))
+        else:
+            return list(self._repeat_iterator(f))
+
