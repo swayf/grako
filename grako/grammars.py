@@ -4,6 +4,7 @@ import re
 import logging
 from copy import deepcopy
 from keyword import iskeyword
+import time
 from .util import memoize, simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
@@ -640,7 +641,8 @@ class Grammar(Renderer):
         abstract_rules = [abstract_template.format(name=rule.name) for rule in self.rules]
         abstract_rules = indent('\n'.join(abstract_rules))
         fields.update(rules=indent(render(self.rules)),
-                      abstract_rules=abstract_rules
+                      abstract_rules=abstract_rules,
+                      version=time.strftime('%y.%j.%H.%M.%S', time.gmtime())
                       )
 
 
@@ -661,6 +663,8 @@ class Grammar(Renderer):
                 from __future__ import print_function, division, absolute_import, unicode_literals
                 from grako.parsing import * # @UnusedWildImport
                 from grako.exceptions import * # @UnusedWildImport
+
+                __version__ = '{version}'
 
                 class {name}ParserRoot(Parser):
                 {rules}
