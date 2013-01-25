@@ -329,7 +329,6 @@ class ChoiceGrammar(_Grammar):
 
     template = '''\
                 def choice{n}():
-                    _e = None
                 {options}
                     self.error({error})
                 _e = choice{n}() \
