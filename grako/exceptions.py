@@ -42,6 +42,7 @@ class FailedToken(FailedParse):
 class FailedPattern(FailedParse):
     def __init__(self, buf, pattern):
         super(FailedPattern, self).__init__(buf, pattern)
+        self.pattern = pattern
 
     @property
     def message(self):
