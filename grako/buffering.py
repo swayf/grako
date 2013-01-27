@@ -7,7 +7,7 @@ from collections import namedtuple
 
 __all__ = ['Buffer']
 
-RETYPE = type(regexp.compile('.'))
+RETYPutfE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
@@ -113,10 +113,8 @@ class Buffer(object):
     def match(self, token, ignorecase=None):
         ignorecase = ignorecase if ignorecase is not None else self.ignorecase
 
-        if self.atend():
-            if token is None:
-                return True
-            return None
+        if token is None:
+            return self.atend()
 
         p = self.pos
         if ignorecase:
