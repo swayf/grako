@@ -5,7 +5,10 @@ class GrammarError(Exception):
     pass
 
 
-class MissingSemanticFor(Exception):
+class SemanticError(Exception):
+    pass
+
+class MissingSemanticFor(SemanticError):
     pass
 
 
