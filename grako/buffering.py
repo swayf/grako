@@ -7,7 +7,7 @@ from collections import namedtuple
 
 __all__ = ['Buffer']
 
-RETYPutfE = type(regexp.compile('.'))
+RETYPE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
