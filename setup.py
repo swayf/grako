@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from distutils.core import setup
+
 setup(
     name='Grako',
     version='1.0rc1',
