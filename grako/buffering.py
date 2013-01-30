@@ -28,9 +28,10 @@ class Buffer(object):
         self.nameguard = nameguard
         self._fileinfo = self.get_fileinfo(text, filename)
         self._linecache = []
+        self._pos = 0
+        self._len = 0
         self._preprocess()
         self._build_line_cache()
-        self._pos = 0
         self._len = len(self.text)
 
     def _preprocess(self):
