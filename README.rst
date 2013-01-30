@@ -1,7 +1,7 @@
+.. -*- restructuredtext -*-
+
 Grako
 =====
-
-.. code :: python
 
 **Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs a memoizing_ PEG_ parser in Python_.
 
@@ -28,7 +28,7 @@ I wrote **Grako** to address the shortcommings I have encountered over the years
 .. _Ruby: http://www.ruby-lang.org/
 
 The Generated Parsers
-=====================
+---------------------
 
 A **Grako** generated parser consists of the following classes:
 
@@ -51,7 +51,7 @@ AST entries are single values if only one item was added to a name, or lists if 
 
 
 Using the Tool
-==============
+--------------
 
 **Grako** is run from the commandline like this::
 
@@ -80,7 +80,7 @@ The *-h* and *--help* parameters provide full usage information::
 
 
 Using The Generated Parser
-==========================
+--------------------------
 
 To use the generated parser, subclass the base or the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
 
@@ -95,7 +95,7 @@ To use the generated parser, subclass the base or the abstract parser, create an
 The generated parsers have named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
 
 The EBNF Grammar Syntax
-=======================
+-----------------------
 
 **Grako** uses a variant of the standard EBNF_ syntax. A grammar consists of a sequence of one or 
 more rules of the form::
@@ -204,7 +204,7 @@ It is also possible to add an AST name to a rule::
 That will make the default AST returned to be a dict with a single item with key ``ast_name`` and the value recovered from the right hand side of the rule.
 
 Whitespace
-==========
+----------
 
 By default, **Grako** generated parsers skip the usual whitespace charactes (``\t`` ``\v`` ``\n`` ``\r`` and the space character), but you can change that behaviour by passing a ``whitespace`` parameter to your parser::
 
@@ -219,7 +219,7 @@ then you will have to handle whitespace in your grammar as it's often done in PE
 
 
 Case Sensitivity
-================
+----------------
 
 If your language is case insensitive, you can tell your parser so using the ``ignorecase`` parameter::
 
@@ -229,7 +229,7 @@ The change will affect both token and pattern matching.
 
 
 Comments
-========
+--------
 
 Parsers will skip over comments specified as a regular expression using the ``comments_re`` paramenter::
     
@@ -237,7 +237,7 @@ Parsers will skip over comments specified as a regular expression using the ``co
 
 
 Semantic Actions
-================
+----------------
 
 There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars, and provide for poor modularization from the parser execution perspective.
 
@@ -257,13 +257,13 @@ The abstract parser will contain a rule of of the form::
         return ast
 
 Warning
-=======
+-------
 
 The ``grako.model`` package is still under development. It's not usable in 
 it's current state.
 
 License
-=======
+-------
 
 **Grako** is copyright 2012-2013 by `ResQSoft Inc.`_ and  `Juancarlo Añez`_
 
@@ -281,7 +281,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
 
 Contact
-=======
+-------
 
 For queries and comments about **Grako**, please use the `Grako Forum`_ 
 at *Google Groups*.
@@ -289,7 +289,7 @@ at *Google Groups*.
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 
 Credits
-=======
+-------
 
 The following must be mentioned as contributors of thoughts, ideas, code, *and funding* to the **Grako** project:
 
@@ -320,6 +320,3 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _UCAB: http://www.ucab.edu.ve/
 .. _USB: http://www.usb.ve/
 .. _ANTLR: http://www.antlr.org/ 
-
--------------------------
-

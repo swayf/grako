@@ -11,8 +11,7 @@ setup(
     url='http://bitbucket.org/apalala/grako',
     license='LICENSE.txt',
     description='EBNF to PEG parser generator.',
-    long_description=open('README.txt').read(),
-    install_requires=[],
+    long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
