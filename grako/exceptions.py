@@ -4,6 +4,8 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 class GrammarError(Exception):
     pass
 
+class ParseError(Exception):
+    pass
 
 class SemanticError(Exception):
     pass
@@ -12,7 +14,7 @@ class MissingSemanticFor(SemanticError):
     pass
 
 
-class FailedParseBase(Exception):
+class FailedParseBase(ParseError):
     def __init__(self, buf, item):
         self.buf = buf
         self.pos = buf.pos
