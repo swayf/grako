@@ -156,8 +156,8 @@ The expressions, in reverse order of operator precedence, can be:
         ``nameguard=False`` to the `Parser` or the `Buffer`, or by using a pattern expression
         (see below) instead of a token expression.
 
-    ``?/<regexp>/?``
-        Match the Python_ regular expression ``<regexp>`` at the current text 
+    ``?/regexp/?``
+        Match the Python_ regular expression ``regexp`` at the current text 
         position. Unlike other expressions, this one does not advance over whitespace or 
         comments. For that, place the ``regexp`` as the only term in its own rule.
 
