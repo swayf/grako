@@ -2,3 +2,5 @@
 \.(pyc|pyo|swp|orig)$
 ^\.
 ^tmp/
+^MANIFEST$
+^dist$
