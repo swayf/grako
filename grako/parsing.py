@@ -3,7 +3,6 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 import re
 from contextlib import contextmanager
-from .util import memoize
 from . import buffering
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
@@ -39,6 +38,7 @@ class Parser(object):
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
+        self._memoization_cache = dict()
         if not self._trace:
             self.trace = lambda x: ()
             self.trace_event = lambda x: ()
@@ -149,8 +149,13 @@ class Parser(object):
         finally:
             self._rule_stack.pop()
 
-    @memoize
     def _invoke_rule(self, name, pos):
+        key = (pos, name)
+        cache = self._memoization_cache
+
+        if key in cache:
+            return cache[key]
+
         rule = self._find_rule(name)
         self._push_ast()
         self._push_cst()
@@ -168,7 +173,10 @@ class Parser(object):
         semantic_rule = self._find_semantic_rule(name)
         if semantic_rule:
             node = semantic_rule(node)
-        return (node, self._pos)
+        result = (node, self._pos)
+
+        cache[key] = result
+        return result
 
     def _token(self, token, node_name=None, force_list=False):
         self._next_token()

@@ -5,7 +5,7 @@ import logging
 from copy import deepcopy
 from keyword import iskeyword
 import time
-from .util import memoize, simplify, indent, trim
+from .util import simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
@@ -529,6 +529,7 @@ class RuleGrammar(NamedGrammar):
     def __init__(self, name, exp, ast_name=None):
         super(RuleGrammar, self).__init__(name, exp, False)
         self.ast_name = ast_name
+        self._memoization_cache = dict()
 
     def parse(self, ctx):
         ctx._rule_stack.append(self.name)
@@ -551,10 +552,17 @@ class RuleGrammar(NamedGrammar):
             ctx.pop_ast()
             ctx._rule_stack.pop()
 
-    @memoize
     def _invoke_rule(self, name, ctx, pos):
+        key = (pos, name)
+        cache = self._memoization_cache
+
+        if key in cache:
+            return cache[key]
+
         ctx.goto(pos)
-        return (self.exp.parse(ctx), ctx.pos)
+        result = (self.exp.parse(ctx), ctx.pos)
+        cache[key] = result
+        return result
 
 
     def _first(self, k, F):

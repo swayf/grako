@@ -9,30 +9,6 @@ def simplify(x):
         return simplify(x[0])
     return x
 
-
-def memoize(func):
-    func.cache = {}
-    def memoize(*args, **kw):
-        if kw:  # frozenset is used to ensure hashability
-            key = args, frozenset(kw.iteritems())
-        else:
-            key = args
-        cache = func.cache
-        if key in cache:
-            result = cache[key]
-            if isinstance(result, Exception):
-                raise result
-            return result
-        else:
-            try:
-                cache[key] = result = func(*args, **kw)
-                return result
-            except Exception as e:
-                cache[key] = e
-                raise
-    return functools.update_wrapper(memoize, func)
-
-
 def trim(docstring):
     """
     Definition of the trim algorithm from Python's PEP 257. It is used
