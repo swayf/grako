@@ -9,7 +9,7 @@ setup(
     packages=['grako', 'grako.model', 'grako.test'],
     scripts=[],
     url='http://bitbucket.org/apalala/grako',
-    license='LICENSE.txt',
+    license='GNU General Public License v3 (GPLv3)',
     description='EBNF to PEG parser generator.',
     long_description=open('README.rst').read(),
     classifiers=[
