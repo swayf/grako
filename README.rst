@@ -15,6 +15,7 @@ Grako
 .. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
 
 
+
 Rationale
 ---------
 
@@ -41,6 +42,7 @@ Rationale
 .. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar 
 .. _Python: http://python.org
 .. _Ruby: http://www.ruby-lang.org/
+
 
 The Generated Parsers
 ---------------------
