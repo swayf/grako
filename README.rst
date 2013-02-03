@@ -348,27 +348,27 @@ Credits
 The following must be mentioned as contributors of thoughts, ideas, code, *and funding* to the **Grako** project:
 
 
-    **Niklaus Wirth** was the chief designer of the programming languages Euler, Algol W, Pascal, Modula, Modula-2, Oberon, Oberon-2, and Oberon-07. In the last chapter of his 1976 book `Algorithms + Data Structures = Programs`_, Wirth_ creates a top-down, descent parser with recovery for the Pascal_-like, `LL(1)`_ programming language `PL/0`_. The structure of the program is that of a PEG_ parser, though the concept of PEG_ wasn't formalized until 2004.
+* **Niklaus Wirth** was the chief designer of the programming languages Euler, Algol W, Pascal, Modula, Modula-2, Oberon, Oberon-2, and Oberon-07. In the last chapter of his 1976 book `Algorithms + Data Structures = Programs`_, Wirth_ creates a top-down, descent parser with recovery for the Pascal_-like, `LL(1)`_ programming language `PL/0`_. The structure of the program is that of a PEG_ parser, though the concept of PEG_ wasn't formalized until 2004.
 
-    **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004. 
+* **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004. 
 
-    Other parser generators like `PEG.js`_ by **David Majda** inspired the work in **Grako**.
+* Other parser generators like `PEG.js`_ by **David Majda** inspired the work in **Grako**.
 
-    **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
+* **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
-    **Terence Parr** created ANTLR_, probably the most solid and professional parser generator out there. Ter, *ANTLR* ant the folks on the ANLTR forums helped me shape my ideas about **Grako**.
+* **Terence Parr** created ANTLR_, probably the most solid and professional parser generator out there. Ter, *ANTLR* ant the folks on the ANLTR forums helped me shape my ideas about **Grako**.
 
-    **JavaCC** looks like an abandoned project. I'll credit it properly when I have more information.
+* **JavaCC** looks like an abandoned project. I'll credit it properly when I have more information.
 
-    **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under two thousand lines of code, would not have been possible without Python_.
+* **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under two thousand lines of code, would not have been possible without Python_.
 
-    **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
+* **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
-    **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (programming languages in particular) are about.
+* **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about.
 
-    **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew.
+* **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew.
 
-    **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
+* **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
 
 .. _Wirth: http://en.wikipedia.org/wiki/Niklaus_Wirth 
 .. _Pascal: http://en.wikipedia.org/wiki/Pascal_(programming_language) 
