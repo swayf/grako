@@ -17,7 +17,7 @@ Grako
 Rationale
 ---------
 
-**Grako** was created to address the shortcommings encountered over the years while working with other parser generation tools, among them:
+**Grako** was created to address recurring problems encountered over decades of working with parser generation tools:
 
 * To deal with programming languages in which important statement words (can't call them keywords) may be used as identifiers in programs, the parser must be able to lead the lexer. The parser also must lead the lexer to parse languages in which the meaning of input symbols may change with context (context sensitive languages) like Ruby_.
 
