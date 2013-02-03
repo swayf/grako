@@ -1,4 +1,4 @@
-.. -*- restructuredtext -*-
+ .. -*- restructuredtext -*-
 
 Grako
 =====
@@ -23,19 +23,18 @@ Rationale
 
 * When ambiguity is the norm in the parsed language, an LL or LR grammar becomes contaminated with miriads of lookaheads (just to make the parser greedy). PEG_ parsers address ambiguity from the onset, and memoization and relying on the exception systme makes backtracking very efficient.
 
-* Semantic actions, like `Abstract Syntax Tree`_ (AST_)creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser language, and translation's target language. 
+* Semantic actions, like `Abstract Syntax Tree`_ (AST_) creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser language, and translation's target language. 
 
-.. _`Abstract Syntax Tree`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
-.. _`AST`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
-  
 * Pre-processing (like handling includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar. 
 
 * It is easy to recruit help on the base programming language (Python_), but, as the grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a parser. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
 
-* Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself. And there's no way to trust generated code that you cannot understand.
+* Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself. It's difficult to trust generated code that you cannot understand.
 
 * Python_ is a great language for working in language parsing and translation.
 
+.. _`Abstract Syntax Tree`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
+.. _`AST`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
 .. _EBNF: http://en.wikipedia.org/wiki/Ebnf 
 .. _memoizing: http://en.wikipedia.org/wiki/Memoization 
 .. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar 
@@ -62,9 +61,9 @@ The methods in the base parser class return the same AST_ received as parameter,
 
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph 
        
-The default ASTs are either lists, or dict-derived objects that contain one item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
+By default, and AST_ is either a list, or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
 
-AST_ entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if only one or zero or elements were added.
+AST_ entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one or zero or elements were added.
 
 
 Using the Tool
