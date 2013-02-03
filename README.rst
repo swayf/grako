@@ -314,7 +314,7 @@ Still, comments are provided for non-obvious intentions in the code, and each **
 License
 -------
 
-**Grako** is copyright 2012-2013 by `ResQSoft Inc.`_ and  `Juancarlo Añez`_
+**Grako** is Copyright 2012-2013 by `ResQSoft Inc.`_ and  `Juancarlo Añez`_
 
 .. _`ResQSoft Inc.`:  http://www.resqsoft.com/
 .. _ResQSoft:  http://www.resqsoft.com/
@@ -335,8 +335,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 Contact
 -------
 
-For queries and comments about **Grako**, please use the `Grako Forum`_ 
-at *Google Groups*.
+For queries and comments about **Grako**, please use the `Grako Forum`_.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 \
@@ -347,6 +346,9 @@ Credits
 -------
 
 The following must be mentioned as contributors of thoughts, ideas, code, *and funding* to the **Grako** project:
+
+
+    **Niklaus Wirth** was the chief designer of the programming languages Euler, Algol W, Pascal, Modula, Modula-2, Oberon, Oberon-2, and Oberon-07. In the last chapter of his 1976 book `Algorithms + Data Structures = Programs`_, Wirth_ creates a top-down, descent parser with recovery for the Pascal_-like, `LL(1)`_ programming language `PL/0`_. The structure of the program is that of a PEG_ parser, though the concept of PEG_ wasn't formalized until 2004.
 
     **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004. 
 
@@ -367,7 +369,12 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
     **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew.
 
     **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
-    
+
+.. _Wirth: http://en.wikipedia.org/wiki/Niklaus_Wirth 
+.. _Pascal: http://en.wikipedia.org/wiki/Pascal_(programming_language) 
+.. _`PL/0`: http://en.wikipedia.org/wiki/PL/0 
+.. _`LL(1)`: http://en.wikipedia.org/wiki/LL(1) 
+.. _`Algorithms + Data Structures = Programs`: http://www.amazon.com/Algorithms-Structures-Prentice-Hall-Automatic-Computation/dp/0130224189/ 
 .. _`blog post`: http://dietbuddha.blogspot.com/2012/12/52python-encapsulating-exceptions-with.html 
 .. _`Python Weekly`: http://www.pythonweekly.com/ 
 .. _introduced: http://dl.acm.org/citation.cfm?id=964001.964011
