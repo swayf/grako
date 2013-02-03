@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+Tests for consistency of the line information caches kept by
+grako.buffering.Buffer.
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 import os
 import random

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+This awkward set of tests tries to make Grako bang its head against iself.
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
 sys.path.append('tmp')

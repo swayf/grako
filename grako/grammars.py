@@ -1,4 +1,16 @@
 # -*- coding: utf-8 -*-
+"""
+Elements for a model of a parsed Grako grammar.
+
+A model constructed with these elements, and rooted in a Grmmar instance is
+able to parse the language defined by the grammar, but the main purpose of
+the model is the generation of independent, top-down, verbose, and debugable
+parsers through the inline templates from the .rendering module.
+
+Models calculate the LL(k) FIRST function to aid in providing more significant
+error messages when a choice fails to parse. FOLLOW(k) and LA(k) should be
+computed, but they are not.
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 import re
 import logging

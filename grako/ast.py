@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Define the AST class, a direct descendant of dict that's used during parsing
+to store the values of named elements of grammar rules.
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
-from collections import OrderedDict
 import json
 
 __all__ = ['AST']

@@ -1,49 +1,12 @@
-""" Base definitions for models of programs.
+"""
+Base definitions for models of programs.
+
+** under construction **
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 from ..rendering import Renderer
 
 EOLCOL = 50
-
-def render(node, **fields):
-    """ Render a node using it's template or defaults
-    """
-    if node is None:
-        return ''
-    elif node is True:
-        return 'true'
-    elif node is False:
-        return 'false'
-    elif isinstance(node, list):
-        return ''.join(render(e, **fields) for e in node)
-    else:
-        return str(node)
-
-def indent(text, indent=1):
-    """ Indent the given block of text by indent*4 spaces
-    """
-    if text is None:
-        return ''
-    text = str(text)
-    if indent >= 0:
-        lines = [' ' * 4 * indent + t for t in text.split('\n')]
-        # check that a trailing EOL is not indented
-#        if lines and not lines[-1].strip():
-#            lines[-1] = ''
-        text = '\n'.join(lines)
-    return text
-
-def rate(obj):
-    """ Rate the given tree negatively for each node that is a generic Node
-    """
-    result = 0
-    if isinstance(obj, Node):
-        result += -1 * (obj.__class__ == Node)
-        result += sum(rate(c) for c in obj.children)
-    if isinstance(obj, list):
-        result += sum(rate(e) for e in obj)
-    return result
-
 
 class Context(object):
     """ Context for source code generation.

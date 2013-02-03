@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+"""
+Parser is the base class for generated parsers and for the bootstrap parser
+(the parser that parses Grako grammars).
+
+Parser does memoization at the rule invocation level, and provides the
+decorators, context managers, and iterators needed to make generated parsers
+simple.
+
+Parser is also in charge of dealing with comments, with the help of
+the .buffering module.
+
+A Parser will take the text to parse directly, or an instance of the
+.buffeing.Buffer class. The text/Buffer must be provided early, at Parser
+instance creation, to guarantee memoization consistency. Parsers instances
+are bound to the text to be parsed.
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
 import re

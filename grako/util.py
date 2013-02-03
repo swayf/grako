@@ -51,12 +51,3 @@ def indent(text, indent=1):
         lines = [' ' * 4 * indent + t for t in text.split('\n')]
         text = '\n'.join(lines)
     return text
-
-# this a decorator for decorators
-def decorator():
-    def _decorator(func):
-        @functools.wraps(func)
-        def wrapped(*args, **kwargs):
-            return func(*args, **kwargs)
-        return wrapped
-    return _decorator

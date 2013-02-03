@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+"""
+Exceptions used in Grako parser generation and in generated parsers.
+
+The parameters of the Failed... hierarchy of exceptions are the ones required
+to be able to report accurate error messages as late as possible with the aid
+of the .buffering.Buffer class, and with as little overhead as possible for
+exceptions that will not be parsing errors (remember that Grako uses the
+exception system to backtrack).
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 class GrammarError(Exception):

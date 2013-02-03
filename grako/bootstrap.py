@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+"""
+Implements parsing of Grako's EBNF idiom for grammars, and grammar model
+creation using the .grammars module.
+
+GrakoParserBase is the bootstrap parser. It uses the facilities of parsing.Parser
+as generated parsers do, but it does not conform to the patterns in the generated
+code. Why? Because having Grako bootstrap itself from its grammar would be cool,
+but very bad engineering. GrakoParserBase is hand-crafted.
+
+The GrakoGrammarGenerator class, a descendant of GrakoParserBase constructs
+a model of the grammar using semantic actions the model elements defined
+in the .grammars module.
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 from collections import OrderedDict
 from .grammars import *  # @UnusedWildImport

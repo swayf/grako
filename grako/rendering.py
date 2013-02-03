@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+The Renderer class provides the infrastructure for generating template-based
+code. It's used by the .grammars module for parser generation.
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 import itertools
 from .util import trim
