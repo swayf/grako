@@ -5,11 +5,13 @@ Grako
 
 **Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs a memoizing_ PEG_ parser in Python_. 
 
-**Grako** is *different* from other PEG_ parser generators because the generated parsers use Python_'s very efficient exception mechanism to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decison making or backtracking. **Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.
+**Grako** is *different* from other PEG_ parser generators because the generated parsers use Python_'s very efficient exception mechanism to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decison making or backtracking. *Possitive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level.
+
+**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At less than 2500 likes of Python_, it is possible to study all its source code in a single session. **Grako** only dependecies are on what the Python_ 2.7.y or 3.X.y standard libraries provide.
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity 
 
-**Grako** is feature complete and in production. It's currently being used with a 2 KLOC_ grammar for a legacy_ programming language to generate a parser capable of parsing millions of lines of legacy code in a matter of minutes.
+**Grako** is feature complete and currently being used to parse and translate hundreds of thousands of lines of legacy_ code. 
 
 .. _KLOC: http://en.wikipedia.org/wiki/KLOC 
 .. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
@@ -291,6 +293,20 @@ The abstract parser will contain a rule of of the form::
 
     def preproc(self, ast):
         return ast
+\
+\
+
+
+The lack of Comments
+--------------------
+Why is the source code for **Grako** so lacking in comments and doc-comments?:
+
+    1. Inline documentation easily goes out of phase with what the code actually does. It is a lesser and more productive effort to provide out-of-line documentation.
+
+    2. Minimal and understandable code with meaningful identifiers makes comments redundant or unnecesary.
+
+Still, comments are provided for non-obvious intentions in the code, and each **Grako** module carries a doc-comment describing its purpose.
+
 \
 \
 
