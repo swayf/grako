@@ -136,6 +136,12 @@ right-hand-side expressions::
 
     name = expre1  | expre2 ;
 
+Rule names that start with an uppercase character::
+
+   FRAGMENT = ?/[a-z]+/?
+
+*do not* advance over whitespace before begining to parse.
+
 The expressions, in reverse order of operator precedence, can be:
 
     ``e1 | e2``
@@ -143,6 +149,9 @@ The expressions, in reverse order of operator precedence, can be:
 
     ``e1 e2`` 
         Match ``e1`` and then match ``e2``.
+
+    ``e1 , e2`` 
+        As above. Match ``e1`` and then match ``e2``.
 
     ``( e )``
         Grouping. Match ``e``.
@@ -166,32 +175,22 @@ The expressions, in reverse order of operator precedence, can be:
     ``'text'`` or ``"text"``
         Match the token text within the quotation marks. 
         
-        **Note that** if *text* is alphanumeric, then Grako will check that the character 
-        following the token is not alphanumerc. This is done to prevent tokens like *IN* matching
-        when the text ahead is *INITIALIZE*. This feature can be turned off by passing 
-        ``nameguard=False`` to the `Parser` or the `Buffer`, or by using a pattern expression
-        (see below) instead of a token expression.
+        **Note that** if *text* is alphanumeric, then Grako will check that the character following the token is not alphanumerc. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the `Parser` or the `Buffer`, or by using a pattern expression (see below) instead of a token expression.
 
     ``?/regexp/?``
-        Match the Python_ regular expression ``regexp`` at the current text 
-        position. Unlike other expressions, this one does not advance over whitespace or 
-        comments. For that, place the ``regexp`` as the only term in its own rule.
+        Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
 
     ``rulename``
-        Invoke the rule named ``rulename``. To help with lexical aspects of grammars,
-        rules with names that begin with an uppercase letter will not advance the 
-        input over whitespace and comments.
+        Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace and comments.
 
     ``()``
         The empty expression. Match nothing.
 
     ``>>``
-        The cut expression. After this point, prevent other options from being
-        considered even if the current option fails to parse.
+        The cut expression. After this point, prevent other options from being considered even if the current option fails to parse.
 
     ``name:e``
-        Add the result of ``e`` to the AST_ using ``name`` as key. If more than one item is
-        added with the same ``name``, the entry is converted to a list.
+        Add the result of ``e`` to the AST_ using ``name`` as key. If more than one item is added with the same ``name``, the entry is converted to a list.
     
     ``name+:e``
         Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be a list even if only one element was added.
