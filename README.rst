@@ -72,6 +72,7 @@ AST_ entries are single values if only one item was added to a name, or lists if
 \
 \
 
+
 Using the Tool
 --------------
 
@@ -102,6 +103,8 @@ The *-h* and *--help* parameters provide full usage information::
 \
 \
 
+
+
 Using The Generated Parser
 --------------------------
 
@@ -118,6 +121,7 @@ To use the generated parser, just subclass the base or the abstract parser, crea
 The generated parsers have named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
 \
 \
+
 
 
 The EBNF Grammar Syntax
