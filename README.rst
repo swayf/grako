@@ -17,17 +17,20 @@ Grako
 Rationale
 ---------
 
-I wrote **Grako** to address the shortcommings I have encountered over the years while working with other parser generation tools:
+**Grako** was created to address the shortcommings encountered over the years while working with other parser generation tools, among them:
 
 * To deal with programming languages in which important statement words (can't call them keywords) may be used as identifiers in programs, the parser must be able to lead the lexer. The parser also must lead the lexer to parse languages in which the meaning of input symbols may change with context (context sensitive languages) like Ruby_.
 
-* When ambiguity is the norm in the parsed language, an LL or LR grammar becomes contaminated with miriads of lookaheads (just to make the parser greedy). PEG_ parsers address ambiguity from the onset, and memoization makes backtracking very efficient.
+* When ambiguity is the norm in the parsed language, an LL or LR grammar becomes contaminated with miriads of lookaheads (just to make the parser greedy). PEG_ parsers address ambiguity from the onset, and memoization and relying on the exception systme makes backtracking very efficient.
 
-* Semantic actions, like AST creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser language, and translation's target language. 
+* Semantic actions, like `Abstract Syntax Tree`_ (AST_)creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser language, and translation's target language. 
+
+.. _`Abstract Syntax Tree`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
+.. _`AST`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
   
 * Pre-processing (like handling includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar. 
 
-* It is easy to recruit help on the base programming language (Python_), but, as the grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a grammar. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
+* It is easy to recruit help on the base programming language (Python_), but, as the grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a parser. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
 
 * Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself. And there's no way to trust generated code that you cannot understand.
 
@@ -44,22 +47,24 @@ The Generated Parsers
 
 A **Grako** generated parser consists of the following classes:
 
-* A root class derived from ``Parser`` wich implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overriden, etc)::
+* A root class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overriden, etc)::
 
     def _myrulename_(self):
 
 * An *abstract* parser class that inherits from the root parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
 
-* An base class with one semantic method per grammar rule. Each method receives as its single parameter the *Abstract Syntax Tree* (AST) built from the rule invocation.::
+* An base class with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation.::
 
     def myrulename(self, ast):
         return ast
 
-The methods in the base parser class return the same AST received as parameter, but derived classes can override the methods to have them return anything you like (like a *Semantic Tree*). You can use the base class as a template for your own parser.
-       
-The default ASTs are either lists, or dict objects that contain one item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
+The methods in the base parser class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
 
-AST entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if a single item was added. 
+.. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph 
+       
+The default ASTs are either lists, or dict-derived objects that contain one item for every named element in the original grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
+
+AST_ entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax to force an entry to be a list even if only one or zero or elements were added.
 
 
 Using the Tool
@@ -94,15 +99,15 @@ The *-h* and *--help* parameters provide full usage information::
 Using The Generated Parser
 --------------------------
 
-To use the generated parser, subclass the base or the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
+To use the generated parser, just subclass the base or the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
 
     class MyParser(MyParserBase):
         pass
 
     parser = MyParser('text to parse')
     result = parser.parse('start')
-    print result # parse() returns an AST by default
-    print result.json() # the AST can be converted to JSON
+    print result # parse() returns an AST_ by default
+    print result.json() # the AST_ can be converted to JSON
 
 The generated parsers have named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
 
@@ -186,11 +191,11 @@ The expressions, in reverse order of operator precedence, can be:
         considered even if the current option fails to parse.
 
     ``name:e``
-        Add the result of ``e`` to the AST using ``name`` as key. If more than one item is
+        Add the result of ``e`` to the AST_ using ``name`` as key. If more than one item is
         added with the same ``name``, the entry is converted to a list.
     
     ``name+:e``
-        Add the result of ``e`` to the AST using ``name`` as key. Force the entry to be 
+        Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be 
         a list even if only one element is added.
 
     ``$``
@@ -199,7 +204,7 @@ The expressions, in reverse order of operator precedence, can be:
     ``(*`` *comment* ``*)``
         Comments may appear anywhere in the text.
 
-When there are no named items in a rule, the AST consists of the return values of elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules. You will have an AST created for::
+When there are no named items in a rule, the AST_ consists of the elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules. You will have an AST_ created for::
 
     number = ?/[0-9]+/?
 
@@ -207,13 +212,13 @@ without having to write::
     
     number = number:?/[0-9]+/?
 
-When a rule has named elementes, the unnamed ones are excluded from the AST (ignored).
+When a rule has named elementes, the unnamed ones are excluded from the AST_ (they are ignored).
 
-It is also possible to add an AST name to a rule::
+It is also possible to add an AST_ name to a rule::
 
     ast_name:rule = expre;
 
-That will make the default AST returned to be a dict with a single item with key ``ast_name`` and the value recovered from the right hand side of the rule.
+That will make the default AST_ returned to be a dict with a single item ``ast_name`` as key, and the AST_ from the right-hand side of the rule as value.
 
 Whitespace
 ----------
@@ -253,7 +258,7 @@ Semantic Actions
 
 There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars, and provide for poor modularization from the parser execution perspective.
 
-The overridable per-rule methods in the generated abstract parser provide enough opportunity to do post-processing, checks (like for inadecuate use of keywords), and AST transformation.
+The overridable per-rule methods in the generated abstract parser provide enough opportunity to do post-processing, checks (like for inadecuate use of keywords), and AST_ transformation.
 
 For finer-grained control it is enough to declare more rules, as the impact on the parsing times will be minimal.
 
@@ -337,8 +342,8 @@ Change History
 --------------
 
 **1.0rc2**
-    Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
+    Second release candidate. Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
 
 **1.0rc1**
-    Initial release.
+    First release candidate.
 
