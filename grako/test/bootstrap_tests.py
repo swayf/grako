@@ -13,7 +13,8 @@ logging.getLogger('grako.grammar').setLevel(logging.WARNING)
 logging.getLogger('grako.parsing').setLevel(logging.WARNING)
 
 def main():
-    os.chdir('/art/grako')
+    if not os.path.isdir('tmp'):
+        os.mkdir('tmp')
     print('-' * 20, 'phase 0 - parse using the bootstrap grammar')
     text = open('etc/grako.ebnf').read()
     g = GrakoParser('Grako', text)
