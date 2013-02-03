@@ -63,7 +63,7 @@ The methods in the base parser class return the same AST_ received as parameter,
        
 By default, and AST_ is either a list, or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
 
-AST_ entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one or zero or elements were added.
+AST_ entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was added. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
 
 
 Using the Tool
@@ -194,8 +194,7 @@ The expressions, in reverse order of operator precedence, can be:
         added with the same ``name``, the entry is converted to a list.
     
     ``name+:e``
-        Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be 
-        a list even if only one element is added.
+        Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be a list even if only one element was added.
 
     ``$``
         The *end of text* symbol. Verify thad the end of the input text has been reached.
@@ -271,12 +270,6 @@ The abstract parser will contain a rule of of the form::
 
     def preproc(self, ast):
         return ast
-
-Warning
--------
-
-The ``grako.model`` package is still under development. It's not usable in 
-it's current state.
 
 License
 -------
