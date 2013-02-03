@@ -9,7 +9,7 @@ Grako
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity 
 
-**Grako** is feature complete and in production. It's currently being used with a 2 KLOC_ grammar for a lagacy_ programming language to generate a parser capable of parsing millions of lines of legacy code in a matter of minutes.
+**Grako** is feature complete and in production. It's currently being used with a 2 KLOC_ grammar for a legacy_ programming language to generate a parser capable of parsing millions of lines of legacy code in a matter of minutes.
 
 .. _KLOC: http://en.wikipedia.org/wiki/KLOC 
 .. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
@@ -336,9 +336,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 --------------
 
-    **1.0rc2**
+**1.0rc2**
     Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
 
-    **1.0rc1**
+**1.0rc1**
     Initial release.
 
