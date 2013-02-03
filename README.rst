@@ -364,9 +364,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
-* **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about.
-
 * **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew.
+
+* **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about.
 
 * **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
 
