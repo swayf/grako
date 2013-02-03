@@ -9,6 +9,7 @@ about source lines and content.
 from __future__ import print_function, division, absolute_import, unicode_literals
 # FIXME: There could be a file buffer using random access
 import re as regexp
+import string
 from bisect import bisect as bisect
 from collections import namedtuple
 
@@ -29,7 +30,7 @@ class Buffer(object):
         self.original_text = text
         self.text = text
         self.filename = filename
-        self.whitespace = set(whitespace if whitespace else ' \t\n\r\f\v')
+        self.whitespace = set(whitespace if whitespace else string.whitespace)
         self.ignorecase = ignorecase
         self.trace = trace
         self.nameguard = nameguard
