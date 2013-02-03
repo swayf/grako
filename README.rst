@@ -312,6 +312,13 @@ Still, comments are provided for *non-obvious intentions* in the code, and each 
 \
 \
 
+Examples
+--------
+
+The file ``etc/grako.ebnf`` contains a grammar for the **Grako** EBNF_ language written in the same language. It is used in the *bootstrap* test suite to prove that **Grako** can generate a parser to parse its own language.
+
+\
+\
 
 License
 -------
