@@ -24,17 +24,17 @@ Rationale
 
 **Grako** was created to address recurring problems encountered over decades of working with parser generation tools:
 
-* To deal with programming languages in which important statement words (can't call them keywords) may be used as identifiers in programs, the parser must be able to lead the lexer. The parser also must lead the lexer to parse languages in which the meaning of input symbols may change with context (context sensitive languages) like Ruby_.
+* To deal with programming languages in which important statement words (can't call them keywords) may be used as identifiers in programs, the parser must be able to lead the lexer. The parser must also lead the lexer to parse languages in which the meaning of input symbols may change with context, like Ruby_.
 
-* When ambiguity is the norm in the parsed language, an LL or LR grammar becomes contaminated with miriads of lookaheads (just to make the parser greedy). PEG_ parsers address ambiguity from the onset, and memoization and relying on the exception systme makes backtracking very efficient.
+* When ambiguity is the norm in the parsed language (as is the case in several legacy_ ones), an LL or LR grammar becomes contaminated with miriads of lookaheads. PEG_ parsers address ambiguity from the onset. Memoization, and relying on the exception-handling system makes backtracking very efficient.
 
-* Semantic actions, like `Abstract Syntax Tree`_ (AST_) creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser language, and translation's target language. 
+* Semantic actions, like `Abstract Syntax Tree`_ (AST_) creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser's language, and translation's target language. 
 
-* Pre-processing (like handling includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar. 
+* Pre-processing (like dealing with includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar. 
 
-* It is easy to recruit help on the base programming language (Python_), but, as the grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a parser. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
+* It is easy to recruit help knowledged about a mainstream programming language (Python_ in this case); it is not so for grammar description languages. As a grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a parser. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
 
-* Generated parsers should be humanly readable and debuggable. Looking at the generated source is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself. It's difficult to trust generated code that you cannot understand.
+* Generated parsers should be humanly-readable and debuggable. Looking at the generated source code is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself. It's inconvenient to trust generated code that you cannot understand.
 
 * Python_ is a great language for working in language parsing and translation.
 
@@ -66,19 +66,19 @@ A **Grako** generated parser consists of the following classes:
 
 The methods in the base parser class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
 
+By default, and AST_ is either a list (for *closures*), or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
+
+AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
+\
+\
+
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph 
        
-By default, and AST_ is either a list, or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
-
-AST_ entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was added. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
-\
-\
-
 
 Using the Tool
 --------------
 
-**Grako** is run from the commandline like this::
+**Grako** is run from the commandline::
 
     $ python -m grako
 
@@ -117,10 +117,10 @@ To use the generated parser, just subclass the base or the abstract parser, crea
 
     parser = MyParser('text to parse')
     result = parser.parse('start')
-    print result # parse() returns an AST_ by default
-    print result.json() # the AST_ can be converted to JSON
+    print result # parse() returns an AST by default
+    print result.json() # the AST can be converted to JSON
 
-The generated parsers have named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
+The generated parsers constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
 \
 \
 
@@ -129,8 +129,7 @@ The generated parsers have named arguments to specify whitespace characters, the
 The EBNF Grammar Syntax
 -----------------------
 
-**Grako** uses a variant of the standard EBNF_ syntax. A grammar consists of a sequence of one or 
-more rules of the form::
+**Grako** uses a variant of the standard EBNF_ syntax. A grammar consists of a sequence of one or more rules of the form::
 
     name = expre ;
 
@@ -150,13 +149,13 @@ If you define more than one rule with the same name::
 The result will be equivalent to applying the choice operator to the 
 right-hand-side expressions::
 
-    name = expre1  | expre2 ;
+    name = expre1 | expre2 ;
 
 Rule names that start with an uppercase character::
 
    FRAGMENT = ?/[a-z]+/?
 
-*do not* advance over whitespace before begining to parse.
+*do not* advance over whitespace before begining to parse. This feature becomes handy when defining complex lexical elements, as it allows breaking them into several rules.
 
 The expressions, in reverse order of operator precedence, can be:
 
@@ -176,17 +175,16 @@ The expressions, in reverse order of operator precedence, can be:
         Optionally match ``e``.
 
     ``{ e }`` or ``{ e }*``
-        Match ``e`` zero or more times.
+        Closure. Match ``e`` zero or more times. Note that the AST_ returned for a closure is always a list.
 
     ``{ e }+`` or ``{ e }-``
-        Match ``e`` one or more times.
+        Closure+1. Match ``e`` one or more times.
 
     ``&e``
         Positive lookahead. Try parsing ``e``, but do not consume any input.
 
     ``!e``
-        Negative lookahead. Try parsing ``e`` and fail if the parse succeeds. 
-        Do not consume any input whichever the outcome.
+        Negative lookahead. Try parsing ``e`` and fail if there's a match. Do not consume any input whichever the outcome.
 
     ``'text'`` or ``"text"``
         Match the token text within the quotation marks. 
@@ -197,7 +195,7 @@ The expressions, in reverse order of operator precedence, can be:
         Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
 
     ``rulename``
-        Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace and comments.
+        Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace or comments.
 
     ``()``
         The empty expression. Match nothing.
@@ -209,7 +207,7 @@ The expressions, in reverse order of operator precedence, can be:
         Add the result of ``e`` to the AST_ using ``name`` as key. If more than one item is added with the same ``name``, the entry is converted to a list.
     
     ``name+:e``
-        Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be a list even if only one element was added.
+        Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be a list even if only one element is added.
 
     ``$``
         The *end of text* symbol. Verify thad the end of the input text has been reached.
@@ -239,15 +237,17 @@ That will make the default AST_ returned to be a dict with a single item ``ast_n
 Whitespace
 ----------
 
-By default, **Grako** generated parsers skip the usual whitespace charactes (``\t`` ``\v`` ``\n`` ``\r`` and the space character), but you can change that behaviour by passing a ``whitespace`` parameter to your parser::
+By default, **Grako** generated parsers skip the usual whitespace charactes (whatever Python_ defines as ``string.whitespace``), but you can change that behaviour by passing a ``whitespace`` parameter to your parser. For example::
 
     parser = MyParser(text, whitespace='\t ')
 
-If you pass no whitespace characters::
+will not consider end-of-line characters as whitespace.
+
+If you don't define any whitespace characters::
 
     parser = MyParser(text, whitespace='')
 
-then you will have to handle whitespace in your grammar as it's often done in PEG_ parsers.
+then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers).
 \
 \
 
@@ -255,7 +255,7 @@ then you will have to handle whitespace in your grammar as it's often done in PE
 Case Sensitivity
 ----------------
 
-If your language is case insensitive, you can tell your parser so using the ``ignorecase`` parameter::
+If the source language is case insensitive, you can tell your parser by using the ``ignorecase`` parameter::
 
     parser = MyParser(text, ignorecase=True)
 
@@ -270,6 +270,8 @@ Comments
 Parsers will skip over comments specified as a regular expression using the ``comments_re`` paramenter::
     
     parser = MyParser(text, comments_re="\(\*.*?\*\)")
+
+For more complex comment handling, you can override the ``Parser._eatcomments()`` method.
 \
 \
 
@@ -277,13 +279,13 @@ Parsers will skip over comments specified as a regular expression using the ``co
 Semantic Actions
 ----------------
 
-There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars, and provide for poor modularization from the parser execution perspective.
+There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars and provide for poor modularization from the parser execution perspective.
 
-The overridable per-rule methods in the generated abstract parser provide enough opportunity to do post-processing, checks (like for inadecuate use of keywords), and AST_ transformation.
+The overridable, per-rule methods in the generated abstract parser provide enough opportunity to do semantics as a rule post-processing operation, like verifications (like for inadecuate use of keywords), or AST_ transformation.
 
 For finer-grained control it is enough to declare more rules, as the impact on the parsing times will be minimal.
 
-If pre-processing is required, one can place invocations of empty rules where appropiate::
+If pre-processing is required at some point, it is enough to place invocations of empty rules where appropiate::
 
     myrule = first_part preproc {second_part} ;
 
@@ -297,15 +299,15 @@ The abstract parser will contain a rule of of the form::
 \
 
 
-The lack of Comments
---------------------
-Why is the source code for **Grako** so lacking in comments and doc-comments?:
+The (lack of) Documentation
+---------------------------
+**Grako** so lacking in comments and doc-comments for these reasons:
 
-    1. Inline documentation easily goes out of phase with what the code actually does. It is a lesser and more productive effort to provide out-of-line documentation.
+    1. Inline documentation easily goes out of phase with what the code actually does. It is an equivalent and more productive effort to provide out-of-line documentation.
 
     2. Minimal and understandable code with meaningful identifiers makes comments redundant or unnecesary.
 
-Still, comments are provided for non-obvious intentions in the code, and each **Grako** module carries a doc-comment describing its purpose.
+Still, comments are provided for *non-obvious intentions* in the code, and each **Grako** module carries a doc-comment describing its purpose.
 
 \
 \
@@ -347,7 +349,6 @@ Credits
 
 The following must be mentioned as contributors of thoughts, ideas, code, *and funding* to the **Grako** project:
 
-
 * **Niklaus Wirth** was the chief designer of the programming languages Euler, Algol W, Pascal, Modula, Modula-2, Oberon, Oberon-2, and Oberon-07. In the last chapter of his 1976 book `Algorithms + Data Structures = Programs`_, Wirth_ creates a top-down, descent parser with recovery for the Pascal_-like, `LL(1)`_ programming language `PL/0`_. The structure of the program is that of a PEG_ parser, though the concept of PEG_ wasn't formalized until 2004.
 
 * **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004. 
@@ -356,9 +357,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
-* **Terence Parr** created ANTLR_, probably the most solid and professional parser generator out there. Ter, *ANTLR* ant the folks on the ANLTR forums helped me shape my ideas about **Grako**.
+* **Terence Parr** created ANTLR_, probably the most solid and professional parser generator out there. Ter, *ANTLR*, and the folks on the *ANLTR* forums helped me shape my ideas about **Grako**.
 
-* **JavaCC** looks like an abandoned project. I'll credit it properly when I have more information.
+* **JavaCC** (originally Jack_) looks like an abandoned project. It was the first parser generator I used while teaching.
 
 * **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under three thousand lines of code, would not have been possible without Python_.
 
@@ -382,6 +383,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _UCAB: http://www.ucab.edu.ve/
 .. _USB: http://www.usb.ve/
 .. _ANTLR: http://www.antlr.org/ 
+.. _Jack: http://en.wikipedia.org/wiki/Javacc 
 \
 \
 
