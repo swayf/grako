@@ -5,9 +5,9 @@ Grako
 
 **Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs memoizing_ PEG_ parsers in Python_. 
 
-**Grako** is *different* from other PEG_ parser generators because the generated parsers use Python_'s very efficient exception mechanism to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decison making or backtracking. *Possitive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level.
+**Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decison making or backtracking. *Possitive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level.
 
-**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At less than 2500 likes of Python_, it is possible to study all its source code in a single session. **Grako** only dependecies are on what the Python_ 2.7.y or 3.X.y standard libraries provide.
+**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At less than 2500 likes of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependecies are on the Python_ 2.7/3.x standard libraries. 
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity 
 
