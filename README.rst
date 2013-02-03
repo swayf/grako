@@ -3,7 +3,19 @@
 Grako
 =====
 
-**Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs a memoizing_ PEG_ parser in Python_.
+**Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs a memoizing_ PEG_ parser in Python_. 
+
+**Grako** is *different* from other PEG_ parser generators because the generated parsers use Python_'s very efficient exception mechanism to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decison making or backtracking. **Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.
+
+.. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity 
+
+**Grako** is feature complete and in production. It's currently being used with a 2 KLOC_ grammar for a lagacy_ programming language to generate a parser capable of parsing millions of lines of legacy code in a matter of minutes.
+
+.. _KLOC: http://en.wikipedia.org/wiki/KLOC 
+.. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
+
+Rationale
+---------
 
 I wrote **Grako** to address the shortcommings I have encountered over the years while working with other parser generation tools:
 
@@ -320,3 +332,13 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _UCAB: http://www.ucab.edu.ve/
 .. _USB: http://www.usb.ve/
 .. _ANTLR: http://www.antlr.org/ 
+
+Change History
+--------------
+
+    **1.0rc2**
+    Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
+
+    **1.0rc1**
+    Initial release.
+
