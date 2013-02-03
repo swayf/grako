@@ -360,7 +360,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **JavaCC** looks like an abandoned project. I'll credit it properly when I have more information.
 
-* **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under two thousand lines of code, would not have been possible without Python_.
+* **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under three thousand lines of code, would not have been possible without Python_.
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
