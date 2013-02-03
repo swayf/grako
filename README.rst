@@ -43,7 +43,8 @@ Rationale
 .. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar 
 .. _Python: http://python.org
 .. _Ruby: http://www.ruby-lang.org/
-
+\
+\
 
 The Generated Parsers
 ---------------------
@@ -68,7 +69,8 @@ The methods in the base parser class return the same AST_ received as parameter,
 By default, and AST_ is either a list, or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
 
 AST_ entries are single values if only one item was added to a name, or lists if more than one item was added. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was added. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
-
+\
+\
 
 Using the Tool
 --------------
@@ -97,7 +99,8 @@ The *-h* and *--help* parameters provide full usage information::
           -t, --trace           produce verbose parsing output
 
         $
-
+\
+\
 
 Using The Generated Parser
 --------------------------
@@ -113,6 +116,9 @@ To use the generated parser, just subclass the base or the abstract parser, crea
     print result.json() # the AST_ can be converted to JSON
 
 The generated parsers have named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
+\
+\
+
 
 The EBNF Grammar Syntax
 -----------------------
@@ -220,6 +226,9 @@ It is also possible to add an AST_ name to a rule::
     ast_name:rule = expre;
 
 That will make the default AST_ returned to be a dict with a single item ``ast_name`` as key, and the AST_ from the right-hand side of the rule as value.
+\
+\
+
 
 Whitespace
 ----------
@@ -233,7 +242,8 @@ If you pass no whitespace characters::
     parser = MyParser(text, whitespace='')
 
 then you will have to handle whitespace in your grammar as it's often done in PEG_ parsers.
-
+\
+\
 
 
 Case Sensitivity
@@ -244,6 +254,8 @@ If your language is case insensitive, you can tell your parser so using the ``ig
     parser = MyParser(text, ignorecase=True)
 
 The change will affect both token and pattern matching.
+\
+\
 
 
 Comments
@@ -252,6 +264,8 @@ Comments
 Parsers will skip over comments specified as a regular expression using the ``comments_re`` paramenter::
     
     parser = MyParser(text, comments_re="\(\*.*?\*\)")
+\
+\
 
 
 Semantic Actions
@@ -273,6 +287,9 @@ The abstract parser will contain a rule of of the form::
 
     def preproc(self, ast):
         return ast
+\
+\
+
 
 License
 -------
@@ -291,6 +308,9 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 `info@resqsoft.com`_.
 
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
+\
+\
+
 
 Contact
 -------
@@ -299,6 +319,9 @@ For queries and comments about **Grako**, please use the `Grako Forum`_
 at *Google Groups*.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
+\
+\
+
 
 Credits
 -------
@@ -332,6 +355,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _UCAB: http://www.ucab.edu.ve/
 .. _USB: http://www.usb.ve/
 .. _ANTLR: http://www.antlr.org/ 
+\
+\
+
 
 Change History
 --------------
