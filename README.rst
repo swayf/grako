@@ -117,10 +117,10 @@ The *-h* and *--help* parameters provide full usage information::
 
 
 
-Using The Generated Parser
+Using the Generated Parser
 --------------------------
 
-To use the generated parser, just subclass the base or the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
+To use the generated parser, just subclass the base or the abstract parser, create an instance of it, and invoke its ``parse()`` method passing the text to parse and the starting rule's name as parameter::
 
     class MyParser(MyParserBase):
         pass
@@ -411,6 +411,13 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 Change History
 --------------
+
+**1.0rc3**
+    * Now the text to parse is passed directly to the `parse()` method.
+    * An end-to end translation example is provided in the *examples/regexp* project.
+    * Tweaked for convenience and clearness while developing the *regexp* example.
+    * Many corrections to this *README*.
+    * Tested under Python_ 3.3.
 
 **1.0rc2**
     Second release candidate. Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
