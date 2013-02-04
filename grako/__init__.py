@@ -10,7 +10,7 @@ import argparse
 from .buffering import Buffer
 from .parsing import Parser
 from .bootstrap import GrakoGrammarGenerator
-from .exceptions import GrakoException
+from .exceptions import *
 
 DESCRIPTION = ('Grako (for grammar compiler) takes grammars'
                ' in a variation of EBNF as input, and outputs a memoizing'
@@ -38,6 +38,14 @@ argparser.add_argument('-t', '--trace',
                        action='store_true'
                        )
 
+def parse(name, grammar, trace=False):
+    parser = GrakoGrammarGenerator(name, grammar, trace=trace)
+    return parser.parse()
+
+def generate(name, grammar, trace=False):
+    model = parse(name, grammar, trace=trace)
+    return model.render()
+
 
 def main():
     try:
@@ -52,18 +60,16 @@ def main():
         name = os.path.splitext(os.path.basename(filename))[0]
     if outfile and os.path.isfile(outfile):
         os.unlink(outfile)
-    text = open(filename, 'r').read()
+    grammar = open(filename, 'r').read()
     try:
-        parser = GrakoGrammarGenerator(name, text, trace=args.trace)
-        grammar = parser.parse()
-        text = grammar.render()
+        parser = generate(name, grammar, trace=args.trace)
         if outfile:
             dirname = os.path.dirname(outfile)
             if dirname and not os.path.isdir(dirname):
                 os.makedirs(dirname)
-            open(outfile, 'w').write(text)
+            open(outfile, 'w').write(parser)
         else:
-            print(text)
+            print(parser)
     except GrakoException as e:
         print(e)
 
