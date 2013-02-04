@@ -214,7 +214,11 @@ The expressions, in reverse order of operator precedence, can be:
         Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be a list even if only one element is added.
 
     ``@e``
-        The override operator. Make the AST_ for the complete rule be the AST_ for ``e``. The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. This is a typical use of the override operator::
+        The override operator. Make the AST_ for the complete rule be the AST_ for ``e``. 
+        
+    The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. 
+        
+    This is a typical use of the override operator::
 
         subexp = '(' @expre ')' .
 
