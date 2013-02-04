@@ -3,12 +3,12 @@
 Implements parsing of Grako's EBNF idiom for grammars, and grammar model
 creation using the .grammars module.
 
-GrakoParserBase is the bootstrap parser. It uses the facilities of parsing.Parser
+GrakoParserRoot is the bootstrap parser. It uses the facilities of parsing.Parser
 as generated parsers do, but it does not conform to the patterns in the generated
 code. Why? Because having Grako bootstrap itself from its grammar would be cool,
-but very bad engineering. GrakoParserBase is hand-crafted.
+but very bad engineering. GrakoParserRoot is hand-crafted.
 
-The GrakoGrammarGenerator class, a descendant of GrakoParserBase constructs
+The GrakoGrammarGenerator class, a descendant of GrakoParserRoot constructs
 a model of the grammar using semantic actions the model elements defined
 in the .grammars module.
 """
@@ -21,17 +21,17 @@ __all__ = ['GrakoParser', 'GrakoGrammarGenerator']
 
 COMMENTS_RE = r'\(\*(?:.|\n)*?\*\)'
 
-class GrakoParserBase(Parser):
+class GrakoParserRoot(Parser):
 
     def __init__(self, grammar_name, text, trace=False):
-        super(GrakoParserBase, self).__init__(text,
+        super(GrakoParserRoot, self).__init__(text,
                 comments_re=COMMENTS_RE,
                 ignorecase=True,
                 trace=trace)
         self.grammar_name = grammar_name
 
     def parse(self, rule='grammar'):
-        return super(GrakoParserBase, self).parse(rule)
+        return super(GrakoParserRoot, self).parse(rule)
 
     def _void_(self):
         self._token('()', 'void')
@@ -222,7 +222,7 @@ class GrakoParserBase(Parser):
         self._check_eof()
 
 
-class AbstractGrakoParser(GrakoParserBase):
+class GrakoParserBase(GrakoParserRoot):
     def token(self, ast):
         return ast
 
@@ -285,7 +285,7 @@ class AbstractGrakoParser(GrakoParserBase):
         return ast
 
 
-class GrakoParser(AbstractGrakoParser):
+class GrakoParser(GrakoParserBase):
 
     def token(self, ast):
         return ast
@@ -359,7 +359,7 @@ class GrakoParser(AbstractGrakoParser):
         return ast
 
 
-class GrakoGrammarGenerator(AbstractGrakoParser):
+class GrakoGrammarGenerator(GrakoParserBase):
 
     def __init__(self, grammar_name, text, trace=False):
         super(GrakoGrammarGenerator, self).__init__(grammar_name, text, trace=trace)
