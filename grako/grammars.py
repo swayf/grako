@@ -12,6 +12,7 @@ error messages when a choice fails to parse. FOLLOW(k) and LA(k) should be
 computed, but they are not.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
+import sys
 import re
 import logging
 from copy import deepcopy
@@ -43,6 +44,11 @@ class Context(object):
         self._ast_stack = [AST()]
         self._rule_stack = []
 
+        if not self.trace:
+            self.trace = lambda x: ()
+            self.trace_event = self.trace
+            self.trace_match = lambda x, y: ()
+
     def goto(self, pos):
         self.buf.goto(pos)
 
@@ -70,6 +76,18 @@ class Context(object):
 
     def next_token(self):
         self.buf.eatwhitespace()
+
+    def trace(self, msg, *params):
+        if self.trace:
+            print(msg % params, file=sys.stderr)
+
+    def trace_event(self, event):
+        self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
+
+    def trace_match(self, token, name=None):
+        if self.trace:
+            name = name if name else ''
+            self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 
 
 class _Grammar(Renderer):
@@ -153,11 +171,11 @@ class TokenGrammar(_Grammar):
         self.token = token
 
     def parse(self, ctx):
-        log.debug('token <%s>\n\t%s', self.token, ctx.buf.lookahead())
         ctx.next_token()
         result = ctx.buf.match(self.token)
         if result is None:
             raise FailedToken(ctx.buf, self.token)
+        ctx.trace_match(self.token, None)
         return result
 
     def _first(self, k, F):
@@ -184,10 +202,10 @@ class PatternGrammar(_Grammar):
         self._re = re.compile(pattern)
 
     def parse(self, ctx):
-        log.debug('pattern <%s>\n\t%s', self.pattern, ctx.buf.lookahead())
         result = ctx.buf.matchre(self._re)
         if result is None:
             raise FailedPattern(ctx.buf, self.pattern)
+        ctx.trace_match(result, self.pattern)
         return result
 
     def _first(self, k, F):
@@ -552,15 +570,16 @@ class RuleGrammar(NamedGrammar):
         try:
             if self.name[0].islower():
                 ctx.next_token()
+            ctx.trace_event('ENTER ')
             _tree, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
             ctx.goto(newpos)
-            log.debug('SUCCESS %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+            ctx.trace_event('SUCCESS')
             if self.ast_name:
                 return AST({self.ast_name:ctx.ast})
             else:
                 return ctx.ast
         except FailedParse:
-            log.debug('FAIL %s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
+            ctx.trace_event('FAILED')
             raise
         finally:
             ctx.pop_ast()

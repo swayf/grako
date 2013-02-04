@@ -57,7 +57,8 @@ class Parser(object):
         self._memoization_cache = dict()
         if not self._trace:
             self.trace = lambda x: ()
-            self.trace_event = lambda x: ()
+            self.trace_event = self.trace
+            self.trace_match = lambda x, y: ()
 
     def parse(self, rule_name):
         try:
