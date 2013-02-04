@@ -15,8 +15,6 @@ Grako
 
 .. _KLOC: http://en.wikipedia.org/wiki/KLOC 
 .. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
-\
-\
 
 
 Rationale
@@ -45,8 +43,6 @@ Rationale
 .. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar 
 .. _Python: http://python.org
 .. _Ruby: http://www.ruby-lang.org/
-\
-\
 
 The Generated Parsers
 ---------------------
@@ -69,8 +65,6 @@ The methods in the base parser class return the same AST_ received as parameter,
 By default, and AST_ is either a list (for *closures*), or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
 
 AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
-\
-\
 
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph 
        
@@ -112,8 +106,6 @@ The *-h* and *--help* parameters provide full usage information::
           -t, --trace           produce verbose parsing output
 
         $
-\
-\
 
 
 
@@ -135,8 +127,6 @@ This is more or less what happens if you invole the generated parser directly::
     python myparser.py inputfile startrule
 
 The generated parsers constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
-\
-\
 
 
 
@@ -244,8 +234,6 @@ It is also possible to add an AST_ name to a rule::
     ast_name:rule = expre;
 
 That will make the default AST_ returned to be a dict with a single item ``ast_name`` as key, and the AST_ from the right-hand side of the rule as value.
-\
-\
 
 
 Whitespace
@@ -262,8 +250,6 @@ If you don't define any whitespace characters::
     parser = MyParser(text, whitespace='')
 
 then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers).
-\
-\
 
 
 Case Sensitivity
@@ -274,8 +260,6 @@ If the source language is case insensitive, you can tell your parser by using th
     parser = MyParser(text, ignorecase=True)
 
 The change will affect both token and pattern matching.
-\
-\
 
 
 Comments
@@ -286,8 +270,6 @@ Parsers will skip over comments specified as a regular expression using the ``co
     parser = MyParser(text, comments_re="\(\*.*?\*\)")
 
 For more complex comment handling, you can override the ``Parser._eatcomments()`` method.
-\
-\
 
 
 Semantic Actions
@@ -309,8 +291,6 @@ The abstract parser will contain a rule of of the form::
 
     def preproc(self, ast):
         return ast
-\
-\
 
 
 The (lack of) Documentation
@@ -323,16 +303,12 @@ The (lack of) Documentation
 
 Still, comments are provided for *non-obvious intentions* in the code, and each **Grako** module carries a doc-comment describing its purpose.
 
-\
-\
 
 Examples
 --------
 
 The file ``etc/grako.ebnf`` contains a grammar for the **Grako** EBNF_ language written in the same language. It is used in the *bootstrap* test suite to prove that **Grako** can generate a parser to parse its own language.
 
-\
-\
 
 License
 -------
@@ -351,8 +327,6 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 `info@resqsoft.com`_.
 
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
-\
-\
 
 
 Contact
@@ -361,8 +335,6 @@ Contact
 For queries and comments about **Grako**, please use the `Grako Forum`_.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
-\
-\
 
 
 Credits
@@ -405,8 +377,6 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _USB: http://www.usb.ve/
 .. _ANTLR: http://www.antlr.org/ 
 .. _Jack: http://en.wikipedia.org/wiki/Javacc 
-\
-\
 
 
 Change History
