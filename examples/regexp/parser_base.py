@@ -12,7 +12,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from grako.parsing import * # @UnusedWildImport
 from grako.exceptions import * # @UnusedWildImport
 
-__version__ = '13.035.15.25.50'
+__version__ = '13.035.15.41.08'
 
 class RegexParserRoot(Parser):
     def _START_(self):
@@ -139,8 +139,8 @@ def main(filename, startrule):
     import json
     with open(filename) as f:
         text = f.read()
-    parser = RegexParserBase(text, simple=True)
-    ast = parser.parse(startrule)
+    parser = RegexParserBase(simple=True)
+    ast = parser.parse(text, startrule)
     print('AST:')
     print(ast)
     print()

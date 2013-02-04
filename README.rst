@@ -414,6 +414,7 @@ Change History
 
 **1.0rc3**
     * Now the text to parse is passed directly to the `parse()` method.
+    * Added a *grako* script to invoke the tool directly.
     * An end-to end translation example is provided in the *examples/regexp* project.
     * Tweaked for convenience and clearness while developing the *regexp* example.
     * Many corrections to this *README*.
