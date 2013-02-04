@@ -224,7 +224,7 @@ The expressions, in reverse order of operator precedence, can be:
 
     The AST_ returned for the ``subexp`` rule will be the AST_ recovered from invoking ``expre``, without having to write a semantic action.
 
-    Combined with named rules (see below), the ``@`` allows creating exactly the required AST_ without the need for semantic rules::
+    Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
 
         closure:closure = @expre '*' .
 
