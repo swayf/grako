@@ -10,16 +10,23 @@ exception system to backtrack).
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-class GrammarError(Exception):
+class GrakoException(Exception):
     pass
 
-class ParseError(Exception):
+
+class GrammarError(GrakoException):
     pass
 
-class SemanticError(Exception):
+
+class SemanticError(GrakoException):
     pass
+
 
 class MissingSemanticFor(SemanticError):
+    pass
+
+
+class ParseError(GrakoException):
     pass
 
 

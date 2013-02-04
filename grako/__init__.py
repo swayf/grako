@@ -10,6 +10,7 @@ import argparse
 from .buffering import Buffer
 from .parsing import Parser
 from .bootstrap import GrakoGrammarGenerator
+from .exceptions import GrakoException
 
 DESCRIPTION = ('Grako (for grammar compiler) takes grammars'
                ' in a variation of EBNF as input, and outputs a memoizing'
@@ -52,13 +53,16 @@ def main():
     if outfile and os.path.isfile(outfile):
         os.unlink(outfile)
     text = open(filename, 'r').read()
-    parser = GrakoGrammarGenerator(name, text, trace=args.trace)
-    grammar = parser.parse()
-    text = grammar.render()
-    if outfile:
-        open(outfile, 'w').write(text)
-    else:
-        print(text)
+    try:
+        parser = GrakoGrammarGenerator(name, text, trace=args.trace)
+        grammar = parser.parse()
+        text = grammar.render()
+        if outfile:
+            open(outfile, 'w').write(text)
+        else:
+            print(text)
+    except GrakoException as e:
+        print(e)
 
 if __name__ == '__main__':
     main()

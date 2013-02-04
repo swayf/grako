@@ -519,7 +519,7 @@ class RuleRefGrammar(_Grammar):
 
     def _validate(self, rules):
         if self.name not in rules:
-            raise GrammarError("reference to unknown rule '%s'" % self.name)
+            raise GrammarError("ERROR: Reference to unknown rule '%s'." % self.name)
 
     def _first(self, k, F):
         self._first_set = F.get(self.name, set())
