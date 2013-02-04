@@ -1,0 +1,3 @@
+#!/usr/env/bin python
+import grako
+grako.main()

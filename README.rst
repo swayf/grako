@@ -82,6 +82,16 @@ Using the Tool
 
     $ python -m grako
 
+or::
+
+    $ scripts/grako
+
+or just::
+
+    $ grako
+
+if **Grako** was installed using *easy_install* or *pip*.
+
 The *-h* and *--help* parameters provide full usage information::
 
         $ python -m grako -h

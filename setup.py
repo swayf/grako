@@ -7,7 +7,7 @@ setup(
     author='Juancarlo Añez',
     author_email='apalala@gmail.com',
     packages=['grako', 'grako.model', 'grako.test'],
-    scripts=[],
+    scripts=['scripts/grako'],
     url='http://bitbucket.org/apalala/grako',
     license='GNU General Public License v3 (GPLv3)',
     description='EBNF to PEG parser generator.',
