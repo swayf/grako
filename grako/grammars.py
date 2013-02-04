@@ -733,11 +733,16 @@ class Grammar(Renderer):
 
                 if __name__ == '__main__':
                     import sys
-                    if len(sys.argv) == 3:
+                    if '-l' in sys.argv:
+                        for r in {name}ParserBase.rule_list():
+                            print(r)
+                    elif len(sys.argv) == 3:
                         main(sys.argv[1], sys.argv[2])
                     else:
                         print('Usage:')
                         program = sys.argv[0].split('/')[-1]
                         print(program, ' <filename> <startrule>')
+                        print(program, ' -l') # list rules
+                        print(program, ' -h')
 
                 '''

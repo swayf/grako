@@ -79,6 +79,20 @@ class Parser(object):
     def ast(self, value):
         self._ast_stack[-1] = value
 
+    @classmethod
+    def rule_list(cls):
+        import inspect
+        methods = inspect.getmembers(cls, predicate=inspect.ismethod)
+        result = []
+        for m in methods:
+            name = m[0]
+            if name[0] != '_' or name[-1] != '_':
+                continue
+            if not name[1:-1].isalnum():
+                continue
+            result.append(name[1:-1])
+        return result
+
     def _push_ast(self):
         self._ast_stack.append(AST())
 
