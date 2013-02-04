@@ -673,7 +673,7 @@ class Grammar(Renderer):
             except FailedCut as e:
                 raise e.nested
         except:
-            log.warning('failed parse')
+            log.info('failed parse')
             raise
 
     def __str__(self):
