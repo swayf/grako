@@ -65,8 +65,7 @@ class Parser(object):
                                                 whitespace=self.whitespace,
                                                 ignorecase=self.ignorecase,
                                                 nameguard=self.nameguard)
-            self._ast_stack = []
-            self._push_ast()
+            self._ast_stack = [AST()]
             self._concrete_stack = [None]
             self._rule_stack = []
             self._cut_stack = [False]
@@ -99,9 +98,11 @@ class Parser(object):
         return result
 
     def _push_ast(self):
+        self._push_cst()
         self._ast_stack.append(AST())
 
     def _pop_ast(self):
+        self._pop_cst()
         return self._ast_stack.pop()
 
     def _add_ast_node(self, name, node, force_list=False):
@@ -116,6 +117,10 @@ class Parser(object):
     @property
     def cst(self):
         return self._concrete_stack[-1]
+
+    @cst.setter
+    def cst(self, cst):
+        self._concrete_stack[-1] = cst
 
     def _push_cst(self):
         self._concrete_stack.append(None)
@@ -132,6 +137,21 @@ class Parser(object):
             previous.append(node)
         else:
             self._concrete_stack[-1] = [previous, node]
+
+    def _extend_cst(self, cst):
+        if cst is None:
+            return
+        if self.cst is None:
+            self.cst = cst
+        elif isinstance(self.cst, list):
+            if isinstance(cst, list):
+                self.cst.extend(cst)
+            else:
+                self.cst.append(cst)
+        elif isinstance(cst, list):
+            self.cst = [self.cst] + cst
+        else:
+            self.cst = [self.cst, cst]
 
     def _pop_cst(self):
         return self._concrete_stack.pop()
@@ -194,7 +214,6 @@ class Parser(object):
 
         rule = self._find_rule(name)
         self._push_ast()
-        self._push_cst()
         try:
             rule()
             node = self.ast
@@ -204,7 +223,6 @@ class Parser(object):
             else:
                 node = self.cst
         finally:
-            self._pop_cst()
             self._pop_ast()
         semantic_rule = self._find_semantic_rule(name)
         if semantic_rule:
@@ -310,9 +328,11 @@ class Parser(object):
             try:
                 yield
                 ast = self.ast
+                cst = self.cst
             finally:
                 self._pop_ast()
             self.ast.update(ast)
+            self._extend_cst(cst)
         except FailedCut:
             raise
         except FailedParse as e:
@@ -329,10 +349,10 @@ class Parser(object):
         self._push_cst()
         try:
             yield
-            node = self.cst
+            cst = self.cst
         finally:
             self._pop_cst()
-        self._add_cst_node(node)
+        self._add_cst_node(cst)
 
     @contextmanager
     def _if(self):
