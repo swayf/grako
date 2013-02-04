@@ -1,8 +1,10 @@
 
-test: parser
-	python test.py 2>&1
+start: test
 	python genparser.py -l
 	python genparser.py data/valid S0
+
+test: parser
+	python test.py 2>&1
 
 parser: parser_base.py
 	

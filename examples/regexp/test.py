@@ -17,12 +17,13 @@ def main():
         raise Exception('Should not have parsed!')
     except grako.FailedParse:
         pass
+    print('Grammar:', file=sys.stderr)
+    print(grammar)
+    sys.stdout.flush()
     with open(PARSER_FILENAME, 'w') as f:
         f.write(model.render())
     print('Generated parser saved as:', PARSER_FILENAME, file=sys.stderr)
-    print('Grammar:')
-    print(grammar)
-    print()
+    print(file=sys.stderr)
 
 
 if __name__ == '__main__':

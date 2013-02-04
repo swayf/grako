@@ -12,7 +12,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from grako.parsing import * # @UnusedWildImport
 from grako.exceptions import * # @UnusedWildImport
 
-__version__ = '13.035.14.51.16'
+__version__ = '13.035.14.56.59'
 
 class RegexParserRoot(Parser):
     def _START_(self):
