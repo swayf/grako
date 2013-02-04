@@ -267,7 +267,7 @@ class Parser(object):
     def _check_eof(self):
         self._next_token()
         if not self._buffer.atend():
-            raise FailedParse(self._buffer, 'expecting end of file')
+            raise FailedParse(self._buffer, 'Expecting end of text.')
 
     def _is_cut_set(self):
         return self._cut_stack[-1]
