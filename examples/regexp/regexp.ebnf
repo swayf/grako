@@ -6,7 +6,7 @@
    is not skipped when invoking them.
  *)
 
-START = expre:EXPRE $.
+START = EXPRE $.
 
 EXPRE = CHOICE | SEQUENCE .
 
@@ -16,10 +16,10 @@ SEQUENCE = terms:{TERM }+ .
 
 TERM = CLOSURE | ATOM .
 
-CLOSURE = atom:ATOM '*' >>  .
+CLOSURE = @ATOM '*' >>  .
 
 ATOM = SUBEXP | LITERAL .
 
-SUBEXP = '(' >> expre:EXPRE ')' .
+SUBEXP = '(' >> @EXPRE ')' .
 
 LITERAL = ?/(?:\\.|[^|*\\()])+/? .

@@ -164,9 +164,20 @@ class GrakoParserRoot(Parser):
         except FailedParse as e:
             raise FailedCut(self._buffer, e)
 
+    def _override_(self):
+        self._token('@')
+        self._cut()
+        try:
+            self._call('element', '@')
+        except FailedParse as e:
+            raise FailedCut(self._buffer, e)
+
     def _element_(self):
         with self._option():
             self._call('named', 'element')
+            return
+        with self._option():
+            self._call('override', 'element')
             return
         with self._option():
             self._call('term', 'element')
@@ -267,6 +278,9 @@ class GrakoParserBase(GrakoParserRoot):
     def named(self, ast):
         return ast
 
+    def override(self, ast):
+        return ast
+
     def element(self, ast):
         return ast
 
@@ -337,6 +351,9 @@ class GrakoParser(GrakoParserBase):
         return ast.term
 
     def named(self, ast):
+        return ast
+
+    def override(self, ast):
         return ast
 
     def element(self, ast):
@@ -421,6 +438,9 @@ class GrakoGrammarGenerator(GrakoParserBase):
 
     def named(self, ast):
         return NamedGrammar(ast.name, ast.value, 'force_list' in ast)
+
+    def override(self, ast):
+        return OverrideGrammar(ast)
 
     def element(self, ast):
         return ast.element
