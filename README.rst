@@ -419,6 +419,7 @@ Change History
     * Tweaked for convenience and clearness while developing the *regexp* example.
     * Many corrections to this *README*.
     * Tested under Python_ 3.3.
+    * Final release candidate for 1.0. Only improvements to the documentation will be accepted from now on.
 
 **1.0rc2**
     Second release candidate. Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
