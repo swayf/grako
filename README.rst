@@ -11,7 +11,7 @@ Grako
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity 
 
-**Grako** is feature complete and currently being used to parse and translate hundreds of thousands of lines of legacy_ code. 
+**Grako** is feature complete and currently being used over very large grammars to parse and translate hundreds of thousands of lines of legacy_ code. 
 
 .. _KLOC: http://en.wikipedia.org/wiki/KLOC 
 .. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
