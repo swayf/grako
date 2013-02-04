@@ -2,7 +2,7 @@
 """
 Elements for a model of a parsed Grako grammar.
 
-A model constructed with these elements, and rooted in a Grmmar instance is
+A model constructed with these elements, and rooted in a Grammar instance is
 able to parse the language defined by the grammar, but the main purpose of
 the model is the generation of independent, top-down, verbose, and debugable
 parsers through the inline templates from the .rendering module.
@@ -40,11 +40,12 @@ class Context(object):
         self.rules = {rule.name :rule for rule in rules}
         self.buf = Buffer(text)
         self.buf.goto(0)
-        self.trace = trace
+        self._trace = trace
         self._ast_stack = [AST()]
         self._rule_stack = []
+        self._memoization_cache = dict()
 
-        if not self.trace:
+        if not self._trace:
             self.trace = lambda x: ()
             self.trace_event = self.trace
             self.trace_match = lambda x, y: ()
@@ -57,7 +58,10 @@ class Context(object):
         return self.buf.pos
 
     def rulestack(self):
-        return '.'.join(self._rule_stack)
+        stack = '.'.join(self._rule_stack)
+        if len(stack) > 60:
+            stack = '...' + stack[-60:]
+        return stack
 
     @property
     def ast(self):
@@ -78,16 +82,16 @@ class Context(object):
         self.buf.eatwhitespace()
 
     def trace(self, msg, *params):
-        if self.trace:
+        if self._trace:
             print(msg % params, file=sys.stderr)
 
     def trace_event(self, event):
-        self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
+        self.trace('%s   %s \n\t%s', event, self.rulestack(), self.buf.lookahead())
 
     def trace_match(self, token, name=None):
-        if self.trace:
+        if self._trace:
             name = name if name else ''
-            self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
+            self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self.buf.lookahead())
 
 
 class _Grammar(Renderer):
@@ -561,7 +565,6 @@ class RuleGrammar(NamedGrammar):
     def __init__(self, name, exp, ast_name=None):
         super(RuleGrammar, self).__init__(name, exp, False)
         self.ast_name = ast_name
-        self._memoization_cache = dict()
 
     def parse(self, ctx):
         ctx._rule_stack.append(self.name)
@@ -587,7 +590,7 @@ class RuleGrammar(NamedGrammar):
 
     def _invoke_rule(self, name, ctx, pos):
         key = (pos, name)
-        cache = self._memoization_cache
+        cache = ctx._memoization_cache
 
         if key in cache:
             return cache[key]
@@ -670,7 +673,7 @@ class Grammar(Renderer):
             except FailedCut as e:
                 raise e.nested
         except:
-            log.warning('failed grammar')
+            log.warning('failed parse')
             raise
 
     def __str__(self):
