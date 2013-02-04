@@ -12,7 +12,7 @@ the .buffering module.
 
 A Parser will take the text to parse directly, or an instance of the
 .buffeing.Buffer class. The text/Buffer must be provided early, at Parser
-instance creation, to guarantee memoization consistency. Parsers instances
+instance creation, to guarantee memoization consistency. Parser instances
 are bound to the text to be parsed.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
