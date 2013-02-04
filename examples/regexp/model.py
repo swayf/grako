@@ -94,15 +94,8 @@ class Closure(Model):
     def render_fields(self, fields):
         fields.update(atomn=self.atom.n)
 
-    _template = '''\
-            S{n} = {{ S{atomn} }} .
-
-            {atom}
-
-            '''
     template = '''\
-            S{n} = S{atomn} S{n} .
-            S{n} = () .
+            S{n} = {{ S{atomn} }} .
 
             {atom}
 
@@ -117,6 +110,8 @@ class Literal(Model):
             S{n} = ?/{exp}/? .
 
             '''
+
+
 class Empty(Model):
     def __init__(self):
         super(Empty, self).__init__()
@@ -125,3 +120,4 @@ class Empty(Model):
             S{n} = () .
 
             '''
+

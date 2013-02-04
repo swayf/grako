@@ -12,7 +12,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from grako.parsing import * # @UnusedWildImport
 from grako.exceptions import * # @UnusedWildImport
 
-__version__ = '13.035.05.59.26'
+__version__ = '13.035.14.51.16'
 
 class RegexParserRoot(Parser):
     def _START_(self):
@@ -136,19 +136,31 @@ class RegexParserBase(RegexParserRoot):
     
 
 def main(filename, startrule):
+    import json
     with open(filename) as f:
         text = f.read()
-    parser = RegexParserBase(text)
+    parser = RegexParserBase(text, simple=True)
     ast = parser.parse(startrule)
+    print('AST:')
     print(ast)
-    print(ast.json(indent=2))
+    print()
+    print('JSON:')
+    print(json.dumps(ast, indent=2))
+    print()
 
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) == 3:
+    if '-l' in sys.argv:
+        print('Rules:')
+        for r in RegexParserBase.rule_list():
+            print(r)
+        print()
+    elif len(sys.argv) == 3:
         main(sys.argv[1], sys.argv[2])
     else:
         print('Usage:')
         program = sys.argv[0].split('/')[-1]
         print(program, ' <filename> <startrule>')
+        print(program, ' -l') # list rules
+        print(program, ' -h')
 
