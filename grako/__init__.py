@@ -58,6 +58,9 @@ def main():
         grammar = parser.parse()
         text = grammar.render()
         if outfile:
+            dirname = os.path.dirname(outfile)
+            if not os.path.isdir(dirname):
+                os.makedirs(dirname)
             open(outfile, 'w').write(text)
         else:
             print(text)
