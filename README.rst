@@ -125,9 +125,9 @@ To use the generated parser, just subclass the base or the abstract parser, crea
     class MyParser(MyParserBase):
         pass
 
-    parser = MyParser('text to parse')
-    ast = parser.parse('start')
-    print(ast # parse()) # returns an AST by default
+    parser = MyParser()
+    ast = parser.parse('text to parse', rule_name='start')
+    print(ast)
     print(json.dumps(ast, indent=2)) # ASTs are JSON-friendy
 
 This is more or less what happens if you invole the generated parser directly::

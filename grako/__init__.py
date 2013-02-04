@@ -39,8 +39,8 @@ argparser.add_argument('-t', '--trace',
                        )
 
 def parse(name, grammar, trace=False):
-    parser = GrakoGrammarGenerator(name, grammar, trace=trace)
-    return parser.parse()
+    parser = GrakoGrammarGenerator(name, trace=trace)
+    return parser.parse(grammar)
 
 def generate(name, grammar, trace=False):
     model = parse(name, grammar, trace=trace)

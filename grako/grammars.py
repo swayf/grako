@@ -726,8 +726,8 @@ class Grammar(Renderer):
                     import json
                     with open(filename) as f:
                         text = f.read()
-                    parser = {name}ParserBase(text, simple=True)
-                    ast = parser.parse(startrule)
+                    parser = {name}ParserBase(simple=True)
+                    ast = parser.parse(text, startrule)
                     print('AST:')
                     print(ast)
                     print()

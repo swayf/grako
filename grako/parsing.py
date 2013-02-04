@@ -10,10 +10,8 @@ simple.
 Parser is also in charge of dealing with comments, with the help of
 the .buffering module.
 
-A Parser will take the text to parse directly, or an instance of the
-.buffeing.Buffer class. The text/Buffer must be provided early, at Parser
-instance creation, to guarantee memoization consistency. Parser instances
-are bound to the text to be parsed.
+Parser.parse() will take the text to parse directly, or an instance of the
+.buffeing.Buffer class.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
@@ -33,43 +31,50 @@ class AbstractParserMixin(object):
 
 
 class Parser(object):
-    def __init__(self, text,
-                        whitespace=None,
-                        comments_re=None,
-                        ignorecase=False,
-                        simple=False,
-                        trace=False,
-                        nameguard=True,
-                        bufferClass=buffering.Buffer):
-        if isinstance(text, buffering.Buffer):
-            self._buffer = text
-        else:
-            self._buffer = buffering.Buffer(text, whitespace, ignorecase=ignorecase)
+    def __init__(self,
+                 whitespace=None,
+                 comments_re=None,
+                 ignorecase=False,
+                 simple=False,
+                 trace=False,
+                 nameguard=True,
+                 bufferClass=buffering.Buffer):
+        self.whitespace = whitespace
         self.comments_re = comments_re
+        self.ignorecase = ignorecase
         self._simple = simple
         self._trace = trace
-        self._bufferClass = bufferClass
-        self._buffer.nameguard = nameguard
+        self.bufferClass = bufferClass
+        self.nameguard = nameguard
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
-        self._memoization_cache = dict()
+        self._memoization_cache = None
         if not self._trace:
             self.trace = lambda x: ()
             self.trace_event = self.trace
             self.trace_match = lambda x, y: ()
 
-    def parse(self, rule_name):
+    def parse(self, text, rule_name):
         try:
+            if isinstance(text, buffering.Buffer):
+                self._buffer = text
+            else:
+                self._buffer = self.bufferClass(text,
+                                                whitespace=self.whitespace,
+                                                ignorecase=self.ignorecase,
+                                                nameguard=self.nameguard)
             self._ast_stack = []
             self._push_ast()
             self._concrete_stack = [None]
             self._rule_stack = []
             self._cut_stack = [False]
+            self._memoization_cache = dict()
             return self._call(rule_name, rule_name)
         finally:
             del self._ast_stack[1:]
+            self._memoization_cache = None
 
     @property
     def ast(self):
