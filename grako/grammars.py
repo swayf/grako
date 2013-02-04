@@ -35,10 +35,11 @@ def urepr(obj):
     return repr(obj).lstrip('u')
 
 class Context(object):
-    def __init__(self, rules, text):
+    def __init__(self, rules, text, trace):
         self.rules = {rule.name :rule for rule in rules}
         self.buf = Buffer(text)
         self.buf.goto(0)
+        self.trace = trace
         self._ast_stack = [AST()]
         self._rule_stack = []
 
@@ -341,6 +342,7 @@ class ChoiceGrammar(_Grammar):
 
     template = '''\
                 def choice{n}():
+                    _e = None
                 {options}
                     self.error({error})
                 _e = choice{n}() \
@@ -636,11 +638,11 @@ class Grammar(Renderer):
             rule._first_set = F[rule.name]
         return F
 
-    def parse(self, start, text):
+    def parse(self, start, text, trace=False):
         log.info('enter grammar')
         try:
             try:
-                ctx = Context(self.rules, text)
+                ctx = Context(self.rules, text, trace=trace)
                 start_rule = ctx.rules[start]
                 tree = start_rule.parse(ctx)
                 ctx.add_ast_node(start, tree, False)
