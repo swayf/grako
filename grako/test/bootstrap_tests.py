@@ -6,10 +6,10 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 sys.path.append('tmp')
 import os
-from pprint import *  # @UnusedWildImport
+import json
 import logging
-from grako.bootstrap import *  # @UnusedWildImport
 logging.basicConfig()
+from grako.bootstrap import GrakoParser, GrakoGrammarGenerator
 logging.getLogger().setLevel(logging.ERROR)
 logging.getLogger('grako.buffering').setLevel(logging.WARNING)
 logging.getLogger('grako.grammar').setLevel(logging.WARNING)
@@ -67,7 +67,7 @@ def main():
     print('-' * 20, 'phase 5 - parse using the grammar model')
     text = open('tmp/4.ebnf').read()
     ast5 = parser.parse('grammar', text)
-    open('tmp/5.ast', 'w').write(ast5.json())
+    open('tmp/5.ast', 'w').write(json.dumps(ast5, indent=2))
 #    print(ast5)
 
     print('-' * 20, 'phase 6 - generate parser code')
@@ -80,7 +80,7 @@ def main():
     parser = GenParser(text, trace=False)
     result = parser.parse('grammar')
     assert result == parser.ast['grammar']
-    open('tmp/8.ast', 'w').write(parser.ast.json())
+    open('tmp/8.ast', 'w').write(json.dumps(parser.ast.json, indent=2))
 #    print(ast5)
 #    print('=' * 20)
 #    print(result)

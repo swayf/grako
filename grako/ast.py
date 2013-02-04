@@ -4,7 +4,6 @@ Define the AST class, a direct descendant of dict that's used during parsing
 to store the values of named elements of grammar rules.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-import json
 
 __all__ = ['AST']
 
@@ -58,6 +57,3 @@ class AST(dict):
         else:
             super(AST, self).__setitem__(key, [previous, value])
         return self
-
-    def json(self, **kwargs):
-        return json.dumps(self, **kwargs)

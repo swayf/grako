@@ -723,12 +723,13 @@ class Grammar(Renderer):
                 {abstract_rules}
 
                 def main(filename, startrule):
+                    import json
                     with open(filename) as f:
                         text = f.read()
                     parser = {name}ParserBase(text)
                     ast = parser.parse(startrule)
                     print(ast)
-                    print(ast.json(indent=2))
+                    print(json.dumps(ast, indent=2))
 
                 if __name__ == '__main__':
                     import sys
