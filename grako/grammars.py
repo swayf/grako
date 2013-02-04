@@ -103,7 +103,7 @@ class EOFGrammar(_Grammar):
     def parse(self, ctx):
         ctx.buf.eatwhitespace()
         if not ctx.buf.atend():
-            raise FailedParse(ctx.buf, '<EOF>')
+            raise FailedParse(ctx.buf, 'Expecting end of text.')
 
     def __str__(self):
         return '$'
