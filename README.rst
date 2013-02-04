@@ -116,9 +116,13 @@ To use the generated parser, just subclass the base or the abstract parser, crea
         pass
 
     parser = MyParser('text to parse')
-    result = parser.parse('start')
-    print result # parse() returns an AST by default
-    print result.json() # the AST can be converted to JSON
+    ast = parser.parse('start')
+    print ast # parse() returns an AST by default
+    print ast.json(indent=2) # the AST can be converted to JSON
+
+This is more or less what happens if you invole the generated parser directly::
+
+    python myparser.py inputfile startrule
 
 The generated parsers constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
 \
