@@ -382,7 +382,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 --------------
 
-**1.0rc3**
+**1.0rc3** 2013-02-04 
     * Now the text to parse is passed directly to the `parse()` method.
     * Added a *grako* script to invoke the tool directly.
     * An end-to end translation example is provided in the *examples/regexp* project.
@@ -391,9 +391,9 @@ Change History
     * Tested under Python_ 3.3.
     * Final release candidate for 1.0. Only improvements to the documentation will be accepted from now on.
 
-**1.0rc2**
+**1.0rc2** 2013-02-02 
     Second release candidate. Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
 
-**1.0rc1**
+**1.0rc1** 2013-01-30 
     First release candidate.
 
