@@ -12,18 +12,17 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from grako.parsing import * # @UnusedWildImport
 from grako.exceptions import * # @UnusedWildImport
 
-__version__ = '13.035.19.33.22'
+__version__ = '13.035.20.32.45'
 
 class RegexParserRoot(Parser):
     def _START_(self):
         _e = None
         _e = self._call('EXPRE')
-        self.ast.add('expre', _e)
         self._check_eof()
         
     def _EXPRE_(self):
         _e = None
-        def choice2():
+        def choice0():
             _e = None
             with self._option():
                 _e = self._call('CHOICE')
@@ -32,31 +31,31 @@ class RegexParserRoot(Parser):
                 _e = self._call('SEQUENCE')
                 return _e
             self.error('no available options')
-        _e = choice2()
+        _e = choice0()
         
     def _CHOICE_(self):
         _e = None
         _e = self._call('SEQUENCE')
         self.ast.add('opts', _e, force_list=True)
-        def repeat4():
+        def repeat2():
             _e = self._token('|')
             self._cut()
             _e = self._call('SEQUENCE')
             self.ast.add('opts', _e, force_list=True)
             return _e
-        _e = self._repeat(repeat4, plus=True)
+        _e = self._repeat(repeat2, plus=True)
         
     def _SEQUENCE_(self):
         _e = None
-        def repeat16():
+        def repeat14():
             _e = self._call('TERM')
             return _e
-        _e = self._repeat(repeat16, plus=True)
+        _e = self._repeat(repeat14, plus=True)
         self.ast.add('terms', _e)
         
     def _TERM_(self):
         _e = None
-        def choice17():
+        def choice15():
             _e = None
             with self._option():
                 _e = self._call('CLOSURE')
@@ -65,18 +64,18 @@ class RegexParserRoot(Parser):
                 _e = self._call('ATOM')
                 return _e
             self.error('no available options')
-        _e = choice17()
+        _e = choice15()
         
     def _CLOSURE_(self):
         _e = None
         _e = self._call('ATOM')
-        self.ast.add('atom', _e)
+        self.ast['@'] = _e
         _e = self._token('*')
         self._cut()
         
     def _ATOM_(self):
         _e = None
-        def choice20():
+        def choice16():
             _e = None
             with self._option():
                 _e = self._call('SUBEXP')
@@ -85,14 +84,14 @@ class RegexParserRoot(Parser):
                 _e = self._call('LITERAL')
                 return _e
             self.error('no available options')
-        _e = choice20()
+        _e = choice16()
         
     def _SUBEXP_(self):
         _e = None
         _e = self._token('(')
         self._cut()
         _e = self._call('EXPRE')
-        self.ast.add('expre', _e)
+        self.ast['@'] = _e
         _e = self._token(')')
         
     def _LITERAL_(self):

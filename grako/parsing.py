@@ -218,7 +218,9 @@ class Parser(object):
             rule()
             node = self.ast
             if node:
-                if not self._simple:
+                if '@' in node:
+                    node = node['@']  # override the AST
+                elif not self._simple:
                     node.add('parseinfo', AST(rule=name, pos=pos))
             else:
                 node = self.cst

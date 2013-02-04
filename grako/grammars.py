@@ -67,6 +67,10 @@ class Context(object):
     def ast(self):
         return self._ast_stack[-1]
 
+    @ast.setter
+    def ast(self, value):
+        self._ast_stack[-1] = value
+
     def push_ast(self):
         self._ast_stack.append(AST())
 
@@ -510,6 +514,21 @@ class NamedGrammar(_DecoratorGrammar):
     template = '''
                 {exp}
                 self.ast.add('{name}', _e{force_list})\
+                '''
+
+
+class OverrideGrammar(_DecoratorGrammar):
+    def parse(self, ctx):
+        ast = super(OverrideGrammar, self).parse(ctx)
+        ctx.ast = ast
+        return ast
+
+    def __str__(self):
+        return '@%s' % str(self.exp)
+
+    template = '''
+                {exp}
+                self.ast['@'] = _e\
                 '''
 
 

@@ -213,6 +213,13 @@ The expressions, in reverse order of operator precedence, can be:
     ``name+:e``
         Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be a list even if only one element is added.
 
+    ``@e``
+        The override operator. Make the AST_ for the complete rule be the AST_ for ``e``. The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. This is a typical use of the override operator::
+
+        subexp = '(' @expre ')' .
+
+The AST_ returned for the ``subexp`` rule will be the AST_ recovered from invoking ``expre``, without having to write a semantic action.
+
     ``$``
         The *end of text* symbol. Verify thad the end of the input text has been reached.
 
@@ -221,7 +228,7 @@ The expressions, in reverse order of operator precedence, can be:
 
 When there are no named items in a rule, the AST_ consists of the elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules. You will have an AST_ created for::
 
-    number = ?/[0-9]+/?
+    number = ?/[0-9]+/? .
 
 without having to write::
     
@@ -231,9 +238,9 @@ When a rule has named elementes, the unnamed ones are excluded from the AST_ (th
 
 It is also possible to add an AST_ name to a rule::
 
-    ast_name:rule = expre;
+    name:rule = expre;
 
-That will make the default AST_ returned to be a dict with a single item ``ast_name`` as key, and the AST_ from the right-hand side of the rule as value.
+That will make the default AST_ returned to be a dict with a single item ``name`` as key, and the AST_ from the right-hand side of the rule as value.
 
 
 Whitespace
