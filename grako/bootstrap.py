@@ -31,8 +31,8 @@ class GrakoParserRoot(Parser):
                                             )
         self.grammar_name = grammar_name
 
-    def parse(self, text, rule='grammar'):
-        return super(GrakoParserRoot, self).parse(text, rule)
+    def parse(self, text, rule='grammar', filename=None):
+        return super(GrakoParserRoot, self).parse(text, rule, filename=filename)
 
     def _void_(self):
         self._token('()', 'void')
