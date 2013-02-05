@@ -10,10 +10,10 @@ PARSER_FILENAME = 'genparser.py'
 
 def main():
     grammar = regexp_parser.translate('(a|b)*')
-    model = grako.parse('Regexp', grammar)
-    model.parse('S0', 'aaabbaba')
+    model = grako.genmodel('Regexp', grammar)
+    model.parse('aaabbaba', 'S0')
     try:
-        model.parse('S0', 'aaaCbbaba')
+        model.parse('aaaCbbaba', 'S0')
         raise Exception('Should not have parsed!')
     except grako.FailedParse:
         pass
