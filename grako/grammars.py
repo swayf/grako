@@ -36,9 +36,9 @@ def urepr(obj):
     return repr(obj).lstrip('u')
 
 class Context(object):
-    def __init__(self, rules, text, trace):
+    def __init__(self, rules, text, filename, trace):
         self.rules = {rule.name :rule for rule in rules}
-        self.buf = Buffer(text)
+        self.buf = Buffer(text, filename=filename)
         self.buf.goto(0)
         self._trace = trace
         self._ast_stack = [AST()]
@@ -679,12 +679,12 @@ class Grammar(Renderer):
             rule._first_set = F[rule.name]
         return F
 
-    def parse(self, start, text, trace=False):
+    def parse(self, text, start=None, filename=None, trace=False,):
         log.info('enter grammar')
         try:
             try:
-                ctx = Context(self.rules, text, trace=trace)
-                start_rule = ctx.rules[start]
+                ctx = Context(self.rules, text, filename, trace=trace)
+                start_rule = ctx.rules[start] if start else self.rules[0]
                 tree = start_rule.parse(ctx)
                 ctx.add_ast_node(start, tree, False)
                 log.info('SUCCESS grammar')
