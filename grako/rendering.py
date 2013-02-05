@@ -35,7 +35,7 @@ class Renderer(object):
         pass
 
     def render(self, template=None, **fields):
-        fields = ({k:v for k, v in vars(self).items() if not k.startswith('_')})
+        fields.update({k:v for k, v in vars(self).items() if not k.startswith('_')})
 
         override = self.render_fields(fields)
         if template is None:
