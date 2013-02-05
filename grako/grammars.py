@@ -14,7 +14,6 @@ computed, but they are not.
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
 import re
-import logging
 from copy import deepcopy
 from keyword import iskeyword
 import time
@@ -23,8 +22,6 @@ from .rendering import Renderer, render
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
-
-log = logging.getLogger('grako.grammars')
 
 def check(result):
     assert isinstance(result, _Grammar), str(result)
@@ -280,7 +277,6 @@ class SequenceGrammar(_Grammar):
         return simplify(self.parse_seq(ctx, self.sequence))
 
     def parse_seq(self, ctx, seq):
-        log.debug('sequence %s', str([type(s) for s in self.sequence]))
         result = []
         for _i, s in enumerate(seq):
             tree = s.parse(ctx)
@@ -377,7 +373,6 @@ class ChoiceGrammar(_Grammar):
 
 class RepeatGrammar(_DecoratorGrammar):
     def parse(self, ctx):
-        log.debug('repeat %s', str(self.exp))
         result = []
         while True:
             p = ctx.buf.pos
@@ -588,7 +583,6 @@ class RuleGrammar(NamedGrammar):
     def parse(self, ctx):
         ctx._rule_stack.append(self.name)
         ctx.push_ast()
-        log.debug('%s \n\t%s', ctx.rulestack(), ctx.buf.lookahead())
         try:
             if self.name[0].islower():
                 ctx.next_token()
@@ -680,7 +674,6 @@ class Grammar(Renderer):
         return F
 
     def parse(self, text, start=None, filename=None, trace=False,):
-        log.info('enter grammar')
         try:
             try:
                 ctx = Context(self.rules, text, filename, trace=trace)
@@ -691,7 +684,6 @@ class Grammar(Renderer):
             except FailedCut as e:
                 raise e.nested
         except:
-            log.info('failed parse')
             raise
 
     def __str__(self):
