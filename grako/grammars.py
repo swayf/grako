@@ -687,7 +687,6 @@ class Grammar(Renderer):
                 start_rule = ctx.rules[start] if start else self.rules[0]
                 tree = start_rule.parse(ctx)
                 ctx.add_ast_node(start, tree, False)
-                log.info('SUCCESS grammar')
                 return ctx.ast
             except FailedCut as e:
                 raise e.nested
