@@ -66,7 +66,7 @@ def main():
 
     print('-' * 20, 'phase 5 - parse using the grammar model')
     text = open('tmp/4.ebnf').read()
-    ast5 = parser.parse('grammar', text)
+    ast5 = parser.parse(text)
     open('tmp/5.ast', 'w').write(json.dumps(ast5, indent=2))
 #    print(ast5)
 
