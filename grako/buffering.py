@@ -18,18 +18,18 @@ __all__ = ['Buffer']
 RETYPE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
-LineInfo = namedtuple('LineInfo', ['line', 'col', 'start', 'text'])
+LineInfo = namedtuple('LineInfo', ['filename', 'line', 'col', 'start', 'text'])
 
 class Buffer(object):
     def __init__(self, text,
-                 filename='unknown',
+                 filename=None,
                  whitespace=None,
                  ignorecase=False,
                  trace=False,
                  nameguard=True):
         self.original_text = text
         self.text = text
-        self.filename = filename
+        self.filename = filename if filename is not None else ''
         self.whitespace = set(whitespace if whitespace else string.whitespace)
         self.ignorecase = ignorecase
         self.trace = trace
@@ -170,7 +170,7 @@ class Buffer(object):
         start, line = self._linecache[n - 1]
         col = pos - start - 1
         text = self.text[start:self._linecache[n].pos]
-        return LineInfo(line, col, start, text)
+        return LineInfo(self.filename, line, col, start, text)
 
     def get_line(self, n=None):
         if n is None:

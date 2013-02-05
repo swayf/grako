@@ -56,12 +56,13 @@ class Parser(object):
             self.trace_event = self.trace
             self.trace_match = lambda x, y: ()
 
-    def parse(self, text, rule_name):
+    def parse(self, text, rule_name, filename=None):
         try:
             if isinstance(text, buffering.Buffer):
                 self._buffer = text
             else:
                 self._buffer = self.bufferClass(text,
+                                                filename=filename,
                                                 whitespace=self.whitespace,
                                                 ignorecase=self.ignorecase,
                                                 nameguard=self.nameguard)
@@ -221,7 +222,7 @@ class Parser(object):
                 if '@' in node:
                     node = node['@']  # override the AST
                 elif not self._simple:
-                    node.add('parseinfo', 
+                    node.add('parseinfo',
                              AST(rule=name, pos=pos, endpos=self._pos)
                              )
             else:

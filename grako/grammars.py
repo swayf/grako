@@ -746,7 +746,7 @@ class Grammar(Renderer):
                     with open(filename) as f:
                         text = f.read()
                     parser = {name}ParserBase(simple=True)
-                    ast = parser.parse(text, startrule)
+                    ast = parser.parse(text, startrule, filename=filename)
                     print('AST:')
                     print(ast)
                     print()
