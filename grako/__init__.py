@@ -62,7 +62,7 @@ def main():
         os.unlink(outfile)
     grammar = open(filename, 'r').read()
     try:
-        parser = gencode(filename, name, grammar, trace=args.trace)
+        parser = gencode(name, grammar, trace=args.trace, filename=filename)
         if outfile:
             dirname = os.path.dirname(outfile)
             if dirname and not os.path.isdir(dirname):
