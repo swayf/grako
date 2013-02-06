@@ -463,7 +463,7 @@ class GrakoGrammarGenerator(GrakoParserBase):
         name = ast.name
         rhs = ast.rhs
         if not name in self.rules:
-            rule = RuleGrammar(name, rhs, ast_name)
+            rule = RuleGrammar(name, rhs, ast_name=ast_name)
             self.rules[name] = rule
         else:
             rule = self.rules[name]

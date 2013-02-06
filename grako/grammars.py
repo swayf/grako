@@ -586,8 +586,6 @@ class RuleGrammar(NamedGrammar):
             node, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
             ctx.goto(newpos)
             ctx.trace_event('SUCCESS')
-            if self.ast_name:
-                node = AST((self.ast_name, node))
             return node
         except FailedParse:
             ctx.trace_event('FAILED')
@@ -611,6 +609,8 @@ class RuleGrammar(NamedGrammar):
                 node = ctx.cst
             elif '@' in node:
                 node = node['@']
+            if self.ast_name:
+                node = AST([(self.ast_name, node)])
         finally:
             ctx._pop_ast()
         result = (node, ctx.pos)
@@ -631,7 +631,7 @@ class RuleGrammar(NamedGrammar):
         if iskeyword(name):
             name += '_'
         if self.ast_name:
-            ast_name_clause = 'self.ast = AST(%s=self.ast)\n' % self.ast_name
+            ast_name_clause = '\nself.ast = AST(%s=self.ast)\n' % self.ast_name_
         else:
             ast_name_clause = ''
         fields.update(
@@ -643,8 +643,8 @@ class RuleGrammar(NamedGrammar):
     template = '''
                 def _{name}_(self):
                     _e = None
-                {exp}
-                    {ast_name_clause}
+                {exp}{ast_name_clause}
+
                 '''
 
 class Grammar(Renderer):
