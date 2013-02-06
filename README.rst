@@ -399,13 +399,13 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 --------------
 
-**1.0rc4** 2013-02-05
+**1.0rc4**
     * Grammar models (not so the generated parsers) were not producing correct ASTs_. enough of a bug to require another release candidate.
     * Added the *override* (@) operator to grammars.
     * Try to honor a ``filename=`` keyword argument throughout (specially in error messages).
     * Refactored code that was identical in ``Parser`` and ``Context``
 
-**1.0rc3** 2013-02-04 
+**1.0rc3**
     * Now the text to parse is passed directly to the `parse()` method.
     * Added a *grako* script to invoke the tool directly.
     * An end-to end translation example is provided in the *examples/regexp* project.
@@ -415,9 +415,9 @@ Change History
     * Final release candidate for 1.0. Only improvements to the documentation will be accepted from now on.
     * Line by line review of this *README*.
 
-**1.0rc2** 2013-02-02 
+**1.0rc2**
     Second release candidate. Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
 
-**1.0rc1** 2013-01-30 
+**1.0rc1**
     First release candidate.
 
