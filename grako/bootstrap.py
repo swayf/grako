@@ -212,7 +212,7 @@ class GrakoParserRoot(Parser):
         try:
             ast_name = self._call('word')
             self._token(':')
-            self.ast.add('ast_name', ast_name)
+            self.ast.add('ast_name', str(ast_name))
         except FailedParse:
             self._goto(p)
         self._call('word', 'name')
