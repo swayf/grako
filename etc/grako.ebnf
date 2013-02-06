@@ -2,17 +2,17 @@ grammar = rules:{rule}+ $ ;
 
 (* a comment *)
 
-rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
+rule:rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
 
-expre = choice ;
+expre = choice | sequence;
 
-choice = options+:sequence {'|' >> options:sequence}+ | sequence ;
+choice:choice = options+:sequence {'|' >> options:sequence}+ ;
 
 sequence = element {[','] element} ;
 
 element = named | override | term ;
 
-named = name:qualified force_list:['+'] ':' value:element ;
+named:named = name:qualified force_list:['+'] ':' value:element ;
 
 override = '@' @element ;
 
