@@ -339,7 +339,7 @@ class ChoiceGrammar(_Grammar):
                 def choice{n}():
                     _e = None
                 {options}
-                    self.error({error})
+                    self._error({error})
                 _e = choice{n}() \
                 '''
 

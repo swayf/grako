@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 import re
 from .ast import AST
+from .exceptions import FailedParse
 from . import buffering
 
 class ParseContext(object):
@@ -167,4 +168,7 @@ class ParseContext(object):
         if self._trace:
             name = name if name else ''
             self._trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
+
+    def _error(self, item, etype=FailedParse):
+        raise etype(self._buffer, item)
 

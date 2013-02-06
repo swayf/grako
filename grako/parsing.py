@@ -167,9 +167,6 @@ class Parser(ParseContext):
             return None
         return result
 
-    def error(self, item, etype=FailedParse):
-        raise etype(self._buffer, item)
-
     def _eof(self):
         return self._buffer.atend()
 
@@ -199,7 +196,7 @@ class Parser(ParseContext):
             raise
         except FailedParse as e:
             if self._is_cut_set():
-                self.error(e, FailedCut)
+                self._error(e, FailedCut)
             self._goto(p)
         finally:
             self._pop_cut()
@@ -237,7 +234,7 @@ class Parser(ParseContext):
             pass
         else:
             self._goto(p)
-            self.error('', etype=FailedLookahead)
+            self._error('', etype=FailedLookahead)
         finally:
             self._pop_ast()  # simply discard
 
@@ -253,7 +250,7 @@ class Parser(ParseContext):
                 raise
             except FailedParse as e:
                 if self._is_cut_set():
-                    self.error(e, FailedCut)
+                    self._error(e, FailedCut)
                 self._goto(p)
                 raise StopIteration()
             finally:
