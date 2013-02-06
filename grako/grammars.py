@@ -22,6 +22,7 @@ from .rendering import Renderer, render
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
+from .contexts import ParseContext
 
 def check(result):
     assert isinstance(result, _Grammar), str(result)
@@ -32,15 +33,13 @@ def dot(x, y, k):
 def urepr(obj):
     return repr(obj).lstrip('u')
 
-class Context(object):
+class ModelContext(ParseContext):
     def __init__(self, rules, text, filename, trace):
+        super(ModelContext, self).__init__()
         self.rules = {rule.name :rule for rule in rules}
         self.buf = Buffer(text, filename=filename)
         self.buf.goto(0)
         self._trace = trace
-        self._ast_stack = [AST()]
-        self._rule_stack = []
-        self._memoization_cache = dict()
 
         if not self._trace:
             self.trace = lambda x: ()
@@ -53,31 +52,6 @@ class Context(object):
     @property
     def pos(self):
         return self.buf.pos
-
-    def rulestack(self):
-        stack = '.'.join(self._rule_stack)
-        if len(stack) > 60:
-            stack = '...' + stack[-60:]
-        return stack
-
-    @property
-    def ast(self):
-        return self._ast_stack[-1]
-
-    @ast.setter
-    def ast(self, value):
-        self._ast_stack[-1] = value
-
-    def push_ast(self):
-        self._ast_stack.append(AST())
-
-    def pop_ast(self):
-        return self._ast_stack.pop()
-
-    def add_ast_node(self, name, node, force_list):
-        if name is not None and node:
-            self.ast.add(name, node, force_list)
-        return node
 
     def next_token(self):
         self.buf.eatwhitespace()
@@ -94,6 +68,8 @@ class Context(object):
             name = name if name else ''
             self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self.buf.lookahead())
 
+    def _find_rule(self, name):
+        return self.rules[name]
 
 class _Grammar(Renderer):
     def __init__(self):
@@ -177,11 +153,12 @@ class TokenGrammar(_Grammar):
 
     def parse(self, ctx):
         ctx.next_token()
-        result = ctx.buf.match(self.token)
-        if result is None:
+        token = ctx.buf.match(self.token)
+        if token is None:
             raise FailedToken(ctx.buf, self.token)
         ctx.trace_match(self.token, None)
-        return result
+        ctx._add_cst_node(token)
+        return token
 
     def _first(self, k, F):
         return set([(self.token,)])
@@ -207,11 +184,12 @@ class PatternGrammar(_Grammar):
         self._re = re.compile(pattern)
 
     def parse(self, ctx):
-        result = ctx.buf.matchre(self._re)
-        if result is None:
+        token = ctx.buf.matchre(self._re)
+        if token is None:
             raise FailedPattern(ctx.buf, self.pattern)
-        ctx.trace_match(result, self.pattern)
-        return result
+        ctx.trace_match(token, self.pattern)
+        ctx._add_cst_node(token)
+        return token
 
     def _first(self, k, F):
         return set([(self.pattern,)])
@@ -311,17 +289,26 @@ class ChoiceGrammar(_Grammar):
         self.options = options
 
     def parse(self, ctx):
-        items = []
         pos = ctx.pos
         for o in self.options:
             ctx.goto(pos)
+            ctx._push_ast()
             try:
-                return o.parse(ctx)
+                result = o.parse(ctx)
+                ast = ctx.ast
+                cst = ctx.cst
             except FailedCut:
                 raise
-            except FailedParse as e:
-                items.append(e.item)
-        raise FailedParse(ctx.buf, 'one of {%s}' % ','.join(items))
+            except FailedParse:
+                continue
+            finally:
+                ctx._pop_ast()
+            ctx.ast.update(ast)
+            ctx._extend_cst(cst)
+            return result
+
+        firstset = ' '.join(str(urepr(f[0])) for f in self.firstset if f)
+        raise FailedParse(ctx.buf, 'one of {%s}' % firstset)
 
     def _validate(self, rules):
         for o in self.options:
@@ -383,7 +370,7 @@ class RepeatGrammar(_DecoratorGrammar):
             except FailedParse:
                 ctx.buf.goto(p)
                 break
-        return simplify(result)
+        return result
 
 
     def _first(self, k, F):
@@ -415,7 +402,7 @@ class RepeatGrammar(_DecoratorGrammar):
 class RepeatOneGrammar(RepeatGrammar):
     def parse(self, ctx):
         head = self.exp.parse(ctx)
-        return simplify([head] + super(RepeatOneGrammar, self).parse(ctx))
+        return [head] + super(RepeatOneGrammar, self).parse(ctx)
 
     def _first(self, k, F):
         result = {()}
@@ -442,13 +429,21 @@ class RepeatOneGrammar(RepeatGrammar):
 class OptionalGrammar(_DecoratorGrammar):
     def parse(self, ctx):
         p = ctx.pos
+        ctx._push_ast()
         try:
-            return self.exp.parse(ctx)
+            result = self.exp.parse(ctx)
+            ast = ctx.ast
+            cst = ctx.cst
         except FailedCut:
             raise
         except FailedParse:
             ctx.goto(p)
             return None
+        finally:
+            ctx._pop_ast()
+        ctx.ast.update(ast)
+        ctx._extend_cst(cst)
+        return result
 
     def _first(self, k, F):
         return {()} | self.exp._first(k, F)
@@ -488,7 +483,7 @@ class NamedGrammar(_DecoratorGrammar):
 
     def parse(self, ctx):
         value = self.exp.parse(ctx)
-        ctx.add_ast_node(self.name, value, self.force_list)
+        ctx._add_ast_node(self.name, value, self.force_list)
         return value
 
     def __str__(self):
@@ -514,9 +509,9 @@ class NamedGrammar(_DecoratorGrammar):
 
 class OverrideGrammar(_DecoratorGrammar):
     def parse(self, ctx):
-        ast = super(OverrideGrammar, self).parse(ctx)
-        ctx.ast = ast
-        return ast
+        result = super(OverrideGrammar, self).parse(ctx)
+        ctx._add_ast_node('@', result)
+        return result
 
     def __str__(self):
         return '@%s' % str(self.exp)
@@ -546,10 +541,12 @@ class RuleRefGrammar(_Grammar):
 
     def parse(self, ctx):
         try:
-            rule = ctx.rules[self.name]
+            rule = ctx._find_rule(self.name)
             if self.name[0].islower():
                 ctx.next_token()
-            return rule.parse(ctx)
+            node = rule.parse(ctx)
+            ctx._add_cst_node(node)
+            return node
         except KeyError:
             raise FailedRef(ctx.buf, self.name)
         except FailedParse:
@@ -582,23 +579,20 @@ class RuleGrammar(NamedGrammar):
 
     def parse(self, ctx):
         ctx._rule_stack.append(self.name)
-        ctx.push_ast()
         try:
             if self.name[0].islower():
                 ctx.next_token()
             ctx.trace_event('ENTER ')
-            _tree, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
+            result, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
             ctx.goto(newpos)
             ctx.trace_event('SUCCESS')
             if self.ast_name:
-                return AST({self.ast_name:ctx.ast})
-            else:
-                return ctx.ast
+                result = AST(ast_name=result)
+            return result
         except FailedParse:
             ctx.trace_event('FAILED')
             raise
         finally:
-            ctx.pop_ast()
             ctx._rule_stack.pop()
 
     def _invoke_rule(self, name, ctx, pos):
@@ -609,7 +603,17 @@ class RuleGrammar(NamedGrammar):
             return cache[key]
 
         ctx.goto(pos)
-        result = (self.exp.parse(ctx), ctx.pos)
+        ctx._push_ast()
+        try:
+            self.exp.parse(ctx)
+            node = ctx.ast
+            if not node:
+                node = ctx.cst
+            elif '@' in node:
+                node = node['@']
+        finally:
+            ctx._pop_ast()
+        result = (node, ctx.pos)
         cache[key] = result
         return result
 
@@ -676,11 +680,9 @@ class Grammar(Renderer):
     def parse(self, text, start=None, filename=None, trace=False,):
         try:
             try:
-                ctx = Context(self.rules, text, filename, trace=trace)
+                ctx = ModelContext(self.rules, text, filename, trace=trace)
                 start_rule = ctx.rules[start] if start else self.rules[0]
-                tree = start_rule.parse(ctx)
-                ctx.add_ast_node(start, tree, False)
-                return ctx.ast
+                return start_rule.parse(ctx)
             except FailedCut as e:
                 raise e.nested
         except:

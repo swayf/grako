@@ -2,13 +2,13 @@ grammar = rules:{rule}+ $ ;
 
 (* a comment *)
 
-rule:rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
+rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
 
 expre = choice ;
 
-choice = options+:sequence {'|' >> options:sequence} ;
+choice = options+:sequence {'|' >> options:sequence}+ | sequence ;
 
-sequence = elements+:element {[','] elements:element} ;
+sequence = element {[','] element} ;
 
 element = named | override | term ;
 

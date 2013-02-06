@@ -20,6 +20,7 @@ from contextlib import contextmanager
 from . import buffering
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
+from .contexts import ParseContext
 
 
 class AbstractParserMixin(object):
@@ -30,7 +31,7 @@ class AbstractParserMixin(object):
         return result
 
 
-class Parser(object):
+class Parser(ParseContext):
     def __init__(self,
                  whitespace=None,
                  comments_re=None,
@@ -39,6 +40,7 @@ class Parser(object):
                  trace=False,
                  nameguard=True,
                  bufferClass=buffering.Buffer):
+        super(Parser, self).__init__()
         self.whitespace = whitespace
         self.comments_re = comments_re
         self.ignorecase = ignorecase
@@ -46,11 +48,6 @@ class Parser(object):
         self._trace = trace
         self.bufferClass = bufferClass
         self.nameguard = nameguard
-        self._ast_stack = []
-        self._concrete_stack = [None]
-        self._rule_stack = []
-        self._cut_stack = [False]
-        self._memoization_cache = None
         if not self._trace:
             self.trace = lambda x: ()
             self.trace_event = self.trace
@@ -66,23 +63,11 @@ class Parser(object):
                                                 whitespace=self.whitespace,
                                                 ignorecase=self.ignorecase,
                                                 nameguard=self.nameguard)
-            self._ast_stack = [AST()]
-            self._concrete_stack = [None]
-            self._rule_stack = []
-            self._cut_stack = [False]
-            self._memoization_cache = dict()
+            self._reset_context()
+            self._push_ast()
             return self._call(rule_name, rule_name)
         finally:
-            del self._ast_stack[1:]
-            self._memoization_cache = None
-
-    @property
-    def ast(self):
-        return self._ast_stack[-1]
-
-    @ast.setter
-    def ast(self, value):
-        self._ast_stack[-1] = value
+            self._memoization_cache = dict()
 
     @classmethod
     def rule_list(cls):
@@ -98,70 +83,8 @@ class Parser(object):
             result.append(name[1:-1])
         return result
 
-    def _push_ast(self):
-        self._push_cst()
-        self._ast_stack.append(AST())
-
-    def _pop_ast(self):
-        self._pop_cst()
-        return self._ast_stack.pop()
-
-    def _add_ast_node(self, name, node, force_list=False):
-        if name is not None:  # and node:
-            self.ast.add(name, node, force_list)
-        self._add_cst_node(node)
-        return node
-
     def result(self):
         return self.ast
-
-    @property
-    def cst(self):
-        return self._concrete_stack[-1]
-
-    @cst.setter
-    def cst(self, cst):
-        self._concrete_stack[-1] = cst
-
-    def _push_cst(self):
-        self._concrete_stack.append(None)
-
-    def _add_cst_node(self, node):
-        if node is None:
-            return
-        previous = self._concrete_stack[-1]
-        if previous is None:
-            self._concrete_stack[-1] = node
-        elif previous == node:  # FIXME: Don't know how this happens, but it does
-            return
-        elif isinstance(previous, list):
-            previous.append(node)
-        else:
-            self._concrete_stack[-1] = [previous, node]
-
-    def _extend_cst(self, cst):
-        if cst is None:
-            return
-        if self.cst is None:
-            self.cst = cst
-        elif isinstance(self.cst, list):
-            if isinstance(cst, list):
-                self.cst.extend(cst)
-            else:
-                self.cst.append(cst)
-        elif isinstance(cst, list):
-            self.cst = [self.cst] + cst
-        else:
-            self.cst = [self.cst, cst]
-
-    def _pop_cst(self):
-        return self._concrete_stack.pop()
-
-    def rulestack(self):
-        stack = '.'.join(self._rule_stack)
-        if len(stack) > 60:
-            stack = '...' + stack[-60:]
-        return stack
 
     @property
     def _pos(self):
@@ -194,11 +117,12 @@ class Parser(object):
         pos = self._pos
         try:
             self.trace_event('ENTER ')
-            result, newpos = self._invoke_rule(name, pos)
+            node, newpos = self._invoke_rule(name, pos)
             self._goto(newpos)
             self.trace_event('SUCCESS')
-            self._add_ast_node(node_name, result, force_list)
-            return result
+            self._add_ast_node(node_name, node, force_list)
+            self._add_cst_node(node)
+            return node
         except FailedParse:
             self.trace_event('FAILED')
             self._goto(pos)
@@ -218,15 +142,14 @@ class Parser(object):
         try:
             rule()
             node = self.ast
-            if node:
-                if '@' in node:
-                    node = node['@']  # override the AST
-                elif not self._simple:
-                    node.add('parseinfo',
-                             AST(rule=name, pos=pos, endpos=self._pos)
-                             )
-            else:
+            if not node:
                 node = self.cst
+            elif '@' in node:
+                node = node['@']  # override the AST
+            elif not self._simple:
+                node.add('parseinfo',
+                         AST(rule=name, pos=pos, endpos=self._pos)
+                         )
         finally:
             self._pop_ast()
         semantic_rule = self._find_semantic_rule(name)
@@ -243,6 +166,7 @@ class Parser(object):
             raise FailedToken(self._buffer, token)
         self.trace_match(token, node_name)
         self._add_ast_node(node_name, token, force_list)
+        self._add_cst_node(token)
         return token
 
     def _try(self, token, node_name=None, force_list=False):
@@ -253,6 +177,7 @@ class Parser(object):
             return None
         self.trace_match(token, node_name)
         self._add_ast_node(node_name, token, force_list)
+        self._add_cst_node(token)
         return token
 
 
@@ -262,6 +187,7 @@ class Parser(object):
             raise FailedPattern(self._buffer, pattern)
         self.trace_match(token, pattern)
         self._add_ast_node(node_name, token, force_list)
+        self._add_cst_node(token)
         return token
 
     def _try_pattern(self, pattern, node_name=None, force_list=False):
@@ -272,6 +198,7 @@ class Parser(object):
             return None
         self.trace_match(token)
         self._add_ast_node(node_name, token, force_list)
+        self._add_cst_node(token)
         return token
 
     def _find_rule(self, name):
@@ -311,18 +238,6 @@ class Parser(object):
         self._next_token()
         if not self._buffer.atend():
             raise FailedParse(self._buffer, 'Expecting end of text.')
-
-    def _is_cut_set(self):
-        return self._cut_stack[-1]
-
-    def _cut(self):
-        self._cut_stack[-1] = True
-
-    def _push_cut(self):
-        self._cut_stack.append(False)
-
-    def _pop_cut(self):
-        return self._cut_stack.pop()
 
     @contextmanager
     def _option(self):
