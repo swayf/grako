@@ -68,8 +68,10 @@ def main():
     result = parser.parse(text, 'grammar')
     assert result == parser.ast['grammar']
     ast8 = parser.ast
-    open('tmp/8.ast', 'w').write(json.dumps(ast8, indent=2))
+    json8 = json.dumps(ast8, indent=2)
+    open('tmp/8.ast', 'w').write(json8)
     assert ast5 == ast8['grammar']
+    assert json8 == open('etc/check.js').read()
 
 
 if __name__ == '__main__':
