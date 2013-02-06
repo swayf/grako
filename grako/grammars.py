@@ -455,8 +455,8 @@ class OptionalGrammar(_DecoratorGrammar):
         fields.update(exp=indent(render(self.exp)))
 
     template = '''\
-                _e = None
                 with self._optional():
+                    _e = None
                 {exp}\
                 '''
 
@@ -583,12 +583,12 @@ class RuleGrammar(NamedGrammar):
             if self.name[0].islower():
                 ctx.next_token()
             ctx.trace_event('ENTER ')
-            result, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
+            node, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
             ctx.goto(newpos)
             ctx.trace_event('SUCCESS')
             if self.ast_name:
-                result = AST(ast_name=result)
-            return result
+                node = AST((self.ast_name, node))
+            return node
         except FailedParse:
             ctx.trace_event('FAILED')
             raise
@@ -681,7 +681,7 @@ class Grammar(Renderer):
         try:
             try:
                 ctx = ModelContext(self.rules, text, filename, trace=trace)
-                start_rule = ctx.rules[start] if start else self.rules[0]
+                start_rule = ctx._find_rule(start) if start else self.rules[0]
                 return start_rule.parse(ctx)
             except FailedCut as e:
                 raise e.nested
