@@ -219,14 +219,17 @@ class Parser(ParseContext):
     @contextmanager
     def _if(self):
         p = self._pos
+        self._push_ast()
         try:
             yield
         finally:
             self._goto(p)
+            self._pop_ast()  # simply discard
 
     @contextmanager
     def _ifnot(self):
         p = self._pos
+        self._push_ast()
         try:
             yield
         except FailedParse:
@@ -235,6 +238,8 @@ class Parser(ParseContext):
         else:
             self._goto(p)
             self.error('', etype=FailedLookahead)
+        finally:
+            self._pop_ast()  # simply discard
 
     def _repeat_iterator(self, f):
         while 1:

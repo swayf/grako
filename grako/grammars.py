@@ -189,10 +189,12 @@ class LookaheadGrammar(_DecoratorGrammar):
 
     def parse(self, ctx):
         p = ctx.pos
+        ctx._push_ast()
         try:
             super(LookaheadNotGrammar, self).parse(ctx)
         finally:
             ctx.goto(p)
+            ctx._pop_ast()  # simply discard
 
     def render_fields(self, fields):
         fields.update(exp=indent(render(self.exp)))
@@ -208,6 +210,7 @@ class LookaheadNotGrammar(_DecoratorGrammar):
 
     def parse(self, ctx):
         p = ctx.pos
+        ctx._push_ast()
         try:
             super(LookaheadNotGrammar, self).parse(ctx)
             ctx.goto(p)
@@ -215,6 +218,9 @@ class LookaheadNotGrammar(_DecoratorGrammar):
         except FailedParse:
             ctx.goto(p)
             pass
+        finally:
+            ctx._pop_ast()  # simply discard
+
 
     def render_fields(self, fields):
         fields.update(exp=indent(render(self.exp)))
