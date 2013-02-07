@@ -400,7 +400,7 @@ Change History
 --------------
 
 **1.0rc4**
-    * Grammar models (not so the generated parsers) were not producing correct ASTs_. enough of a bug to require another release candidate.
+    * Grammar models (not so the generated parsers) were not producing correct ASTs_. Enough of a bug to require another release candidate.
     * Added the *override* (@) operator to grammars.
     * Try to honor a ``filename=`` keyword argument throughout (specially in error messages).
     * Refactored code that was identical in ``Parser`` and ``Context``
