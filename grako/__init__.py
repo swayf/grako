@@ -22,7 +22,7 @@ argparser = argparse.ArgumentParser(prog='grako',
 
 argparser.add_argument('filename',
                        metavar='grammar',
-                       help='The filename of the grammar to generate a parser for'
+                       help='The filename of the grammar to gencode( a parser for'
                        )
 argparser.add_argument('-m', '--name',
                        nargs=1,
@@ -38,16 +38,18 @@ argparser.add_argument('-t', '--trace',
                        action='store_true'
                        )
 
-def parse(name, grammar, trace=False):
-    parser = GrakoGrammarGenerator(name, grammar, trace=trace)
-    return parser.parse()
+def genmodel(name, grammar, trace=False, filename=None):
+    parser = GrakoGrammarGenerator(name, trace=trace)
+    return parser.parse(grammar, filename=filename)
 
-def generate(name, grammar, trace=False):
-    model = parse(name, grammar, trace=trace)
+def gencode(name, grammar, trace=False, filename=None):
+    model = genmodel(name, grammar, trace=trace, filename=filename)
     return model.render()
 
 
 def main():
+    import logging
+    logging.basicConfig()
     try:
         args = argparser.parse_args()
     except Exception as e:
@@ -62,7 +64,7 @@ def main():
         os.unlink(outfile)
     grammar = open(filename, 'r').read()
     try:
-        parser = generate(name, grammar, trace=args.trace)
+        parser = gencode(name, grammar, trace=args.trace, filename=filename)
         if outfile:
             dirname = os.path.dirname(outfile)
             if dirname and not os.path.isdir(dirname):

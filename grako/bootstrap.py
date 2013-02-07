@@ -23,15 +23,16 @@ COMMENTS_RE = r'\(\*(?:.|\n)*?\*\)'
 
 class GrakoParserRoot(Parser):
 
-    def __init__(self, grammar_name, text, trace=False):
-        super(GrakoParserRoot, self).__init__(text,
-                comments_re=COMMENTS_RE,
-                ignorecase=True,
-                trace=trace)
+    def __init__(self, grammar_name, trace=False):
+        super(GrakoParserRoot, self).__init__(
+                                            comments_re=COMMENTS_RE,
+                                            ignorecase=True,
+                                            trace=trace
+                                            )
         self.grammar_name = grammar_name
 
-    def parse(self, rule='grammar'):
-        return super(GrakoParserRoot, self).parse(rule)
+    def parse(self, text, rule='grammar', filename=None):
+        return super(GrakoParserRoot, self).parse(text, rule, filename=filename)
 
     def _void_(self):
         self._token('()', 'void')
@@ -163,9 +164,20 @@ class GrakoParserRoot(Parser):
         except FailedParse as e:
             raise FailedCut(self._buffer, e)
 
+    def _override_(self):
+        self._token('@')
+        self._cut()
+        try:
+            self._call('element', '@')
+        except FailedParse as e:
+            raise FailedCut(self._buffer, e)
+
     def _element_(self):
         with self._option():
             self._call('named', 'element')
+            return
+        with self._option():
+            self._call('override', 'element')
             return
         with self._option():
             self._call('term', 'element')
@@ -200,7 +212,7 @@ class GrakoParserRoot(Parser):
         try:
             ast_name = self._call('word')
             self._token(':')
-            self.ast.add('ast_name', ast_name)
+            self.ast.add('ast_name', str(ast_name))
         except FailedParse:
             self._goto(p)
         self._call('word', 'name')
@@ -264,6 +276,9 @@ class GrakoParserBase(GrakoParserRoot):
         return ast.term
 
     def named(self, ast):
+        return ast
+
+    def override(self, ast):
         return ast
 
     def element(self, ast):
@@ -338,6 +353,9 @@ class GrakoParser(GrakoParserBase):
     def named(self, ast):
         return ast
 
+    def override(self, ast):
+        return ast
+
     def element(self, ast):
         return simplify(ast.element)
 
@@ -361,8 +379,8 @@ class GrakoParser(GrakoParserBase):
 
 class GrakoGrammarGenerator(GrakoParserBase):
 
-    def __init__(self, grammar_name, text, trace=False):
-        super(GrakoGrammarGenerator, self).__init__(grammar_name, text, trace=trace)
+    def __init__(self, grammar_name, trace=False):
+        super(GrakoGrammarGenerator, self).__init__(grammar_name, trace=trace)
         self.rules = OrderedDict()
 
     def token(self, ast):
@@ -421,6 +439,9 @@ class GrakoGrammarGenerator(GrakoParserBase):
     def named(self, ast):
         return NamedGrammar(ast.name, ast.value, 'force_list' in ast)
 
+    def override(self, ast):
+        return OverrideGrammar(ast)
+
     def element(self, ast):
         return ast.element
 
@@ -442,7 +463,7 @@ class GrakoGrammarGenerator(GrakoParserBase):
         name = ast.name
         rhs = ast.rhs
         if not name in self.rules:
-            rule = RuleGrammar(name, rhs, ast_name)
+            rule = RuleGrammar(name, rhs, ast_name=ast_name)
             self.rules[name] = rule
         else:
             rule = self.rules[name]

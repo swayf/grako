@@ -4,12 +4,12 @@ import parser_base
 from model import *  # @UnusedWildImport
 
 class RegexpParser(parser_base.RegexParserBase):
-    def __init__(self, text, **kwargs):
-        super(RegexpParser, self).__init__(text, **kwargs)
+    def __init__(self, **kwargs):
+        super(RegexpParser, self).__init__(**kwargs)
         self._count = 0
 
     def START(self, ast):
-        return Regexp(ast.expre)
+        return Regexp(ast)
 
     def CHOICE(self, ast):
         return Choice(ast.opts)
@@ -23,16 +23,16 @@ class RegexpParser(parser_base.RegexParserBase):
             return Sequence(ast.terms)
 
     def CLOSURE(self, ast):
-        return Closure(ast.atom)
+        return Closure(ast)
 
     def SUBEXP(self, ast):
-        return ast.expre
+        return ast
 
     def LITERAL(self, ast):
         return Literal(ast)
 
 def translate(regexp, trace=False):
-    parser = RegexpParser(regexp, trace=trace)
-    model = parser.parse('START')
+    parser = RegexpParser(trace=trace)
+    model = parser.parse(regexp, 'START')
     model.set_rule_numbers()
     return model.render()

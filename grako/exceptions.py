@@ -42,8 +42,13 @@ class FailedParseBase(ParseError):
 
     def __str__(self):
         info = self.buf.line_info(self.pos)
-        template = "{}:{} failed {} :\n{}\n{}^"
-        return template.format(info.line + 1, info.col + 1, self.message, info.text, ' ' * info.col)
+        template = "{}({}:{}) {} :\n{}\n{}^"
+        return template.format(info.filename,
+                               info.line + 1, info.col + 1,
+                               self.message,
+                               info.text,
+                               ' ' * info.col
+                               )
 
 
 class FailedParse(FailedParseBase):

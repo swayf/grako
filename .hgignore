@@ -7,3 +7,4 @@
 ^build$
 ^examples/.*/grako$
 genparser.py$
+parser_base.py$

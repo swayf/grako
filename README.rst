@@ -7,7 +7,7 @@ Grako
 
 **Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decison making or backtracking. *Possitive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level.
 
-**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At less than 2500 likes of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependecies are on the Python_ 2.7/3.x standard libraries. 
+**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 2500 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependecies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity 
 
@@ -15,8 +15,7 @@ Grako
 
 .. _KLOC: http://en.wikipedia.org/wiki/KLOC 
 .. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
-\
-\
+.. _PyPy: http://pypy.org/
 
 
 Rationale
@@ -39,14 +38,13 @@ Rationale
 * Python_ is a great language for working in language parsing and translation.
 
 .. _`Abstract Syntax Tree`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
-.. _`AST`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
+.. _AST: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
+.. _ASTs: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
 .. _EBNF: http://en.wikipedia.org/wiki/Ebnf 
 .. _memoizing: http://en.wikipedia.org/wiki/Memoization 
 .. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar 
 .. _Python: http://python.org
 .. _Ruby: http://www.ruby-lang.org/
-\
-\
 
 The Generated Parsers
 ---------------------
@@ -69,8 +67,6 @@ The methods in the base parser class return the same AST_ received as parameter,
 By default, and AST_ is either a list (for *closures*), or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
 
 AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
-\
-\
 
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph 
        
@@ -112,22 +108,20 @@ The *-h* and *--help* parameters provide full usage information::
           -t, --trace           produce verbose parsing output
 
         $
-\
-\
 
 
 
-Using The Generated Parser
+Using the Generated Parser
 --------------------------
 
-To use the generated parser, just subclass the base or the abstract parser, create an instance of it passing the text to parse, and invoke its ``parse`` method passing the starting rule's name as parameter::
+To use the generated parser, just subclass the base or the abstract parser, create an instance of it, and invoke its ``parse()`` method passing the text to parse and the starting rule's name as parameter::
 
     class MyParser(MyParserBase):
         pass
 
-    parser = MyParser('text to parse')
-    ast = parser.parse('start')
-    print(ast # parse()) # returns an AST by default
+    parser = MyParser()
+    ast = parser.parse('text to parse', rule_name='start')
+    print(ast)
     print(json.dumps(ast, indent=2)) # ASTs are JSON-friendy
 
 This is more or less what happens if you invole the generated parser directly::
@@ -135,8 +129,6 @@ This is more or less what happens if you invole the generated parser directly::
     python myparser.py inputfile startrule
 
 The generated parsers constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
-\
-\
 
 
 
@@ -223,6 +215,21 @@ The expressions, in reverse order of operator precedence, can be:
     ``name+:e``
         Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be a list even if only one element is added.
 
+    ``@e``
+        The override operator. Make the AST_ for the complete rule be the AST_ for ``e``. 
+        
+    The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. 
+        
+    This is a typical use of the override operator::
+
+        subexp = '(' @expre ')' .
+
+    The AST_ returned for the ``subexp`` rule will be the AST_ recovered from invoking ``expre``, without having to write a semantic action.
+
+    Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
+
+        closure:closure = @expre '*' .
+
     ``$``
         The *end of text* symbol. Verify thad the end of the input text has been reached.
 
@@ -231,7 +238,7 @@ The expressions, in reverse order of operator precedence, can be:
 
 When there are no named items in a rule, the AST_ consists of the elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules. You will have an AST_ created for::
 
-    number = ?/[0-9]+/?
+    number = ?/[0-9]+/? .
 
 without having to write::
     
@@ -241,11 +248,9 @@ When a rule has named elementes, the unnamed ones are excluded from the AST_ (th
 
 It is also possible to add an AST_ name to a rule::
 
-    ast_name:rule = expre;
+    name:rule = expre;
 
-That will make the default AST_ returned to be a dict with a single item ``ast_name`` as key, and the AST_ from the right-hand side of the rule as value.
-\
-\
+That will make the default AST_ returned to be a dict with a single item ``name`` as key, and the AST_ from the right-hand side of the rule as value.
 
 
 Whitespace
@@ -262,8 +267,6 @@ If you don't define any whitespace characters::
     parser = MyParser(text, whitespace='')
 
 then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers).
-\
-\
 
 
 Case Sensitivity
@@ -274,8 +277,6 @@ If the source language is case insensitive, you can tell your parser by using th
     parser = MyParser(text, ignorecase=True)
 
 The change will affect both token and pattern matching.
-\
-\
 
 
 Comments
@@ -286,8 +287,6 @@ Parsers will skip over comments specified as a regular expression using the ``co
     parser = MyParser(text, comments_re="\(\*.*?\*\)")
 
 For more complex comment handling, you can override the ``Parser._eatcomments()`` method.
-\
-\
 
 
 Semantic Actions
@@ -309,8 +308,6 @@ The abstract parser will contain a rule of of the form::
 
     def preproc(self, ast):
         return ast
-\
-\
 
 
 The (lack of) Documentation
@@ -323,16 +320,12 @@ The (lack of) Documentation
 
 Still, comments are provided for *non-obvious intentions* in the code, and each **Grako** module carries a doc-comment describing its purpose.
 
-\
-\
 
 Examples
 --------
 
 The file ``etc/grako.ebnf`` contains a grammar for the **Grako** EBNF_ language written in the same language. It is used in the *bootstrap* test suite to prove that **Grako** can generate a parser to parse its own language.
 
-\
-\
 
 License
 -------
@@ -351,8 +344,6 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 `info@resqsoft.com`_.
 
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
-\
-\
 
 
 Contact
@@ -361,8 +352,6 @@ Contact
 For queries and comments about **Grako**, please use the `Grako Forum`_.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
-\
-\
 
 
 Credits
@@ -405,12 +394,26 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _USB: http://www.usb.ve/
 .. _ANTLR: http://www.antlr.org/ 
 .. _Jack: http://en.wikipedia.org/wiki/Javacc 
-\
-\
 
 
 Change History
 --------------
+
+**1.0rc4**
+    * Grammar models (not so the generated parsers) were not producing correct ASTs_. enough of a bug to require another release candidate.
+    * Added the *override* (@) operator to grammars.
+    * Try to honor a ``filename=`` keyword argument throughout (specially in error messages).
+    * Refactored code that was identical in ``Parser`` and ``Context``
+
+**1.0rc3**
+    * Now the text to parse is passed directly to the `parse()` method.
+    * Added a *grako* script to invoke the tool directly.
+    * An end-to end translation example is provided in the *examples/regexp* project.
+    * Tweaked for convenience and clearness while developing the *regexp* example.
+    * Many corrections to this *README*.
+    * Tested under Python_ 3.3.
+    * Final release candidate for 1.0. Only improvements to the documentation will be accepted from now on.
+    * Line by line review of this *README*.
 
 **1.0rc2**
     Second release candidate. Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
