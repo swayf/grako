@@ -12,7 +12,6 @@ error messages when a choice fails to parse. FOLLOW(k) and LA(k) should be
 computed, but they are not.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-import sys
 import re
 from copy import deepcopy
 from keyword import iskeyword
