@@ -48,6 +48,8 @@ def gencode(name, grammar, trace=False, filename=None):
 
 
 def main():
+    import logging
+    logging.basicConfig()
     try:
         args = argparser.parse_args()
     except Exception as e:
