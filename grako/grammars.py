@@ -35,38 +35,18 @@ def urepr(obj):
 
 class ModelContext(ParseContext):
     def __init__(self, rules, text, filename, trace):
-        super(ModelContext, self).__init__()
+        super(ModelContext, self).__init__(trace=trace)
         self.rules = {rule.name :rule for rule in rules}
-        self.buf = Buffer(text, filename=filename)
-        self.buf.goto(0)
-        self._trace = trace
-
-        if not self._trace:
-            self.trace = lambda x: ()
-            self.trace_event = self.trace
-            self.trace_match = lambda x, y: ()
-
-    def goto(self, pos):
-        self.buf.goto(pos)
+        self._buffer = Buffer(text, filename=filename)
+        self._buffer.goto(0)
 
     @property
     def pos(self):
-        return self.buf.pos
+        return self._buffer.pos
 
-    def next_token(self):
-        self.buf.eatwhitespace()
-
-    def trace(self, msg, *params):
-        if self._trace:
-            print(msg % params, file=sys.stderr)
-
-    def trace_event(self, event):
-        self.trace('%s   %s \n\t%s', event, self.rulestack(), self.buf.lookahead())
-
-    def trace_match(self, token, name=None):
-        if self._trace:
-            name = name if name else ''
-            self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self.buf.lookahead())
+    @property
+    def buf(self):
+        return self._buffer
 
     def _find_rule(self, name):
         return self.rules[name]
@@ -101,7 +81,7 @@ class VoidGrammar(_Grammar):
 
 class EOFGrammar(_Grammar):
     def parse(self, ctx):
-        ctx.buf.eatwhitespace()
+        ctx._next_token()
         if not ctx.buf.atend():
             raise FailedParse(ctx.buf, 'Expecting end of text.')
 
@@ -152,11 +132,11 @@ class TokenGrammar(_Grammar):
         self.token = token
 
     def parse(self, ctx):
-        ctx.next_token()
+        ctx._next_token()
         token = ctx.buf.match(self.token)
         if token is None:
             raise FailedToken(ctx.buf, self.token)
-        ctx.trace_match(self.token, None)
+        ctx._trace_match(self.token, None)
         ctx._add_cst_node(token)
         return token
 
@@ -187,7 +167,7 @@ class PatternGrammar(_Grammar):
         token = ctx.buf.matchre(self._re)
         if token is None:
             raise FailedPattern(ctx.buf, self.pattern)
-        ctx.trace_match(token, self.pattern)
+        ctx._trace_match(token, self.pattern)
         ctx._add_cst_node(token)
         return token
 
@@ -209,10 +189,12 @@ class LookaheadGrammar(_DecoratorGrammar):
 
     def parse(self, ctx):
         p = ctx.pos
+        ctx._push_ast()
         try:
             super(LookaheadNotGrammar, self).parse(ctx)
         finally:
             ctx.goto(p)
+            ctx._pop_ast()  # simply discard
 
     def render_fields(self, fields):
         fields.update(exp=indent(render(self.exp)))
@@ -228,6 +210,7 @@ class LookaheadNotGrammar(_DecoratorGrammar):
 
     def parse(self, ctx):
         p = ctx.pos
+        ctx._push_ast()
         try:
             super(LookaheadNotGrammar, self).parse(ctx)
             ctx.goto(p)
@@ -235,6 +218,9 @@ class LookaheadNotGrammar(_DecoratorGrammar):
         except FailedParse:
             ctx.goto(p)
             pass
+        finally:
+            ctx._pop_ast()  # simply discard
+
 
     def render_fields(self, fields):
         fields.update(exp=indent(render(self.exp)))
@@ -353,7 +339,7 @@ class ChoiceGrammar(_Grammar):
                 def choice{n}():
                     _e = None
                 {options}
-                    self.error({error})
+                    self._error({error})
                 _e = choice{n}() \
                 '''
 
@@ -543,7 +529,7 @@ class RuleRefGrammar(_Grammar):
         try:
             rule = ctx._find_rule(self.name)
             if self.name[0].islower():
-                ctx.next_token()
+                ctx._next_token()
             node = rule.parse(ctx)
             ctx._add_cst_node(node)
             return node
@@ -581,14 +567,14 @@ class RuleGrammar(NamedGrammar):
         ctx._rule_stack.append(self.name)
         try:
             if self.name[0].islower():
-                ctx.next_token()
-            ctx.trace_event('ENTER ')
+                ctx._next_token()
+            ctx._trace_event('ENTER ')
             node, newpos = self._invoke_rule(self.name, ctx, ctx.pos)
             ctx.goto(newpos)
-            ctx.trace_event('SUCCESS')
+            ctx._trace_event('SUCCESS')
             return node
         except FailedParse:
-            ctx.trace_event('FAILED')
+            ctx._trace_event('FAILED')
             raise
         finally:
             ctx._rule_stack.pop()

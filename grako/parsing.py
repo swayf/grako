@@ -14,8 +14,6 @@ Parser.parse() will take the text to parse directly, or an instance of the
 .buffeing.Buffer class.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-import sys
-import re
 from contextlib import contextmanager
 from . import buffering
 from .exceptions import *  # @UnusedWildImport
@@ -32,29 +30,10 @@ class AbstractParserMixin(object):
 
 
 class Parser(ParseContext):
-    def __init__(self,
-                 whitespace=None,
-                 comments_re=None,
-                 ignorecase=False,
-                 simple=False,
-                 trace=False,
-                 nameguard=True,
-                 bufferClass=buffering.Buffer):
-        super(Parser, self).__init__()
-        self.whitespace = whitespace
-        self.comments_re = comments_re
-        self.ignorecase = ignorecase
-        self._simple = simple
-        self._trace = trace
-        self.bufferClass = bufferClass
-        self.nameguard = nameguard
-        if not self._trace:
-            self.trace = lambda x: ()
-            self.trace_event = self.trace
-            self.trace_match = lambda x, y: ()
 
     def parse(self, text, rule_name, filename=None):
         try:
+            self._reset_context()
             if isinstance(text, buffering.Buffer):
                 self._buffer = text
             else:
@@ -63,7 +42,6 @@ class Parser(ParseContext):
                                                 whitespace=self.whitespace,
                                                 ignorecase=self.ignorecase,
                                                 nameguard=self.nameguard)
-            self._reset_context()
             self._push_ast()
             return self._call(rule_name, rule_name)
         finally:
@@ -86,45 +64,21 @@ class Parser(ParseContext):
     def result(self):
         return self.ast
 
-    @property
-    def _pos(self):
-        return self._buffer.pos
-
-    def _goto(self, pos):
-        self._buffer.goto(pos)
-
-    def _eatwhitespace(self):
-        self._buffer.eatwhitespace()
-
-    def _eatcomments(self):
-        if self.comments_re is not None:
-            opts = re.MULTILINE if '\n' in self.comments_re else 0
-            while self._buffer.matchre(self.comments_re, opts):
-                pass
-
-    def _next_token(self):
-        p = None
-        while self._pos != p:
-            p = self._pos
-            self._eatwhitespace()
-            self._eatcomments()
-
-
     def _call(self, name, node_name=None, force_list=False):
         self._rule_stack.append(name)
         if name[0].islower():
             self._next_token()
         pos = self._pos
         try:
-            self.trace_event('ENTER ')
+            self._trace_event('ENTER ')
             node, newpos = self._invoke_rule(name, pos)
             self._goto(newpos)
-            self.trace_event('SUCCESS')
+            self._trace_event('SUCCESS')
             self._add_ast_node(node_name, node, force_list)
             self._add_cst_node(node)
             return node
         except FailedParse:
-            self.trace_event('FAILED')
+            self._trace_event('FAILED')
             self._goto(pos)
             raise
         finally:
@@ -164,7 +118,7 @@ class Parser(ParseContext):
         self._next_token()
         if self._buffer.match(token) is None:
             raise FailedToken(self._buffer, token)
-        self.trace_match(token, node_name)
+        self._trace_match(token, node_name)
         self._add_ast_node(node_name, token, force_list)
         self._add_cst_node(token)
         return token
@@ -175,7 +129,7 @@ class Parser(ParseContext):
         if self._buffer.match(token) is None:
             self._goto(p)
             return None
-        self.trace_match(token, node_name)
+        self._trace_match(token, node_name)
         self._add_ast_node(node_name, token, force_list)
         self._add_cst_node(token)
         return token
@@ -185,7 +139,7 @@ class Parser(ParseContext):
         token = self._buffer.matchre(pattern)
         if token is None:
             raise FailedPattern(self._buffer, pattern)
-        self.trace_match(token, pattern)
+        self._trace_match(token, pattern)
         self._add_ast_node(node_name, token, force_list)
         self._add_cst_node(token)
         return token
@@ -196,7 +150,7 @@ class Parser(ParseContext):
         if token is None:
             self._goto(p)
             return None
-        self.trace_match(token)
+        self._trace_match(token)
         self._add_ast_node(node_name, token, force_list)
         self._add_cst_node(token)
         return token
@@ -212,21 +166,6 @@ class Parser(ParseContext):
         if result is None or not isinstance(result, type(self._find_rule)):
             return None
         return result
-
-    def error(self, item, etype=FailedParse):
-        raise etype(self._buffer, item)
-
-    def trace(self, msg, *params):
-        if self._trace:
-            print(msg % params, file=sys.stderr)
-
-    def trace_event(self, event):
-        self.trace('%s   %s \n\t%s', event, self.rulestack(), self._buffer.lookahead())
-
-    def trace_match(self, token, name=None):
-        if self._trace:
-            name = name if name else ''
-            self.trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 
     def _eof(self):
         return self._buffer.atend()
@@ -257,7 +196,7 @@ class Parser(ParseContext):
             raise
         except FailedParse as e:
             if self._is_cut_set():
-                self.error(e, FailedCut)
+                self._error(e, FailedCut)
             self._goto(p)
         finally:
             self._pop_cut()
@@ -277,14 +216,17 @@ class Parser(ParseContext):
     @contextmanager
     def _if(self):
         p = self._pos
+        self._push_ast()
         try:
             yield
         finally:
             self._goto(p)
+            self._pop_ast()  # simply discard
 
     @contextmanager
     def _ifnot(self):
         p = self._pos
+        self._push_ast()
         try:
             yield
         except FailedParse:
@@ -292,7 +234,9 @@ class Parser(ParseContext):
             pass
         else:
             self._goto(p)
-            self.error('', etype=FailedLookahead)
+            self._error('', etype=FailedLookahead)
+        finally:
+            self._pop_ast()  # simply discard
 
     def _repeat_iterator(self, f):
         while 1:
@@ -306,7 +250,7 @@ class Parser(ParseContext):
                 raise
             except FailedParse as e:
                 if self._is_cut_set():
-                    self.error(e, FailedCut)
+                    self._error(e, FailedCut)
                 self._goto(p)
                 raise StopIteration()
             finally:
