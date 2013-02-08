@@ -195,7 +195,7 @@ The expressions, in reverse order of operator precedence, can be:
     ``'text'`` or ``"text"``
         Match the token text within the quotation marks. 
         
-        **Note that** if *text* is alphanumeric, then Grako will check that the character following the token is not alphanumerc. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the `Parser` or the `Buffer`, or by using a pattern expression (see below) instead of a token expression.
+        **Note that** if *text* is alphanumeric, then Grako will check that the character following the token is not alphanumerc. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the ``Parser`` or the ``Buffer``, or by using a pattern expression (see below) instead of a token expression.
 
     ``?/regexp/?``
         Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
@@ -400,7 +400,7 @@ Change History
 --------------
 
 **1.0rc4**
-    * Grammar models (not so the generated parsers) were not producing correct ASTs_. enough of a bug to require another release candidate.
+    * Grammar models (not so the generated parsers) were not producing correct ASTs_. Enough of a bug to require another release candidate.
     * Added the *override* (@) operator to grammars.
     * Try to honor a ``filename=`` keyword argument throughout (specially in error messages).
     * Refactored code that was identical in ``Parser`` and ``Context``

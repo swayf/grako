@@ -7,15 +7,15 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import itertools
 from .util import trim
 
-def render(item, **fields):
+def render(item, join='', **fields):
     """ Render the given item
     """
     if item is None:
         return ''
     elif isinstance(item, Renderer):
-        return item.render(**fields)
+        return item.render(join=join, **fields)
     elif isinstance(item, list):
-        return ''.join(render(e) for e in item)
+        return join.join(render(e, join=join, **fields) for e in item)
     else:
         return str(item)
 

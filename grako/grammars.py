@@ -12,7 +12,6 @@ error messages when a choice fails to parse. FOLLOW(k) and LA(k) should be
 computed, but they are not.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-import sys
 import re
 from copy import deepcopy
 from keyword import iskeyword
@@ -323,11 +322,11 @@ class ChoiceGrammar(_Grammar):
                       error=urepr(error)
                       )
 
-    def render(self):
+    def render(self, **fields):
         if len(self.options) == 1:
-            return render(self.options[0])
+            return render(self.options[0], **fields)
         else:
-            return super(ChoiceGrammar, self).render()
+            return super(ChoiceGrammar, self).render(**fields)
 
     option_template = '''\
                     with self._option():
@@ -372,10 +371,10 @@ class RepeatGrammar(_DecoratorGrammar):
         fields.update(n=self.counter(),
                       innerexp=indent(render(self.exp)))
 
-    def render(self):
+    def render(self, **fields):
         if {()} in self.exp.firstset:
             raise GrammarError('may repeat empty sequence')
-        return super(RepeatGrammar, self).render()
+        return super(RepeatGrammar, self).render(**fields)
 
     template = '''
                 def repeat{n}():
