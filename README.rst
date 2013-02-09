@@ -401,6 +401,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 --------------
 
+**1.0.0**
+   No significant changes. 
+
 **1.0rc4**
     * Grammar models (not so the generated parsers) were not producing correct ASTs_. Enough of a bug to require another release candidate.
     * Added the *override* (@) operator to grammars.
