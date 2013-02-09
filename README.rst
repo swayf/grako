@@ -124,7 +124,7 @@ To use the generated parser, just subclass the base or the abstract parser, crea
     print(ast)
     print(json.dumps(ast, indent=2)) # ASTs are JSON-friendy
 
-This is more or less what happens if you invole the generated parser directly::
+This is more or less what happens if you invoke the generated parser directly::
 
     python myparser.py inputfile startrule
 
