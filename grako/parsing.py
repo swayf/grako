@@ -89,7 +89,10 @@ class Parser(ParseContext):
         cache = self._memoization_cache
 
         if key in cache:
-            return cache[key]
+            result = cache[key]
+            if isinstance(result, Exception):
+                raise result
+            return result
 
         rule = self._find_rule(name)
         self._push_ast()
@@ -104,15 +107,18 @@ class Parser(ParseContext):
                 node.add('parseinfo',
                          AST(rule=name, pos=pos, endpos=self._pos)
                          )
+            semantic_rule = self._find_semantic_rule(name)
+            if semantic_rule:
+                node = semantic_rule(node)
+            result = (node, self._pos)
+
+            cache[key] = result
+            return result
+        except Exception as e:
+            cache[key] = e
+            raise
         finally:
             self._pop_ast()
-        semantic_rule = self._find_semantic_rule(name)
-        if semantic_rule:
-            node = semantic_rule(node)
-        result = (node, self._pos)
-
-        cache[key] = result
-        return result
 
     def _token(self, token, node_name=None, force_list=False):
         self._next_token()
