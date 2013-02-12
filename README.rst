@@ -62,7 +62,8 @@ A **Grako** generated parser consists of the following classes:
 
 * An base class with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation:
 
-.. code:: python
+.. code::
+    :class: python
 
     def myrulename(self, ast):
         return ast
