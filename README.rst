@@ -20,7 +20,21 @@ Grako
 Table of Contents
 -----------------
 
-    Rationale_
+#. `Rationale`_
+#. `The Generated Parsers`_
+#. `Using the Tool`_
+#. `Using the Generated Parser`_
+#. `The EBNF Grammar Syntax`_
+#. `Whitespace`_
+#. `Case Sensitivity`_
+#. `Comments`_
+#. `Semantic Actions`_
+#. `The (lack of) Documentation`_
+#. `Examples`_
+#. `License`_
+#. `Contact`_
+#. `Credits`_
+#. `Change History`_
 
 
 Rationale
