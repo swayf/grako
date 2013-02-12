@@ -7,7 +7,7 @@ Parse a regular expression, translate it to CFGs_ in **Grako** EBNF_ grammar not
 .. _EBNF: http://en.wikipedia.org/wiki/Ebnf 
 .. _PEG:http://en.wikipedia.org/wiki/Parsing_expression_grammar 
 
-The project has no practical use, but it's complete yet concise example of how to implement translators in **Grakos**'.
+The project has no practical use, but it's complete yet concise example of how to implement translators in **Grako**'.
 
 The parser builds an OO model of each parsed regexp using semantic actions. The model generates a **Grako** grammar with the help the *rendering* module using inline templates. The generated grammar is then parsed to generate a parser. The generated parser can be executed thus::
 

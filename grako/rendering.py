@@ -5,7 +5,7 @@ code. It's used by the .grammars module for parser generation.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 import itertools
-from .util import trim
+from .util import trim, ustr
 
 def render(item, join='', **fields):
     """ Render the given item
@@ -17,7 +17,7 @@ def render(item, join='', **fields):
     elif isinstance(item, list):
         return join.join(render(e, join=join, **fields) for e in item)
     else:
-        return str(item)
+        return ustr(item)
 
 
 class Renderer(object):

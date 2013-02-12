@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
+import sys
 
 __all__ = ['simplify', 'memoize', 'trim', 'indent']
+
+def ustr(s):
+    if sys.version_info[0] >= 3:
+        return str(s)
+    else:
+        return unicode(s)
 
 def simplify(x):
     if isinstance(x, list) and len(x) == 1:
@@ -45,7 +52,7 @@ def indent(text, indent=1):
     """
     if text is None:
         return ''
-    text = str(text)
+    text = ustr(text)
     if indent >= 0:
         lines = [' ' * 4 * indent + t for t in text.split('\n')]
         text = '\n'.join(lines)
