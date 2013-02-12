@@ -1,5 +1,7 @@
  .. -*- restructuredtext -*-
 
+.. contents:: Table of Contents
+
 Grako
 =====
 
