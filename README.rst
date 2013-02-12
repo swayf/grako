@@ -17,8 +17,9 @@ Grako
 .. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
 .. _PyPy: http://pypy.org/
 
+
 Table of Contents
------------------
+=================
 
 * `Rationale`_
 * `The Generated Parsers`_
