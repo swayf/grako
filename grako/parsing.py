@@ -66,8 +66,6 @@ class Parser(ParseContext):
 
     def _call(self, name, node_name=None, force_list=False):
         self._rule_stack.append(name)
-        if name[0].islower():
-            self._next_token()
         pos = self._pos
         try:
             self._trace_event('ENTER ')
@@ -97,6 +95,8 @@ class Parser(ParseContext):
         rule = self._find_rule(name)
         self._push_ast()
         try:
+            if name[0].islower():
+                self._next_token()
             rule()
             node = self.ast
             if not node:

@@ -409,6 +409,7 @@ Change History
 
 **tip**
     * Also memoize exception results.
+    * Also memoize advancing over whitespace and comments.
     * Work with unicode while rendering.
     * Added a table of contents to this *README*.
 
