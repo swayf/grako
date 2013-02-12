@@ -423,6 +423,7 @@ Change History
 **tip**
     * Also memoize exception results.
     * Work with unicode while rendering.
+    * Added a table of contents to this *README*.
 
 **1.0.0**
     First feature-complete release.
