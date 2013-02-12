@@ -420,7 +420,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-**1.0.1**
+**tip**
     * Also memoize exception results.
     * Work with unicode while rendering.
 
