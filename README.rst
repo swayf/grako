@@ -17,7 +17,6 @@ Grako
 
 
 .. contents:: Table of Contents
-    :backlinks:
 
 
 Rationale
@@ -59,7 +58,7 @@ A **Grako** generated parser consists of the following classes:
 
 * An *abstract* parser class that inherits from the root parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
 
-* An base class with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation.:
+* An base class with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
 
 .. code:: python
     def myrulename(self, ast):
