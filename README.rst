@@ -68,9 +68,6 @@ A **Grako** generated parser consists of the following classes:
 
 The methods in the base parser class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
 
-By default, and AST_ is either a list (for *closures*), or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
-
-AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
 
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph 
        
@@ -259,6 +256,19 @@ It is also possible to add an AST_ name to a rule::
 That will make the default AST_ returned to be a dict with a single item ``name`` as key, and the AST_ from the right-hand side of the rule as value.
 
 
+Abstract Syntax Trees (ASTs)
+============================
+
+By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
+
+AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
+
+When the ``parseinfo`` keyword argument has been passed to the ``Parser`` constructor, a ``parseinfo`` element is added to AST_ nodes that are *dict*-like. The element contains a *namedtuple* with the parse iformation for the node::
+
+   ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos']) 
+
+With the help of the ``Buffer.line_info()`` method, it is possible to recover the line, column, and original text parsed for the node. Note that when *parseinfo* is generated, the *buffer* used during parsing is kept in memory with the AST_.
+
 Whitespace
 ==========
 
@@ -272,7 +282,7 @@ If you don't define any whitespace characters::
 
     parser = MyParser(text, whitespace='')
 
-then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers).
+then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers). 
 
 
 Case Sensitivity
@@ -412,6 +422,7 @@ Change History
     * Also memoize advancing over whitespace and comments.
     * Work with unicode while rendering.
     * Added a table of contents to this *README*.
+    * Document ``parseinfo`` and default it to *False*.
 
 **1.0.0**
     First feature-complete release.

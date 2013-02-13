@@ -2,16 +2,19 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
 import re
+from collections import namedtuple
 from .ast import AST
 from .exceptions import FailedParse
 from . import buffering
+
+ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 class ParseContext(object):
     def __init__(self,
                  whitespace=None,
                  comments_re=None,
                  ignorecase=False,
-                 simple=False,
+                 parseinfo=False,
                  trace=False,
                  nameguard=True,
                  encoding='utf-8',
@@ -22,7 +25,7 @@ class ParseContext(object):
         self.comments_re = comments_re
         self.ignorecase = ignorecase
         self.encoding = encoding
-        self._simple = simple
+        self.parseinfo = parseinfo
         self.bufferClass = bufferClass
         self.nameguard = nameguard
 
