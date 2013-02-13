@@ -16,7 +16,7 @@ class AST(dict):
     # http://code.activestate.com/recipes/473786-dictionary-with-attribute-style-access/
 
     def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
+        super(AST, self).__init__(*args, **kwargs)
 
     def __getstate__(self):
         return self.__dict__.items()
@@ -26,7 +26,7 @@ class AST(dict):
             self.__dict__[key] = val
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, dict.__repr__(self))
+        return "%s(%s)" % (self.__class__.__name__, super(AST, self).__repr__())
 
     def __setitem__(self, key, value):
         self.add(key, value)
@@ -40,6 +40,11 @@ class AST(dict):
 
     __getattr__ = __getitem__
     __setattr__ = __setitem__
+
+    def __getattribute__(self, name):
+        if name in self:
+            return self[name]
+        return super(AST, self).__getattribute__(name)
 
     def copy(self):
         ch = AST(self)

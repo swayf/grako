@@ -1,5 +1,4 @@
- .. -*- restructuredtext -*-
-
+=====
 Grako
 =====
 
@@ -18,8 +17,13 @@ Grako
 .. _PyPy: http://pypy.org/
 
 
+Table of Contents
+=================
+.. contents:: \
+
+
 Rationale
----------
+=========
 
 **Grako** was created to address recurring problems encountered over decades of working with parser generation tools:
 
@@ -47,7 +51,7 @@ Rationale
 .. _Ruby: http://www.ruby-lang.org/
 
 The Generated Parsers
----------------------
+=====================
 
 A **Grako** generated parser consists of the following classes:
 
@@ -57,7 +61,7 @@ A **Grako** generated parser consists of the following classes:
 
 * An *abstract* parser class that inherits from the root parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
 
-* An base class with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation.::
+* An base class with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
 
     def myrulename(self, ast):
         return ast
@@ -72,7 +76,7 @@ AST_ entries are single values if only one item was associated with a name, or l
        
 
 Using the Tool
---------------
+==============
 
 **Grako** is run from the commandline::
 
@@ -88,7 +92,7 @@ or just::
 
 if **Grako** was installed using *easy_install* or *pip*.
 
-The *-h* and *--help* parameters provide full usage information::
+The *-h* and *==help* parameters provide full usage information::
 
         $ python -m grako -h
         usage: grako [-h] [-m name] [-o outfile] [-v] grammar
@@ -100,19 +104,19 @@ The *-h* and *--help* parameters provide full usage information::
           grammar               The file name of the grammar to generate a parser for
 
         optional arguments:
-          -h, --help            show this help message and exit
-          -m name, --name name  An optional name for the grammar. It defaults to the
+          -h, ==help            show this help message and exit
+          -m name, ==name name  An optional name for the grammar. It defaults to the
                                 basename of the grammar file's name
-          -o outfile, --outfile outfile
+          -o outfile, ==outfile outfile
                                 specify where the output should go (default is stdout)
-          -t, --trace           produce verbose parsing output
+          -t, ==trace           produce verbose parsing output
 
         $
 
 
 
 Using the Generated Parser
---------------------------
+==========================
 
 To use the generated parser, just subclass the base or the abstract parser, create an instance of it, and invoke its ``parse()`` method passing the text to parse and the starting rule's name as parameter::
 
@@ -124,7 +128,7 @@ To use the generated parser, just subclass the base or the abstract parser, crea
     print(ast)
     print(json.dumps(ast, indent=2)) # ASTs are JSON-friendy
 
-This is more or less what happens if you invole the generated parser directly::
+This is more or less what happens if you invoke the generated parser directly::
 
     python myparser.py inputfile startrule
 
@@ -133,7 +137,7 @@ The generated parsers constructors accept named arguments to specify whitespace 
 
 
 The EBNF Grammar Syntax
------------------------
+=======================
 
 **Grako** uses a variant of the standard EBNF_ syntax. A grammar consists of a sequence of one or more rules of the form::
 
@@ -195,10 +199,12 @@ The expressions, in reverse order of operator precedence, can be:
     ``'text'`` or ``"text"``
         Match the token text within the quotation marks. 
         
-        **Note that** if *text* is alphanumeric, then Grako will check that the character following the token is not alphanumerc. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the `Parser` or the `Buffer`, or by using a pattern expression (see below) instead of a token expression.
+        **Note that** if *text* is alphanumeric, then Grako will check that the character following the token is not alphanumerc. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the ``Parser`` or the ``Buffer``, or by using a pattern expression (see below) instead of a token expression.
 
     ``?/regexp/?``
-        Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
+        The pattern expression. Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
+
+     The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is AST_ for the expression. 
 
     ``rulename``
         Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace or comments.
@@ -254,7 +260,7 @@ That will make the default AST_ returned to be a dict with a single item ``name`
 
 
 Whitespace
-----------
+==========
 
 By default, **Grako** generated parsers skip the usual whitespace charactes (whatever Python_ defines as ``string.whitespace``), but you can change that behaviour by passing a ``whitespace`` parameter to your parser. For example::
 
@@ -270,7 +276,7 @@ then you will have to handle whitespace in your grammar rules (as it's often don
 
 
 Case Sensitivity
-----------------
+================
 
 If the source language is case insensitive, you can tell your parser by using the ``ignorecase`` parameter::
 
@@ -280,7 +286,7 @@ The change will affect both token and pattern matching.
 
 
 Comments
---------
+========
 
 Parsers will skip over comments specified as a regular expression using the ``comments_re`` paramenter::
     
@@ -290,7 +296,7 @@ For more complex comment handling, you can override the ``Parser._eatcomments()`
 
 
 Semantic Actions
-----------------
+================
 
 There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars and provide for poor modularization from the parser execution perspective.
 
@@ -311,7 +317,7 @@ The abstract parser will contain a rule of of the form::
 
 
 The (lack of) Documentation
----------------------------
+===========================
 **Grako** so lacking in comments and doc-comments for these reasons:
 
     1. Inline documentation easily goes out of phase with what the code actually does. It is an equivalent and more productive effort to provide out-of-line documentation.
@@ -322,13 +328,15 @@ Still, comments are provided for *non-obvious intentions* in the code, and each 
 
 
 Examples
---------
+========
 
 The file ``etc/grako.ebnf`` contains a grammar for the **Grako** EBNF_ language written in the same language. It is used in the *bootstrap* test suite to prove that **Grako** can generate a parser to parse its own language.
 
+The project ``examples/regexp`` contains a regexp-to-EBNF translator and parser generator. The project has no practical use, but it's a complete, end-to-end example of how to implement translators using **Grako**.
+
 
 License
--------
+=======
 
 **Grako** is Copyright 2012-2013 by `ResQSoft Inc.`_ and  `Juancarlo Añez`_
 
@@ -347,7 +355,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 
 
 Contact
--------
+=======
 
 For queries and comments about **Grako**, please use the `Grako Forum`_.
 
@@ -355,7 +363,7 @@ For queries and comments about **Grako**, please use the `Grako Forum`_.
 
 
 Credits
--------
+=======
 
 The following must be mentioned as contributors of thoughts, ideas, code, *and funding* to the **Grako** project:
 
@@ -397,27 +405,14 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 
 Change History
---------------
+==============
 
-**1.0rc4**
-    * Grammar models (not so the generated parsers) were not producing correct ASTs_. enough of a bug to require another release candidate.
-    * Added the *override* (@) operator to grammars.
-    * Try to honor a ``filename=`` keyword argument throughout (specially in error messages).
-    * Refactored code that was identical in ``Parser`` and ``Context``
+**tip**
+    * Also memoize exception results.
+    * Also memoize advancing over whitespace and comments.
+    * Work with unicode while rendering.
+    * Added a table of contents to this *README*.
 
-**1.0rc3**
-    * Now the text to parse is passed directly to the `parse()` method.
-    * Added a *grako* script to invoke the tool directly.
-    * An end-to end translation example is provided in the *examples/regexp* project.
-    * Tweaked for convenience and clearness while developing the *regexp* example.
-    * Many corrections to this *README*.
-    * Tested under Python_ 3.3.
-    * Final release candidate for 1.0. Only improvements to the documentation will be accepted from now on.
-    * Line by line review of this *README*.
-
-**1.0rc2**
-    Second release candidate. Made memoization local to each parser instance so the cached information from one parse doesn't stay (as garbage) when parsing multiple (hundreds of) input files.
-
-**1.0rc1**
-    First release candidate.
+**1.0.0**
+    First feature-complete release.
 

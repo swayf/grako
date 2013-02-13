@@ -12,5 +12,5 @@ parser_base.py: regexp.ebnf
 	PYTHONPATH=../.. python -m grako -m Regex -o parser_base.py regexp.ebnf 2>&1
 
 clean:
-	rm -f parser_base.py
-	rm -f genparser.py
+	-@rm -f parser_base.py
+	-@rm -f genparser.py
