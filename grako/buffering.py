@@ -30,7 +30,7 @@ class Buffer(object):
         self.original_text = text
         self.text = text
         self.filename = filename if filename is not None else ''
-        self.whitespace = set(whitespace if whitespace else string.whitespace)
+        self.whitespace = set(whitespace if whitespace is not None else string.whitespace)
         self.ignorecase = ignorecase
         self.trace = trace
         self.nameguard = nameguard
