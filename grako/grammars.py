@@ -33,8 +33,8 @@ def urepr(obj):
     return repr(obj).lstrip('u')
 
 class ModelContext(ParseContext):
-    def __init__(self, rules, text, filename, trace):
-        super(ModelContext, self).__init__(trace=trace)
+    def __init__(self, rules, text, filename, trace, **kwargs):
+        super(ModelContext, self).__init__(trace=trace, **kwargs)
         self.rules = {rule.name :rule for rule in rules}
         self._buffer = Buffer(text, filename=filename)
         self._buffer.goto(0)
@@ -662,10 +662,10 @@ class Grammar(Renderer):
             rule._first_set = F[rule.name]
         return F
 
-    def parse(self, text, start=None, filename=None, trace=False,):
+    def parse(self, text, start=None, filename=None, trace=False, **kwargs):
         try:
             try:
-                ctx = ModelContext(self.rules, text, filename, trace=trace)
+                ctx = ModelContext(self.rules, text, filename, trace=trace, **kwargs)
                 start_rule = ctx._find_rule(start) if start else self.rules[0]
                 return start_rule.parse(ctx)
             except FailedCut as e:
