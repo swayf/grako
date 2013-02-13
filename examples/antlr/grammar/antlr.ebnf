@@ -1,0 +1,247 @@
+(*
+ [The "BSD licence"]
+ Copyright (c) 2005-2007 Terence Parr
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. The name of the author may not be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*)
+
+(*
+    ANTLR v3 grammar written in Grako EBNF syntax.
+
+    This grammar is inspired in, but different one by the one created
+    by Terence Parr using ANTLR syntax. It is licensed under the BSD
+    License to keep in the spirit of ANTLR.
+*)
+
+grammar
+    =
+    [('lexer'|'parser')] grammar id ';'
+    [options] 
+    [tokens] 
+    {scope} 
+    {action}
+    {rule}+
+    $
+    ;
+
+options
+    =
+    'options' '{' {option}+ '}'
+    ;
+
+option
+    =
+    id '='  (id|string|char|int|'*') ';'
+    ;
+
+tokens
+    =
+    'tokens' '{' {token}+ '}' 
+    ;
+
+token
+    =
+    token_name ['=' token_value ] ';'
+    ;
+
+scope
+    =
+    'scope' 
+    ( 
+      block ['scope' id {',' id} ';' ]
+    | id {',' id} ';'
+    | id block
+    )
+    ;
+
+action
+    =
+    '@' ('lexer'|'parser'|id) block
+    ;
+
+block
+    =
+    '{' {(block|?/./?)} '}'
+    ;
+
+rule
+    =
+    ['protected'|'public'|'private'|'fragment']
+    id ['!'] [args] 
+    ['returns' args] 
+    ['trhows' id {',' id}* ]
+    [options]
+    [scope]
+    {action}
+    ':' alternatives ';'
+    [exceptions]
+    ;
+
+exceptions
+    =
+    {'catch' args block}
+    ['finally' block]
+    ;
+
+alternatives
+    =
+    alternative {'|' alternative} 
+    ;
+
+alternative
+    =
+    {element}* [rewrite]
+    ;
+
+element
+    =
+      id ('+='|=) atom
+    | semantic
+    | syntactic
+    | optional
+    | closure
+    | positive_closure
+    | atom
+    ;
+
+semantic
+    =
+    block '?'
+    ;
+
+syntactic
+    =
+    block '=>'
+    ;
+
+optional
+    =
+    atom '?'
+    ;
+
+closure
+    =
+    atom '*'
+    ;
+
+positive_closuere
+    =
+    atom '+'
+    ;
+
+atom
+    =
+    ['^'|'!']
+    (
+      negative
+    | range
+    | terminal
+    | rule_ref
+    | subexp
+    | terminal
+    | non_terminal
+    )
+    ;
+
+subexp
+    =
+    '(' aternatives ')'
+    ;
+
+negative
+    =
+    '~' (non_terminal|subexp)
+    ;
+
+non_terminal
+    =
+      rule_ref
+    | token_ref
+    ;
+
+terminal
+    =
+      char
+    | string
+    | '.'
+    ;
+
+
+rewrite
+    =
+    '->' ?/[^|;]*/?
+    ;
+
+rule_ref
+    =
+    lower_name
+    ;
+
+token_ref
+    =
+    upper_name
+    ;
+
+token_name
+    =
+    upper_name
+    ;
+
+id
+    =
+    lower_name
+    ;
+
+lower_name
+    =
+    ?/[a-z]/? NAME_CHARS
+    ;
+
+upper_name
+    =
+    ?/[A-Z]/? NAME_CHARS
+    ;
+
+NAME_CHARS
+    =
+    ?/[A-Za-z0-9_]*/?
+    ;
+
+char
+    =
+    string;
+    ;
+
+string
+    =
+    '"' ?/([^"\n]|"")*/? '"'
+    |
+    "'" ?/([^'\n]|'')*/? "'"
+    |
+    "<<" ?/.*(?!>>)/? ">>"
+    ;
+
+int =
+    ?/[0-9]+/?
+    ;
