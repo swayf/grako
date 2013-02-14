@@ -385,6 +385,8 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
+**Jeff Knupp** explains why **Grako**'s use of exceptions_ is sound, so I don't have to.
+
 * **Terence Parr** created ANTLR_, probably the most solid and professional parser generator out there. Ter, *ANTLR*, and the folks on the *ANLTR* forums helped me shape my ideas about **Grako**.
 
 * **JavaCC** (originally Jack_) looks like an abandoned project. It was the first parser generator I used while teaching.
@@ -412,7 +414,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _USB: http://www.usb.ve/
 .. _ANTLR: http://www.antlr.org/ 
 .. _Jack: http://en.wikipedia.org/wiki/Javacc 
-
+.. _exceptions: http://www.jeffknupp.com/blog/2013/02/06/write-cleaner-python-use-exceptions/
 
 Change History
 ==============
