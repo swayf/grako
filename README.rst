@@ -399,7 +399,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about. I learned why languages use declensions_, and why, although the underlying words are in English_, the structure of the programs we write is more like Japanese_.
 
-* **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
+* **Grako** would not have been possible without the vision, the funding, and the trust provided by **Thomas Bragg** through ResQSoft_. 
 
 .. _Wirth: http://en.wikipedia.org/wiki/Niklaus_Wirth 
 .. _Pascal: http://en.wikipedia.org/wiki/Pascal_(programming_language) 
