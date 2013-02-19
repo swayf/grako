@@ -201,7 +201,7 @@ The expressions, in reverse order of operator precedence, can be:
     ``?/regexp/?``
         The pattern expression. Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
 
-     The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is AST_ for the expression. 
+        The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is AST_ for the expression. 
 
     ``rulename``
         Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace or comments.
@@ -221,15 +221,15 @@ The expressions, in reverse order of operator precedence, can be:
     ``@e``
         The override operator. Make the AST_ for the complete rule be the AST_ for ``e``. 
         
-    The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. 
+        The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. 
         
-    This is a typical use of the override operator::
+        This is a typical use of the override operator::
 
-        subexp = '(' @expre ')' .
+            subexp = '(' @expre ')' .
 
-    The AST_ returned for the ``subexp`` rule will be the AST_ recovered from invoking ``expre``, without having to write a semantic action.
+        The AST_ returned for the ``subexp`` rule will be the AST_ recovered from invoking ``expre``, without having to write a semantic action.
 
-    Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
+        Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
 
         closure:closure = @expre '*' .
 
