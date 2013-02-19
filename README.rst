@@ -261,9 +261,9 @@ Abstract Syntax Trees (ASTs)
 
 By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
 
-AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
+AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (the ``+:`` operator) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
 
-When the ``parseinfo`` keyword argument has been passed to the ``Parser`` constructor, a ``parseinfo`` element is added to AST_ nodes that are *dict*-like. The element contains a *namedtuple* with the parse iformation for the node::
+When the ``parseinfo=True`` keyword argument has been passed to the ``Parser`` constructor, a ``parseinfo`` element is added to AST_ nodes that are *dict*-like. The element contains a *namedtuple* with the parse iformation for the node::
 
    ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos']) 
 
@@ -320,7 +320,7 @@ If pre-processing is required at some point, it is enough to place invocations o
 
     preproc = () ;
 
-The abstract parser will contain a rule of of the form::
+The abstract parser will honor as a semantic action a method declared as::
 
     def preproc(self, ast):
         return ast
@@ -328,7 +328,7 @@ The abstract parser will contain a rule of of the form::
 
 The (lack of) Documentation
 ===========================
-**Grako** so lacking in comments and doc-comments for these reasons:
+**Grako** lacking in comments and doc-comments for these reasons:
 
     1. Inline documentation easily goes out of phase with what the code actually does. It is an equivalent and more productive effort to provide out-of-line documentation.
 
@@ -385,7 +385,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
-**Jeff Knupp** explains why **Grako**'s use of exceptions_ is sound, so I don't have to.
+* **Jeff Knupp** explains why **Grako**'s use of exceptions_ is sound, so I don't have to.
 
 * **Terence Parr** created ANTLR_, probably the most solid and professional parser generator out there. Ter, *ANTLR*, and the folks on the *ANLTR* forums helped me shape my ideas about **Grako**.
 
@@ -395,7 +395,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
-* **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew. My peers, and then teaching advisers **Alberto Torres**, and **Enzo Chiariotti** formed a team with **Gustavo** to challenge us with programming languages like *LATORTA* and term exams that wen't well into the eight hours. And, of course, the *pirate* patch on the left or right eye depending on the *LL* or *LR* challenge. 
+* **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew. My peers, and then teaching advisers **Alberto Torres**, and **Enzo Chiariotti** formed a team with **Gustavo** to challenge us with programming languages like *LATORTA* and term exams that wen't well into the eight hours. And, of course, there was the *pirate patch* on the left or right eye depending on the *LL* or *LR* challenge. 
 
 * **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about.
 
