@@ -422,13 +422,13 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-**tip**
+- **tip**
     * Also memoize exception results.
     * Also memoize advancing over whitespace and comments.
     * Work with unicode while rendering.
     * Added a table of contents to this *README*.
     * Document ``parseinfo`` and default it to *False*.
 
-**1.0.0**
+- **1.0.0**
     First feature-complete release.
 
