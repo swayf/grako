@@ -391,6 +391,8 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **JavaCC** (originally Jack_) looks like an abandoned project. It was the first parser generator I used while teaching.
 
+* *Grako* is very fast. But dealing with millions of lines of legacy source code in a matter of minutes would be impossible without PyPy_, the work of *Armin Rigo* and the `PyPy team`.
+
 * **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under three thousand lines of code, would not have been possible without Python_.
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
@@ -415,6 +417,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _ANTLR: http://www.antlr.org/ 
 .. _Jack: http://en.wikipedia.org/wiki/Javacc 
 .. _exceptions: http://www.jeffknupp.com/blog/2013/02/06/write-cleaner-python-use-exceptions/
+.. _`PyPy team`: http://pypy.org/people.html
 .. _declensions: http://en.wikipedia.org/wiki/Declension 
 .. _English: http://en.wikipedia.org/wiki/English_grammar 
 .. _Japanese: http://en.wikipedia.org/wiki/Japanese_grammar 
