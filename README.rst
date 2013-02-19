@@ -397,7 +397,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew. My peers, and then teaching advisers **Alberto Torres**, and **Enzo Chiariotti** formed a team with **Gustavo** to challenge us with programming languages like *LATORTA* and term exams that went well into the eight hours. And, of course, there was also the *pirate patch* that should be worn on the left or right eye depending on the *LL* or *LR* challenge. 
 
-* **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about.
+* **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about. I learned why languages use declensions_, and why, although the underlying words are in English_, the structure of the programs we write is more like Japanese_.
 
 * **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
 
@@ -415,6 +415,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _ANTLR: http://www.antlr.org/ 
 .. _Jack: http://en.wikipedia.org/wiki/Javacc 
 .. _exceptions: http://www.jeffknupp.com/blog/2013/02/06/write-cleaner-python-use-exceptions/
+.. _declensions: http://en.wikipedia.org/wiki/Declension 
+.. _English: http://en.wikipedia.org/wiki/English_grammar 
+.. _Japanese: http://en.wikipedia.org/wiki/Japanese_grammar 
 
 Change History
 ==============
