@@ -17,8 +17,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from contextlib import contextmanager
 from . import buffering
 from .exceptions import *  # @UnusedWildImport
-from .ast import AST
-from .contexts import ParseContext
+from .contexts import ParseContext, ParseInfo
 
 
 class AbstractParserMixin(object):
@@ -31,7 +30,7 @@ class AbstractParserMixin(object):
 
 class Parser(ParseContext):
 
-    def parse(self, text, rule_name, filename=None):
+    def parse(self, text, rule_name, filename=None, **kwargs):
         try:
             self._reset_context()
             if isinstance(text, buffering.Buffer):
@@ -41,7 +40,8 @@ class Parser(ParseContext):
                                                 filename=filename,
                                                 whitespace=self.whitespace,
                                                 ignorecase=self.ignorecase,
-                                                nameguard=self.nameguard)
+                                                nameguard=self.nameguard,
+                                                **kwargs)
             self._push_ast()
             return self._call(rule_name, rule_name)
         finally:
@@ -103,10 +103,8 @@ class Parser(ParseContext):
                 node = self.cst
             elif '@' in node:
                 node = node['@']  # override the AST
-            elif not self._simple:
-                node.add('parseinfo',
-                         AST(rule=name, pos=pos, endpos=self._pos)
-                         )
+            elif self.parseinfo:
+                node.add('parseinfo', ParseInfo(self._buffer, name, pos, self._pos))
             semantic_rule = self._find_semantic_rule(name)
             if semantic_rule:
                 node = semantic_rule(node)

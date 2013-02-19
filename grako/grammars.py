@@ -21,7 +21,7 @@ from .rendering import Renderer, render
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
-from .contexts import ParseContext
+from .contexts import ParseContext, ParseInfo
 
 def check(result):
     assert isinstance(result, _Grammar), str(result)
@@ -594,6 +594,8 @@ class RuleGrammar(NamedGrammar):
                 node = ctx.cst
             elif '@' in node:
                 node = node['@']
+            elif ctx.parseinfo:
+                node.add('parseinfo', ParseInfo(ctx._buffer, name, pos, ctx._pos))
             if self.ast_name:
                 node = AST([(self.ast_name, node)])
         finally:
@@ -723,7 +725,7 @@ class Grammar(Renderer):
                     import json
                     with open(filename) as f:
                         text = f.read()
-                    parser = {name}ParserBase(simple=True)
+                    parser = {name}ParserBase(parseinfo=False)
                     ast = parser.parse(text, startrule, filename=filename)
                     print('AST:')
                     print(ast)

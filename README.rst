@@ -68,9 +68,6 @@ A **Grako** generated parser consists of the following classes:
 
 The methods in the base parser class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
 
-By default, and AST_ is either a list (for *closures*), or dict-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
-
-AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (see below) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
 
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph 
        
@@ -204,7 +201,7 @@ The expressions, in reverse order of operator precedence, can be:
     ``?/regexp/?``
         The pattern expression. Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
 
-     The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is AST_ for the expression. 
+        The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is AST_ for the expression. 
 
     ``rulename``
         Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace or comments.
@@ -224,15 +221,15 @@ The expressions, in reverse order of operator precedence, can be:
     ``@e``
         The override operator. Make the AST_ for the complete rule be the AST_ for ``e``. 
         
-    The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. 
+        The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. 
         
-    This is a typical use of the override operator::
+        This is a typical use of the override operator::
 
-        subexp = '(' @expre ')' .
+            subexp = '(' @expre ')' .
 
-    The AST_ returned for the ``subexp`` rule will be the AST_ recovered from invoking ``expre``, without having to write a semantic action.
+        The AST_ returned for the ``subexp`` rule will be the AST_ recovered from invoking ``expre``, without having to write a semantic action.
 
-    Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
+        Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
 
         closure:closure = @expre '*' .
 
@@ -259,6 +256,19 @@ It is also possible to add an AST_ name to a rule::
 That will make the default AST_ returned to be a dict with a single item ``name`` as key, and the AST_ from the right-hand side of the rule as value.
 
 
+Abstract Syntax Trees (ASTs)
+============================
+
+By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
+
+AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (the ``+:`` operator) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
+
+When the ``parseinfo=True`` keyword argument has been passed to the ``Parser`` constructor, a ``parseinfo`` element is added to AST_ nodes that are *dict*-like. The element contains a *namedtuple* with the parse iformation for the node::
+
+   ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos']) 
+
+With the help of the ``Buffer.line_info()`` method, it is possible to recover the line, column, and original text parsed for the node. Note that when *parseinfo* is generated, the *buffer* used during parsing is kept in memory with the AST_.
+
 Whitespace
 ==========
 
@@ -272,7 +282,7 @@ If you don't define any whitespace characters::
 
     parser = MyParser(text, whitespace='')
 
-then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers).
+then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers). 
 
 
 Case Sensitivity
@@ -310,7 +320,7 @@ If pre-processing is required at some point, it is enough to place invocations o
 
     preproc = () ;
 
-The abstract parser will contain a rule of of the form::
+The abstract parser will honor as a semantic action a method declared as::
 
     def preproc(self, ast):
         return ast
@@ -318,7 +328,7 @@ The abstract parser will contain a rule of of the form::
 
 The (lack of) Documentation
 ===========================
-**Grako** so lacking in comments and doc-comments for these reasons:
+**Grako** lacking in comments and doc-comments for these reasons:
 
     1. Inline documentation easily goes out of phase with what the code actually does. It is an equivalent and more productive effort to provide out-of-line documentation.
 
@@ -375,6 +385,8 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
 
+* **Jeff Knupp** explains why **Grako**'s use of exceptions_ is sound, so I don't have to.
+
 * **Terence Parr** created ANTLR_, probably the most solid and professional parser generator out there. Ter, *ANTLR*, and the folks on the *ANLTR* forums helped me shape my ideas about **Grako**.
 
 * **JavaCC** (originally Jack_) looks like an abandoned project. It was the first parser generator I used while teaching.
@@ -383,11 +395,11 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
-* **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew.
+* **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew. My peers, and then teaching advisers **Alberto Torres**, and **Enzo Chiariotti** formed a team with **Gustavo** to challenge us with programming languages like *LATORTA* and term exams that went well into the eight hours. And, of course, there was also the *pirate patch* that should be worn on the left or right eye depending on the *LL* or *LR* challenge. 
 
-* **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about.
+* **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about. I learned why languages use declensions_, and why, although the underlying words are in English_, the structure of the programs we write is more like Japanese_.
 
-* **Grako** would not have been possible without the funding provided by **Thomas Bragg** through ResQSoft_. 
+* **Grako** would not have been possible without the vision, the funding, and the trust provided by **Thomas Bragg** through ResQSoft_. 
 
 .. _Wirth: http://en.wikipedia.org/wiki/Niklaus_Wirth 
 .. _Pascal: http://en.wikipedia.org/wiki/Pascal_(programming_language) 
@@ -402,17 +414,21 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _USB: http://www.usb.ve/
 .. _ANTLR: http://www.antlr.org/ 
 .. _Jack: http://en.wikipedia.org/wiki/Javacc 
-
+.. _exceptions: http://www.jeffknupp.com/blog/2013/02/06/write-cleaner-python-use-exceptions/
+.. _declensions: http://en.wikipedia.org/wiki/Declension 
+.. _English: http://en.wikipedia.org/wiki/English_grammar 
+.. _Japanese: http://en.wikipedia.org/wiki/Japanese_grammar 
 
 Change History
 ==============
 
-**tip**
+- **tip**
     * Also memoize exception results.
     * Also memoize advancing over whitespace and comments.
     * Work with unicode while rendering.
     * Added a table of contents to this *README*.
+    * Document ``parseinfo`` and default it to *False*.
 
-**1.0.0**
+- **1.0.0**
     First feature-complete release.
 
