@@ -261,8 +261,5 @@ class Parser(ParseContext):
                 self._pop_cut()
 
     def _repeat(self, f, plus=False):
-        if plus:
-            return [f()] + list(self._repeat_iterator(f))
-        else:
-            return list(self._repeat_iterator(f))
+        return ([f()] if plus else[]) + list(self._repeat_iterator(f))
 
