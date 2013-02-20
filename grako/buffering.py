@@ -147,7 +147,7 @@ class Buffer(object):
         matched = re.match(self.text, self.pos)
         if matched:
             token = matched.group()
-            self.move(len(token))
+            self._pos += len(token)
             return token
 
     def get_fileinfo(self, text, filename):
