@@ -177,7 +177,7 @@ The expressions, in reverse order of operator precedence, can be:
         As above. Match ``e1`` and then match ``e2``.
 
     ``( e )``
-        Grouping. Match ``e``.
+        Grouping. Match ``e``. Note that the AST_ for the group will be a list if more than one element is matched.
 
     ``[ e ]``
         Optionally match ``e``.
