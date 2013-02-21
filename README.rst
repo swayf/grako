@@ -232,7 +232,8 @@ The expressions, in reverse order of operator precedence, can be:
 
         Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
 
-        closure:closure = @expre '*' .
+            closure:closure = @expre '*' .
+
 
     ``$``
         The *end of text* symbol. Verify thad the end of the input text has been reached.
