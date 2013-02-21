@@ -127,7 +127,7 @@ class Parser(ParseContext):
         self._add_cst_node(token)
         return token
 
-    def _try(self, token, node_name=None, force_list=False):
+    def _try_token(self, token, node_name=None, force_list=False):
         p = self._pos
         self._next_token()
         if self._buffer.match(token) is None:
@@ -181,6 +181,18 @@ class Parser(ParseContext):
         self._next_token()
         if not self._buffer.atend():
             raise FailedParse(self._buffer, 'Expecting end of text.')
+
+    @contextmanager
+    def _try(self):
+        self._push_ast()
+        try:
+            yield
+            ast = self.ast
+            cst = self.cst
+        finally:
+            self._pop_ast()
+        self.ast.update(ast)
+        self._extend_cst(cst)
 
     @contextmanager
     def _option(self):
