@@ -184,36 +184,31 @@ class Parser(ParseContext):
 
     @contextmanager
     def _try(self):
+        p = self._pos
         self._push_ast()
         try:
             yield
             ast = self.ast
             cst = self.cst
+        except:
+            self._goto(p)
+            raise
         finally:
             self._pop_ast()
-        self.ast.update(ast)
+        self._update_ast(ast)
         self._extend_cst(cst)
 
     @contextmanager
     def _option(self):
-        p = self._pos
         self._push_cut()
         try:
-            self._push_ast()
-            try:
+            with self._try():
                 yield
-                ast = self.ast
-                cst = self.cst
-            finally:
-                self._pop_ast()
-            self.ast.update(ast)
-            self._extend_cst(cst)
         except FailedCut:
             raise
         except FailedParse as e:
             if self._is_cut_set():
                 self._error(e, FailedCut)
-            self._goto(p)
         finally:
             self._pop_cut()
 
@@ -254,24 +249,30 @@ class Parser(ParseContext):
         finally:
             self._pop_ast()  # simply discard
 
-    def _repeat_iterator(self, f):
+    def _repeater(self, f):
+        result = []
         while 1:
             p = self._pos
             self._push_cut()
             try:
                 value = f()
                 if value is not None:
-                    yield value
+                    result.append(value)
             except FailedCut:
                 raise
             except FailedParse as e:
+                self._goto(p)
                 if self._is_cut_set():
                     self._error(e, FailedCut)
-                self._goto(p)
-                raise StopIteration()
+                else:
+                    return result
             finally:
                 self._pop_cut()
 
     def _repeat(self, f, plus=False):
-        return ([f()] if plus else[]) + list(self._repeat_iterator(f))
+        one = []
+        if plus:
+#            with self._try():
+            one = [f()]
+        return one + self._repeater(f)
 

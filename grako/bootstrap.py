@@ -187,8 +187,7 @@ class GrakoParserRoot(Parser):
     def _sequence_(self):
         self._call('element', 'sequence', True)
         f = lambda : self._call('element', 'sequence', True)
-        for _ in self._repeat_iterator(f):
-            pass
+        self._repeater(f)
 
     def _choice_(self):
         self._call('sequence', 'options', True)

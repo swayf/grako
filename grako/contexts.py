@@ -95,6 +95,17 @@ class ParseContext(object):
             self.ast.add(name, node, force_list)
         return node
 
+    def _update_ast(self, ast):
+        for key, value in ast.items():
+            if key not in self.ast or not isinstance(value, list):
+                self._add_ast_node(key, value)
+            else:
+                prev = self.ast[key]
+                if isinstance(prev, list):
+                    prev.extend(value)
+                else:
+                    self.ast[key] = [prev] + value
+
     @property
     def cst(self):
         return self._concrete_stack[-1]
