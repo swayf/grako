@@ -112,6 +112,14 @@ class _DecoratorGrammar(_Grammar):
 
 
 class GroupGrammar(_DecoratorGrammar):
+    def parse(self, ctx):
+        ctx._push_cst()
+        try:
+            value = self.exp.parse(ctx)
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(value)
+
     def __str__(self):
         return '(%s)' % str(self.exp).strip()
 
@@ -345,17 +353,8 @@ class ChoiceGrammar(_Grammar):
 
 class RepeatGrammar(_DecoratorGrammar):
     def parse(self, ctx):
-        result = []
-        while True:
-            p = ctx.buf.pos
-            try:
-                tree = self.exp.parse(ctx)
-                if tree is not None:
-                    result.append(tree)
-            except FailedParse:
-                ctx.buf.goto(p)
-                break
-        return result
+        f = lambda : self.exp.parse(ctx)
+        return ctx._repeat(f)
 
 
     def _first(self, k, F):
@@ -386,7 +385,8 @@ class RepeatGrammar(_DecoratorGrammar):
 
 class RepeatOneGrammar(RepeatGrammar):
     def parse(self, ctx):
-        head = self.exp.parse(ctx)
+        with ctx._try():
+            head = self.exp.parse(ctx)
         return [head] + super(RepeatOneGrammar, self).parse(ctx)
 
     def _first(self, k, F):
@@ -495,7 +495,7 @@ class NamedGrammar(_DecoratorGrammar):
 class OverrideGrammar(_DecoratorGrammar):
     def parse(self, ctx):
         result = super(OverrideGrammar, self).parse(ctx)
-        ctx._add_ast_node('@', result)
+        ctx.ast['@'] = result
         return result
 
     def __str__(self):

@@ -2,9 +2,10 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
 import re
+from contextlib import contextmanager
 from collections import namedtuple
 from .ast import AST
-from .exceptions import FailedParse
+from .exceptions import FailedParse, FailedCut, FailedLookahead
 from . import buffering
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
@@ -185,4 +186,97 @@ class ParseContext(object):
 
     def _error(self, item, etype=FailedParse):
         raise etype(self._buffer, item)
+
+    @contextmanager
+    def _try(self):
+        p = self._pos
+        self._push_ast()
+        try:
+            yield
+            ast = self.ast
+            cst = self.cst
+        except:
+            self._goto(p)
+            raise
+        finally:
+            self._pop_ast()
+        self._update_ast(ast)
+        self._extend_cst(cst)
+
+    @contextmanager
+    def _option(self):
+        self._push_cut()
+        try:
+            with self._try():
+                yield
+        except FailedCut:
+            raise
+        except FailedParse as e:
+            if self._is_cut_set():
+                self._error(e, FailedCut)
+        finally:
+            self._pop_cut()
+
+    _optional = _option
+
+    @contextmanager
+    def _group(self):
+        self._push_cst()
+        try:
+            yield
+            cst = self.cst
+        finally:
+            self._pop_cst()
+        self._add_cst_node(cst)
+
+    @contextmanager
+    def _if(self):
+        p = self._pos
+        self._push_ast()
+        try:
+            yield
+        finally:
+            self._goto(p)
+            self._pop_ast()  # simply discard
+
+    @contextmanager
+    def _ifnot(self):
+        p = self._pos
+        self._push_ast()
+        try:
+            yield
+        except FailedParse:
+            self._goto(p)
+            pass
+        else:
+            self._goto(p)
+            self._error('', etype=FailedLookahead)
+        finally:
+            self._pop_ast()  # simply discard
+
+    def _repeater(self, f):
+        result = []
+        while True:
+            self._push_cut()
+            try:
+                with self._try():
+                    value = f()
+                if value is not None:
+                    result.append(value)
+            except FailedCut:
+                raise
+            except FailedParse as e:
+                if self._is_cut_set():
+                    self._error(e, FailedCut)
+                else:
+                    return result
+            finally:
+                self._pop_cut()
+
+    def _repeat(self, f, plus=False):
+        one = []
+        if plus:
+            with self._try():
+                one = [f()]
+        return one + self._repeater(f)
 

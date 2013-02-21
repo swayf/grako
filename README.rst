@@ -426,9 +426,11 @@ Change History
 ==============
 
 - **tip**
+    * *BUG!* Need to preserve state in partially-matched closure iterations.
     * Also memoize exception results.
     * Also memoize advancing over whitespace and comments.
     * Work with unicode while rendering.
+    * Improved consistency between the way generated parsers and models parse.
     * Added a table of contents to this *README*.
     * Document ``parseinfo`` and default it to *False*.
 

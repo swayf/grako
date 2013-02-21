@@ -194,8 +194,9 @@ class GrakoParserRoot(Parser):
         while True:
             p = self._pos
             try:
-                self._token('|')
-                self._call('sequence', 'options')
+                with self._try():
+                    self._token('|')
+                    self._call('sequence', 'options')
             except FailedCut as e:
                 self._goto(p)
                 raise e.nested
@@ -225,7 +226,8 @@ class GrakoParserRoot(Parser):
         while True:
             p = self._pos
             try:
-                self._call('rule', 'rules')
+                with self._try():
+                    self._call('rule', 'rules')
             except FailedParse:
                 self._goto(p)
                 break
