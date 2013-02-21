@@ -21,7 +21,7 @@ from .rendering import Renderer, render
 from .buffering import Buffer
 from .exceptions import *  # @UnusedWildImport
 from .ast import AST
-from .contexts import ParseContext
+from .contexts import ParseContext, ParseInfo
 
 def check(result):
     assert isinstance(result, _Grammar), str(result)
@@ -33,8 +33,8 @@ def urepr(obj):
     return repr(obj).lstrip('u')
 
 class ModelContext(ParseContext):
-    def __init__(self, rules, text, filename, trace):
-        super(ModelContext, self).__init__(trace=trace)
+    def __init__(self, rules, text, filename, trace, **kwargs):
+        super(ModelContext, self).__init__(trace=trace, **kwargs)
         self.rules = {rule.name :rule for rule in rules}
         self._buffer = Buffer(text, filename=filename)
         self._buffer.goto(0)
@@ -112,6 +112,14 @@ class _DecoratorGrammar(_Grammar):
 
 
 class GroupGrammar(_DecoratorGrammar):
+    def parse(self, ctx):
+        ctx._push_cst()
+        try:
+            value = self.exp.parse(ctx)
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(value)
+
     def __str__(self):
         return '(%s)' % str(self.exp).strip()
 
@@ -345,16 +353,14 @@ class ChoiceGrammar(_Grammar):
 
 class RepeatGrammar(_DecoratorGrammar):
     def parse(self, ctx):
-        result = []
-        while True:
-            p = ctx.buf.pos
-            try:
-                tree = self.exp.parse(ctx)
-                if tree is not None:
-                    result.append(tree)
-            except FailedParse:
-                ctx.buf.goto(p)
-                break
+        ctx._push_cst()
+        try:
+            f = lambda : self.exp.parse(ctx)
+            result = ctx._repeat(f)
+            cst = ctx.cst
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(cst)
         return result
 
 
@@ -386,8 +392,17 @@ class RepeatGrammar(_DecoratorGrammar):
 
 class RepeatOneGrammar(RepeatGrammar):
     def parse(self, ctx):
-        head = self.exp.parse(ctx)
-        return [head] + super(RepeatOneGrammar, self).parse(ctx)
+        ctx._push_cst()
+        try:
+            with ctx._try():
+                head = self.exp.parse(ctx)
+            f = lambda : self.exp.parse(ctx)
+            result = [head] + ctx._repeat(f)
+            cst = ctx.cst
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(cst)
+        return result
 
     def _first(self, k, F):
         result = {()}
@@ -503,7 +518,7 @@ class OverrideGrammar(_DecoratorGrammar):
 
     template = '''
                 {exp}
-                self.ast['@'] = _e\
+                self._add_ast_node('@', _e)\
                 '''
 
 
@@ -594,6 +609,8 @@ class RuleGrammar(NamedGrammar):
                 node = ctx.cst
             elif '@' in node:
                 node = node['@']
+            elif ctx.parseinfo:
+                node.add('parseinfo', ParseInfo(ctx._buffer, name, pos, ctx._pos))
             if self.ast_name:
                 node = AST([(self.ast_name, node)])
         finally:
@@ -662,10 +679,10 @@ class Grammar(Renderer):
             rule._first_set = F[rule.name]
         return F
 
-    def parse(self, text, start=None, filename=None, trace=False,):
+    def parse(self, text, start=None, filename=None, trace=False, **kwargs):
         try:
             try:
-                ctx = ModelContext(self.rules, text, filename, trace=trace)
+                ctx = ModelContext(self.rules, text, filename, trace=trace, **kwargs)
                 start_rule = ctx._find_rule(start) if start else self.rules[0]
                 return start_rule.parse(ctx)
             except FailedCut as e:
@@ -723,7 +740,7 @@ class Grammar(Renderer):
                     import json
                     with open(filename) as f:
                         text = f.read()
-                    parser = {name}ParserBase(simple=True)
+                    parser = {name}ParserBase(parseinfo=False)
                     ast = parser.parse(text, startrule, filename=filename)
                     print('AST:')
                     print(ast)

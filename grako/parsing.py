@@ -14,11 +14,9 @@ Parser.parse() will take the text to parse directly, or an instance of the
 .buffeing.Buffer class.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-from contextlib import contextmanager
 from . import buffering
 from .exceptions import *  # @UnusedWildImport
-from .ast import AST
-from .contexts import ParseContext
+from .contexts import ParseContext, ParseInfo
 
 
 class AbstractParserMixin(object):
@@ -31,7 +29,7 @@ class AbstractParserMixin(object):
 
 class Parser(ParseContext):
 
-    def parse(self, text, rule_name, filename=None):
+    def parse(self, text, rule_name, filename=None, **kwargs):
         try:
             self._reset_context()
             if isinstance(text, buffering.Buffer):
@@ -41,7 +39,8 @@ class Parser(ParseContext):
                                                 filename=filename,
                                                 whitespace=self.whitespace,
                                                 ignorecase=self.ignorecase,
-                                                nameguard=self.nameguard)
+                                                nameguard=self.nameguard,
+                                                **kwargs)
             self._push_ast()
             return self._call(rule_name, rule_name)
         finally:
@@ -103,10 +102,8 @@ class Parser(ParseContext):
                 node = self.cst
             elif '@' in node:
                 node = node['@']  # override the AST
-            elif not self._simple:
-                node.add('parseinfo',
-                         AST(rule=name, pos=pos, endpos=self._pos)
-                         )
+            elif self.parseinfo:
+                node.add('parseinfo', ParseInfo(self._buffer, name, pos, self._pos))
             semantic_rule = self._find_semantic_rule(name)
             if semantic_rule:
                 node = semantic_rule(node)
@@ -129,7 +126,7 @@ class Parser(ParseContext):
         self._add_cst_node(token)
         return token
 
-    def _try(self, token, node_name=None, force_list=False):
+    def _try_token(self, token, node_name=None, force_list=False):
         p = self._pos
         self._next_token()
         if self._buffer.match(token) is None:
@@ -183,88 +180,4 @@ class Parser(ParseContext):
         self._next_token()
         if not self._buffer.atend():
             raise FailedParse(self._buffer, 'Expecting end of text.')
-
-    @contextmanager
-    def _option(self):
-        p = self._pos
-        self._push_cut()
-        try:
-            self._push_ast()
-            try:
-                yield
-                ast = self.ast
-                cst = self.cst
-            finally:
-                self._pop_ast()
-            self.ast.update(ast)
-            self._extend_cst(cst)
-        except FailedCut:
-            raise
-        except FailedParse as e:
-            if self._is_cut_set():
-                self._error(e, FailedCut)
-            self._goto(p)
-        finally:
-            self._pop_cut()
-
-    _optional = _option
-
-    @contextmanager
-    def _group(self):
-        self._push_cst()
-        try:
-            yield
-            cst = self.cst
-        finally:
-            self._pop_cst()
-        self._add_cst_node(cst)
-
-    @contextmanager
-    def _if(self):
-        p = self._pos
-        self._push_ast()
-        try:
-            yield
-        finally:
-            self._goto(p)
-            self._pop_ast()  # simply discard
-
-    @contextmanager
-    def _ifnot(self):
-        p = self._pos
-        self._push_ast()
-        try:
-            yield
-        except FailedParse:
-            self._goto(p)
-            pass
-        else:
-            self._goto(p)
-            self._error('', etype=FailedLookahead)
-        finally:
-            self._pop_ast()  # simply discard
-
-    def _repeat_iterator(self, f):
-        while 1:
-            p = self._pos
-            self._push_cut()
-            try:
-                value = f()
-                if value is not None:
-                    yield value
-            except FailedCut:
-                raise
-            except FailedParse as e:
-                if self._is_cut_set():
-                    self._error(e, FailedCut)
-                self._goto(p)
-                raise StopIteration()
-            finally:
-                self._pop_cut()
-
-    def _repeat(self, f, plus=False):
-        if plus:
-            return [f()] + list(self._repeat_iterator(f))
-        else:
-            return list(self._repeat_iterator(f))
 

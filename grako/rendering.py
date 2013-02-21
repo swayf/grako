@@ -15,7 +15,7 @@ def render(item, join='', **fields):
     elif isinstance(item, Renderer):
         return item.render(join=join, **fields)
     elif isinstance(item, list):
-        return join.join(render(e, join=join, **fields) for e in item)
+        return join.join(render(e, join=join, **fields) for e in item if e is not None)
     else:
         return ustr(item)
 

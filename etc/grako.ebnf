@@ -8,11 +8,11 @@ expre = choice | sequence;
 
 choice:choice = options+:sequence {'|' >> options:sequence}+ ;
 
-sequence = element {[','] element} ;
+sequence = @element {[','] @element} ;
 
 element = named | override | term ;
 
-named:named = name:qualified force_list:['+'] ':' value:element ;
+named:named = name:qualified [force_list:'+'] ':' value:element ;
 
 override = '@' @element ;
 
@@ -45,6 +45,6 @@ qualified = ?/[-_A-Za-z0-9]+(?:\.[-_A-Za-z0-9]+)*/? ;
 
 word = ?/[-_A-Za-z0-9]+/? ;
 
-pattern = '?/' >> @?/(.*?)(?=/\?)/? '/?' ;
+pattern:pattern = '?/' >> pattern:?/(.*?)(?=/\?)/? '/?' ;
 
 eof = '$' ;

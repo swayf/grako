@@ -83,14 +83,14 @@ class GrakoParserRoot(Parser):
         self._token(']')
 
     def _plus_(self):
-        if not self._try('-', 'symbol'):
+        if not self._try_token('-', 'symbol'):
             self._token('+', 'symbol')
 
     def _repeat_(self):
         self._token('{')
         self._call('expre', 'repeat')
         self._token('}')
-        if not self._try('*'):
+        if not self._try_token('*'):
             try:
                 self._call('plus', 'plus')
             except FailedParse:
@@ -156,7 +156,7 @@ class GrakoParserRoot(Parser):
 
     def _named_(self):
         name = self._call('qualified')
-        if not self._try('+:', 'force_list'):
+        if not self._try_token('+:', 'force_list'):
             self._token(':')
         self.ast.add('name', name)
         try:
@@ -186,17 +186,17 @@ class GrakoParserRoot(Parser):
 
     def _sequence_(self):
         self._call('element', 'sequence', True)
-        f = lambda : self._call('element', 'sequence')
-        for _ in self._repeat_iterator(f):
-            pass
+        f = lambda : self._call('element', 'sequence', True)
+        self._repeater(f)
 
     def _choice_(self):
         self._call('sequence', 'options', True)
         while True:
             p = self._pos
             try:
-                self._token('|')
-                self._call('sequence', 'options')
+                with self._try():
+                    self._token('|')
+                    self._call('sequence', 'options')
             except FailedCut as e:
                 self._goto(p)
                 raise e.nested
@@ -218,7 +218,7 @@ class GrakoParserRoot(Parser):
         self._call('word', 'name')
         self._token('=')
         self._call('expre', 'rhs')
-        if not self._try(';'):
+        if not self._try_token(';'):
             self._token('.')
 
     def _grammar_(self):
@@ -226,7 +226,8 @@ class GrakoParserRoot(Parser):
         while True:
             p = self._pos
             try:
-                self._call('rule', 'rules')
+                with self._try():
+                    self._call('rule', 'rules')
             except FailedParse:
                 self._goto(p)
                 break
@@ -446,9 +447,11 @@ class GrakoGrammarGenerator(GrakoParserBase):
         return ast.element
 
     def sequence(self, ast):
-        if len(ast.sequence) == 1:
-            return simplify(ast.sequence)
-        return SequenceGrammar(ast.sequence)
+        seq = ast.sequence
+        assert isinstance(seq, list), str(seq)
+        if len(seq) == 1:
+            return simplify(seq)
+        return SequenceGrammar(seq)
 
     def choice(self, ast):
         if len(ast.options) == 1:
