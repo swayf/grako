@@ -23,7 +23,7 @@ class BufferingTests(unittest.TestCase):
     def test_pos_consistency(self):
         line = col = 0
         for p, c in enumerate(self.text):
-            bl, bc = self.buf.line_info(p)[:2]
+            bl, bc = self.buf.line_info(p)[1:3]
             d = self.buf.next()
 #            print('tx', line, col, c.encode('string-escape'))
 #            print('bu', bl, bc, d.encode('string-escape'))
@@ -35,9 +35,10 @@ class BufferingTests(unittest.TestCase):
                 line += 1
             else:
                 col += 1
+
     def test_next_consisntency(self):
         while not self.buf.atend():
-            bl, bc = self.buf.line_info()[:2]
+            bl, bc = self.buf.line_info()[1:3]
 #            print('li', bl, bc)
 #            print('bu', self.buf.line, self.buf.col)
             self.assertEqual(bl, self.buf.line)
@@ -47,7 +48,7 @@ class BufferingTests(unittest.TestCase):
     def test_goto_consistency(self):
         for _ in range(100):
             self.buf.goto(random.randrange(len(self.text)))
-            bl, bc = self.buf.line_info()[:2]
+            bl, bc = self.buf.line_info()[1:3]
 #            print('li', bl, bc)
 #            print('bu', self.buf.line, self.buf.col)
             self.assertEqual(bl, self.buf.line)
@@ -59,10 +60,10 @@ class BufferingTests(unittest.TestCase):
             self.assertEqual(line, self.buf.get_line(n))
 
 def suite():
-    pass
+    return unittest.TestLoader().loadTestsFromTestCase(BufferingTests)
 
 def main():
-    unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite())
 
 if __name__ == '__main__':
     main()
