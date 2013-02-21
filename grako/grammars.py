@@ -495,7 +495,7 @@ class NamedGrammar(_DecoratorGrammar):
 class OverrideGrammar(_DecoratorGrammar):
     def parse(self, ctx):
         result = super(OverrideGrammar, self).parse(ctx)
-        ctx.ast['@'] = result
+        ctx._add_ast_node('@', result)
         return result
 
     def __str__(self):
@@ -503,7 +503,7 @@ class OverrideGrammar(_DecoratorGrammar):
 
     template = '''
                 {exp}
-                self.ast['@'] = _e\
+                self._add_ast_node('@', _e)\
                 '''
 
 
