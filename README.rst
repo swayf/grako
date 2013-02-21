@@ -428,7 +428,7 @@ Change History
 ==============
 
 - **1.1.0**
-    * *BUG!* Need to preserve state closure iterations match partially.
+    * *BUG!* Need to preserve state when closure iterations match partially.
     * Improved performance by also memoizing exception results and advancement over whitespace and comments.
     * Work with unicode while rendering.
     * Improved consistency between the way generated parsers and models parse.
