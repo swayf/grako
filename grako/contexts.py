@@ -201,7 +201,7 @@ class ParseContext(object):
         finally:
             self._pop_ast()
         self._update_ast(ast)
-        self._extend_cst(cst)
+        self._add_cst_node(cst)
 
     @contextmanager
     def _option(self):
@@ -274,9 +274,16 @@ class ParseContext(object):
                 self._pop_cut()
 
     def _repeat(self, f, plus=False):
-        one = []
-        if plus:
-            with self._try():
-                one = [f()]
-        return one + self._repeater(f)
+        self._push_cst()
+        try:
+            one = []
+            if plus:
+                with self._try():
+                    one = [f()]
+            result = one + self._repeater(f)
+            cst = self.cst
+        finally:
+            self._pop_cst()
+        self._add_cst_node(cst)
+        return result
 

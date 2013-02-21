@@ -353,8 +353,15 @@ class ChoiceGrammar(_Grammar):
 
 class RepeatGrammar(_DecoratorGrammar):
     def parse(self, ctx):
-        f = lambda : self.exp.parse(ctx)
-        return ctx._repeat(f)
+        ctx._push_cst()
+        try:
+            f = lambda : self.exp.parse(ctx)
+            result = ctx._repeat(f)
+            cst = ctx.cst
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(cst)
+        return result
 
 
     def _first(self, k, F):
@@ -385,9 +392,17 @@ class RepeatGrammar(_DecoratorGrammar):
 
 class RepeatOneGrammar(RepeatGrammar):
     def parse(self, ctx):
-        with ctx._try():
-            head = self.exp.parse(ctx)
-        return [head] + super(RepeatOneGrammar, self).parse(ctx)
+        ctx._push_cst()
+        try:
+            with ctx._try():
+                head = self.exp.parse(ctx)
+            f = lambda : self.exp.parse(ctx)
+            result = [head] + ctx._repeat(f)
+            cst = ctx.cst
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(cst)
+        return result
 
     def _first(self, k, F):
         result = {()}
