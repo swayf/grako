@@ -90,7 +90,7 @@ or just::
 
 if **Grako** was installed using *easy_install* or *pip*.
 
-The *-h* and *==help* parameters provide full usage information::
+The *-h* and *--help* parameters provide full usage information::
 
         $ python -m grako -h
         usage: grako [-h] [-m name] [-o outfile] [-v] grammar
@@ -102,12 +102,12 @@ The *-h* and *==help* parameters provide full usage information::
           grammar               The file name of the grammar to generate a parser for
 
         optional arguments:
-          -h, ==help            show this help message and exit
-          -m name, ==name name  An optional name for the grammar. It defaults to the
+          -h, --help            show this help message and exit
+          -m name, --name name  An optional name for the grammar. It defaults to the
                                 basename of the grammar file's name
-          -o outfile, ==outfile outfile
+          -o outfile, --outfile outfile
                                 specify where the output should go (default is stdout)
-          -t, ==trace           produce verbose parsing output
+          -t, --trace           produce verbose parsing output
 
         $
 
