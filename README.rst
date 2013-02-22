@@ -353,11 +353,17 @@ Every *attribute* of the class that doesn't start with ``_`` may be used as a te
                     
 The ``rendering`` module uses a ``Formatter`` enhanced to support the rendering of items in an *iterable* one by one. The syntax to acheive that is::
 
-    {fieldname:separator:simple_format}
+    {fieldname:ind:sep:fmt}
 
-Both ``separator`` and ``simple_format`` are optional, but the *colons* are not. Such a field will be rendered using::
+All of ``ind``, ``sep``, and ``fmt`` are optional, but the three *colons* are not. Such a field will be rendered using::
 
-     separator.join(simple_format % render(v) for v in value)
+     indent(sep.join(fmt % render(v) for v in value), ind)
+
+The extended format can also be used with non-iterables, in which case the rendering will be::
+
+     indent(fmt % render(value), ind)
+
+The default multiplier for ``ind`` is ``4``, but that can be ovrriden using ``n*m`` (for example ``3*1``) in the format.
 
 The (lack of) Documentation
 ===========================

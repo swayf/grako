@@ -56,13 +56,13 @@ def trim(docstring):
     # Return a single string:
     return '\n'.join(trimmed)
 
-def indent(text, indent=1):
+def indent(text, indent=1, multiplier=4):
     """ Indent the given block of text by indent*4 spaces
     """
     if text is None:
         return ''
     text = ustr(text)
     if indent >= 0:
-        lines = [' ' * 4 * indent + t for t in text.split('\n')]
+        lines = [' ' * multiplier * indent + t for t in text.split('\n')]
         text = '\n'.join(lines)
     return text

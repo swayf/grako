@@ -53,7 +53,7 @@ class Choice(Model):
         fields.update(exp=[o.n for o in self.options])
 
     template = '''\
-        S{n} = {exp: |  :S%s} .
+        S{n} = {exp:: |  :S%s} .
 
         {options}
 
@@ -75,7 +75,7 @@ class Sequence(Model):
         fields.update(exp=[t.n for t in self.terms])
 
     template = '''\
-        S{n} = {exp: :S%s} .
+        S{n} = {exp:: :S%s} .
 
         {terms}
 

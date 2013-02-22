@@ -6,7 +6,7 @@ code. It's used by the .grammars module for parser generation.
 from __future__ import print_function, division, absolute_import, unicode_literals
 import itertools
 import string
-from .util import trim, ustr, isiter, strtype
+from .util import trim, ustr, isiter, strtype, indent
 
 def render(item, join='', **fields):
     """ Render the given item
@@ -25,14 +25,26 @@ def render(item, join='', **fields):
 
 class RenderingFormatter(string.Formatter):
     def format_field(self, value, spec):
-        if not isiter(value) or ':' not in spec:
+        if ':' not in spec:
             return super(RenderingFormatter, self).format_field(render(value), spec)
 
-        sep, fmt = spec.split(':')
+        ind, sep, fmt = spec.split(':')
         if not fmt:
             fmt = '%s'
+        if not ind:
+            ind = 0
+            mult = 0
+        elif '*' in ind:
+            ind, mult = ind.split('*')
+        else:
+            mult = 4
+        ind = int(ind)
+        mult = int(mult)
 
-        return sep.join(fmt % render(v) for v in value)
+        if isiter(value):
+            return indent(sep.join(fmt % render(v) for v in value), ind, mult)
+        else:
+            return indent(fmt % render(value), ind, mult)
 
 class Renderer(object):
     template = ''
