@@ -5,6 +5,7 @@ code. It's used by the .grammars module for parser generation.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 import itertools
+import string
 from .util import trim, ustr
 
 def render(item, join='', **fields):
@@ -20,9 +21,15 @@ def render(item, join='', **fields):
         return ustr(item)
 
 
+class RenderingFormatter(string.Formatter):
+    def format_field(self, value, spec):
+        value = render(value)
+        return super(RenderingFormatter, self).format_field(value, spec)
+
 class Renderer(object):
     template = ''
     _counter = itertools.count()
+    formatter = RenderingFormatter()
 
     def __init__(self, template=None):
         if template is not None:
@@ -44,10 +51,8 @@ class Renderer(object):
             else:
                 template = self.template
 
-        fields.update(fields)
-        fields = {k:render(v) for k, v in fields.items()}
         try:
-            return trim(template).format(**fields)
+            return self.formatter.format(trim(template), **fields)
         except KeyError as e:
             raise KeyError(str(e), type(self))
 
