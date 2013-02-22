@@ -333,7 +333,7 @@ Templates and Translation
 
 **Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parses.
 
-Translation in **Grako** is *template-based*, but instead of defining or using a complext templating engine, it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
+Translation in **Grako** is *template-based*, but instead of defining or using a complext templating engine (yet another language), it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
 
 To generate a parser, **Grako** constructs an object model of the parsed grammar. Each node in the model is a descendant of ``rendering.Renderer``, and knows how to render itself. This is an example taken from **Grako**'s source code::
 
