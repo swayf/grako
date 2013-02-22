@@ -427,6 +427,10 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
+- **tip**
+    * Implemented lazy rendering of template fields.
+    * Implemented rendering of iterables using a specified separator.
+
 - **1.1.0**
     * *BUG!* Need to preserve state when closure iterations match partially.
     * Improved performance by also memoizing exception results and advancement over whitespace and comments.
