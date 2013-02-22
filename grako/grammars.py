@@ -123,12 +123,9 @@ class GroupGrammar(_DecoratorGrammar):
     def __str__(self):
         return '(%s)' % str(self.exp).strip()
 
-    def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
-
     template = '''\
                 with self._group():
-                {exp}
+                {exp:1::}
                     _e = self.cst
                 '''
 
@@ -203,12 +200,9 @@ class LookaheadGrammar(_DecoratorGrammar):
             ctx.goto(p)
             ctx._pop_ast()  # simply discard
 
-    def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
-
     template = '''\
                 with self._if():
-                {exp}\
+                {exp:1::}\
                 '''
 
 class LookaheadNotGrammar(_DecoratorGrammar):
@@ -229,12 +223,9 @@ class LookaheadNotGrammar(_DecoratorGrammar):
             ctx._pop_ast()  # simply discard
 
 
-    def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
-
     template = '''\
                 with self._ifnot():
-                {exp}\
+                {exp:1::}\
                 '''
 
 
@@ -374,8 +365,7 @@ class RepeatGrammar(_DecoratorGrammar):
         return '{%s}' % str(self.exp)
 
     def render_fields(self, fields):
-        fields.update(n=self.counter(),
-                      innerexp=indent(render(self.exp)))
+        fields.update(n=self.counter())
 
     def render(self, **fields):
         if {()} in self.exp.firstset:
@@ -384,7 +374,7 @@ class RepeatGrammar(_DecoratorGrammar):
 
     template = '''
                 def repeat{n}():
-                {innerexp}
+                {exp:1::}
                     return _e
                 _e = self._repeat(repeat{n})\
                 '''
@@ -414,13 +404,11 @@ class RepeatOneGrammar(RepeatGrammar):
         return '{%s}+' % str(self.exp)
 
     def render_fields(self, fields):
-        fields.update(n=self.counter(),
-                      exp=render(self.exp),
-                      innerexp=indent(render(self.exp)))
+        fields.update(n=self.counter())
 
     template = '''
                 def repeat{n}():
-                {innerexp}
+                {exp:1::}
                     return _e
                 _e = self._repeat(repeat{n}, plus=True)\
                 '''
@@ -451,13 +439,10 @@ class OptionalGrammar(_DecoratorGrammar):
     def __str__(self):
         return '[%s]' % str(self.exp)
 
-    def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
-
     template = '''\
                 with self._optional():
                     _e = None
-                {exp}\
+                {exp:1::}\
                 '''
 
 
@@ -498,7 +483,6 @@ class NamedGrammar(_DecoratorGrammar):
         fields.update(
                       n=self.counter(),
                       name=name,
-                      exp=render(self.exp),
                       force_list=', force_list=True' if self.force_list else ''
                       )
     template = '''
@@ -638,14 +622,13 @@ class RuleGrammar(NamedGrammar):
             ast_name_clause = ''
         fields.update(
                       name=name,
-                      exp=indent(render(self.exp)),
                       ast_name_clause=ast_name_clause
                       )
 
     template = '''
                 def _{name}_(self):
                     _e = None
-                {exp}{ast_name_clause}
+                {exp:1::}{ast_name_clause}
 
                 '''
 

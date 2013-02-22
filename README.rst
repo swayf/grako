@@ -349,7 +349,7 @@ To generate a parser, **Grako** constructs an object model of the parsed grammar
                     {exp}\
                     '''
 
-Every *attribute* of the class that doesn't start with ``_`` may be used as a template field, and fields can be added or modified by overriding the ``render_fields()`` method.  Fields themselves are lazily *rendered* before being expanded by the template, so a field may be an instance of a ``Renderer`` descendant.
+Every *attribute* of the object that doesn't start with ``_`` may be used as a template field, and fields can be added or modified by overriding the ``render_fields()`` method.  Fields themselves are lazily *rendered* before being expanded by the template, so a field may be an instance of a ``Renderer`` descendant.
                     
 The ``rendering`` module uses a ``Formatter`` enhanced to support the rendering of items in an *iterable* one by one. The syntax to acheive that is::
 
