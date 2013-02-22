@@ -5,24 +5,51 @@ code. It's used by the .grammars module for parser generation.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 import itertools
-from .util import trim, ustr
+import string
+from .util import trim, ustr, isiter, strtype, indent
 
 def render(item, join='', **fields):
     """ Render the given item
     """
     if item is None:
         return ''
+    elif isinstance(item, strtype):
+        return item
     elif isinstance(item, Renderer):
         return item.render(join=join, **fields)
-    elif isinstance(item, list):
-        return join.join(render(e, join=join, **fields) for e in item if e is not None)
+    elif isiter(item):
+        return join.join(render(e, join=join, **fields) for e in iter(item) if e is not None)
     else:
         return ustr(item)
 
 
+class RenderingFormatter(string.Formatter):
+    def format_field(self, value, spec):
+        if ':' not in spec:
+            return super(RenderingFormatter, self).format_field(render(value), spec)
+
+        ind, sep, fmt = spec.split(':')
+        if not fmt:
+            fmt = '%s'
+        if not ind:
+            ind = 0
+            mult = 0
+        elif '*' in ind:
+            ind, mult = ind.split('*')
+        else:
+            mult = 4
+        ind = int(ind)
+        mult = int(mult)
+
+        if isiter(value):
+            return indent(sep.join(fmt % render(v) for v in value), ind, mult)
+        else:
+            return indent(fmt % render(value), ind, mult)
+
 class Renderer(object):
     template = ''
     _counter = itertools.count()
+    formatter = RenderingFormatter()
 
     def __init__(self, template=None):
         if template is not None:
@@ -44,10 +71,8 @@ class Renderer(object):
             else:
                 template = self.template
 
-        fields.update(fields)
-        fields = {k:render(v) for k, v in fields.items()}
         try:
-            return trim(template).format(**fields)
+            return self.formatter.format(trim(template), **fields)
         except KeyError as e:
             raise KeyError(str(e), type(self))
 

@@ -28,10 +28,10 @@ class Regexp(Model):
         return self.exp._set_rule_numbers(s)
 
     def render_fields(self, fields):
-        fields.update(startn='S%d' % self.exp.n)
+        fields.update(startn=self.exp.n)
 
     template = '''\
-        S{n} = {startn} $ .
+        S{n} = S{startn} $ .
 
         {exp}
         '''
@@ -50,10 +50,10 @@ class Choice(Model):
         return s
 
     def render_fields(self, fields):
-        fields.update(exp=' | '.join('S%d' % o.n for o in self.options))
+        fields.update(exp=[o.n for o in self.options])
 
     template = '''\
-        S{n} = {exp} .
+        S{n} = {exp:: |  :S%s} .
 
         {options}
 
@@ -72,10 +72,10 @@ class Sequence(Model):
         return s
 
     def render_fields(self, fields):
-        fields.update(exp=' '.join('S%d' % t.n for t in self.terms))
+        fields.update(exp=[t.n for t in self.terms])
 
     template = '''\
-        S{n} = {exp} .
+        S{n} = {exp:: :S%s} .
 
         {terms}
 
