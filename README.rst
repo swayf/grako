@@ -328,6 +328,37 @@ The abstract parser will honor as a semantic action a method declared as::
         return ast
 
 
+Templates and Translation 
+=========================
+
+**Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parses.
+
+Translation in **Grako** is *template-based*, but instead of defining or using a complext templating engine, it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
+
+To generate a parser, **Grako** constructs an object model of the parsed grammar. Each node in the model is a descendant of ``rendering.Renderer``, and knows how to render itself. This is an example taken from **Grako**'s source code::
+
+    class LookaheadGrammar(_DecoratorGrammar):
+
+        ...
+
+        def render_fields(self, fields):
+            fields.update(exp=indent(render(self.exp)))
+    
+        template = '''\
+                    with self._if():
+                    {exp}\
+                    '''
+
+Every *attribute* of the class that doesn't start with ``_`` may be used as a template field, and fields can be added or modified by overriding the ``render_fields()`` method.  Fields themselves are lazily *rendered* before being expanded by the template, so a field may be an instance of a ``Renderer`` descendant.
+                    
+The ``rendering`` module uses a ``Formatter`` enhanced to support the rendering of items in an *iterable* one by one. The syntax to acheive that is::
+
+    {fieldname:separator:simple_format}
+
+Both ``separator`` and ``simple_format`` are optional, but the *colons* are not. Such a field will be rendered using::
+
+     separator.join(simple_format % render(v) for v in value)
+
 The (lack of) Documentation
 ===========================
 **Grako** lacking in comments and doc-comments for these reasons:
@@ -428,8 +459,9 @@ Change History
 ==============
 
 - **tip**
-    * Implemented lazy rendering of template fields.
-    * Implemented rendering of iterables using a specified separator.
+    * Lazy rendering of template fields.
+    * Rendering of iterables using a specified separator.
+    * Basic documentation of the *rendering engine*.
 
 - **1.1.0**
     * *BUG!* Need to preserve state when closure iterations match partially.
