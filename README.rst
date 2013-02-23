@@ -403,10 +403,10 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
 
 
-Contact
-=======
+Contact and Updates
+===================
 
-For queries and comments about **Grako**, please use the `Grako Forum`_.
+To comment **Grako** and to receive notifications about new releales, please join the low-volume the `Grako Forum`_ at *Google Groups*.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 
