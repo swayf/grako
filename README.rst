@@ -90,7 +90,7 @@ or just::
 
 if **Grako** was installed using *easy_install* or *pip*.
 
-The *-h* and *==help* parameters provide full usage information::
+The *-h* and *--help* parameters provide full usage information::
 
         $ python -m grako -h
         usage: grako [-h] [-m name] [-o outfile] [-v] grammar
@@ -102,12 +102,12 @@ The *-h* and *==help* parameters provide full usage information::
           grammar               The file name of the grammar to generate a parser for
 
         optional arguments:
-          -h, ==help            show this help message and exit
-          -m name, ==name name  An optional name for the grammar. It defaults to the
+          -h, --help            show this help message and exit
+          -m name, --name name  An optional name for the grammar. It defaults to the
                                 basename of the grammar file's name
-          -o outfile, ==outfile outfile
+          -o outfile, --outfile outfile
                                 specify where the output should go (default is stdout)
-          -t, ==trace           produce verbose parsing output
+          -t, --trace           produce verbose parsing output
 
         $
 
@@ -328,6 +328,43 @@ The abstract parser will honor as a semantic action a method declared as::
         return ast
 
 
+Templates and Translation 
+=========================
+
+**Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parses.
+
+Translation in **Grako** is *template-based*, but instead of defining or using a complext templating engine (yet another language), it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
+
+To generate a parser, **Grako** constructs an object model of the parsed grammar. Each node in the model is a descendant of ``rendering.Renderer``, and knows how to render itself. This is an example taken from **Grako**'s source code::
+
+    class LookaheadGrammar(_DecoratorGrammar):
+
+        ...
+
+        def render_fields(self, fields):
+            fields.update(exp=indent(render(self.exp)))
+    
+        template = '''\
+                    with self._if():
+                    {exp}\
+                    '''
+
+Every *attribute* of the object that doesn't start with ``_`` may be used as a template field, and fields can be added or modified by overriding the ``render_fields()`` method.  Fields themselves are lazily *rendered* before being expanded by the template, so a field may be an instance of a ``Renderer`` descendant.
+                    
+The ``rendering`` module uses a ``Formatter`` enhanced to support the rendering of items in an *iterable* one by one. The syntax to acheive that is::
+
+    {fieldname:ind:sep:fmt}
+
+All of ``ind``, ``sep``, and ``fmt`` are optional, but the three *colons* are not. Such a field will be rendered using::
+
+     indent(sep.join(fmt % render(v) for v in value), ind)
+
+The extended format can also be used with non-iterables, in which case the rendering will be::
+
+     indent(fmt % render(value), ind)
+
+The default multiplier for ``ind`` is ``4``, but that can be ovrriden using ``n*m`` (for example ``3*1``) in the format.
+
 The (lack of) Documentation
 ===========================
 **Grako** lacking in comments and doc-comments for these reasons:
@@ -366,10 +403,10 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
 
 
-Contact
-=======
+Contact and Updates
+===================
 
-For queries and comments about **Grako**, please use the `Grako Forum`_.
+To comment **Grako** and to receive notifications about new releales, please join the low-volume the `Grako Forum`_ at *Google Groups*.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 
@@ -426,6 +463,11 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 Change History
 ==============
+
+- **tip**
+    * Lazy rendering of template fields.
+    * Rendering of iterables using a specified separator.
+    * Basic documentation of the *rendering engine*.
 
 - **1.1.0**
     * *BUG!* Need to preserve state when closure iterations match partially.
