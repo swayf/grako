@@ -367,7 +367,7 @@ The default multiplier for ``ind`` is ``4``, but that can be ovrriden using ``n*
 
 The (lack of) Documentation
 ===========================
-**Grako** lacking in comments and doc-comments for these reasons:
+**Grako** is lacking in comments and doc-comments for these reasons:
 
     1. Inline documentation easily goes out of phase with what the code actually does. It is an equivalent and more productive effort to provide out-of-line documentation.
 
