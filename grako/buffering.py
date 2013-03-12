@@ -36,6 +36,7 @@ class Buffer(object):
         self.nameguard = nameguard
         self._fileinfo = self.get_fileinfo(text, filename)
         self._linecache = []
+        self._linecount = 0
         self._pos = 0
         self._len = 0
         self._preprocess()
@@ -162,6 +163,11 @@ class Buffer(object):
                 cache.append(PosLine(i , n))
         cache.append(PosLine(len(self.text), n + 1))
         self._linecache = cache
+        self._linecount = n
+
+    @property
+    def linecount(self):
+        return self._linecount
 
     def line_info(self, pos=None):
         if pos is None:
