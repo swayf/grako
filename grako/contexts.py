@@ -56,6 +56,10 @@ class ParseContext(object):
     def _pos(self):
         return self._buffer.pos
 
+    @property
+    def linecount(self):
+        return self._buffer.linecount
+
     def _goto(self, pos):
         self._buffer.goto(pos)
 
