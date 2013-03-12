@@ -40,10 +40,11 @@ def trim(text, tabwidth=4):
         stripped = line.lstrip()
         if stripped:
             indent = min(indent, len(line) - len(stripped))
-    return '%s\n%s' % (
-            lines[0].strip(),
-            '\n'.join(line[indent:].rstrip() for line in lines[1:])
-            )
+    trimmed = [lines[0].strip()] + [line[indent:].rstrip() for line in lines[1:]]
+    i = 0
+    while i < len(trimmed) and not trimmed[i]:
+        i += 1
+    return '\n'.join(trimmed[i:])
 
 def indent(text, indent=1, multiplier=4):
     """ Indent the given block of text by indent*4 spaces
