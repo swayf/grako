@@ -63,6 +63,6 @@ def indent(text, indent=1, multiplier=4):
         return ''
     text = ustr(text)
     if indent >= 0:
-        lines = [' ' * multiplier * indent + t for t in text.split('\n')]
-        text = '\n'.join(lines)
+        sindent = ' ' * multiplier * indent
+        text = '\n'.join(sindent + t for t in text.splitlines())
     return text
