@@ -466,7 +466,8 @@ Change History
 
 - **tip**
     * Lazy rendering of template fields.
-    * Rendering of iterables using a specified separator.
+    * Optimization of *rendering engine*'s `indent()` and `trim()`.
+    * Rendering of iterables using a specified separator, indent, and format.
     * Basic documentation of the *rendering engine*.
 
 - **1.1.0**
