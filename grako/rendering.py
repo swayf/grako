@@ -29,8 +29,9 @@ class RenderingFormatter(string.Formatter):
             return super(RenderingFormatter, self).format_field(render(value), spec)
 
         ind, sep, fmt = spec.split(':')
-        if not fmt:
-            fmt = '%s'
+        if sep == '\\n':
+            sep = '\n'
+            
         if not ind:
             ind = 0
             mult = 0
@@ -40,6 +41,9 @@ class RenderingFormatter(string.Formatter):
             mult = 4
         ind = int(ind)
         mult = int(mult)
+
+        if not fmt:
+            fmt = '%s'
 
         if isiter(value):
             return indent(sep.join(fmt % render(v) for v in value), ind, mult)

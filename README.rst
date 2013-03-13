@@ -365,6 +365,8 @@ The extended format can also be used with non-iterables, in which case the rende
 
 The default multiplier for ``ind`` is ``4``, but that can be ovrriden using ``n*m`` (for example ``3*1``) in the format.
 
+**Note** Using a newline (`\n`) as separator will interfere with trimming of templates. To use newline as separator, specify it as `\\n`, and the renderer will understand the intention.
+
 The (lack of) Documentation
 ===========================
 **Grako** is lacking in comments and doc-comments for these reasons:
