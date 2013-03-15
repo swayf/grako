@@ -2,20 +2,20 @@
 Grako
 =====
 
-**Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs memoizing_ PEG_ parsers in Python_. 
+**Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs memoizing_ PEG_ parsers in Python_.
 
 **Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decison making or backtracking. *Possitive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level. The use of Python_'s `context managers`_ considerably reduces the size of the generated parsers for enhanced CPU cache hits.
 
 **Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 2500 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependecies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
 
-.. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity 
+.. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity
 
-**Grako** is feature complete and currently being used over very large grammars to parse and translate hundreds of thousands of lines of legacy_ code. 
+**Grako** is feature complete and currently being used over very large grammars to parse and translate hundreds of thousands of lines of legacy_ code.
 
-.. _KLOC: http://en.wikipedia.org/wiki/KLOC 
-.. _legacy: http://en.wikipedia.org/wiki/Legacy_code 
+.. _KLOC: http://en.wikipedia.org/wiki/KLOC
+.. _legacy: http://en.wikipedia.org/wiki/Legacy_code
 .. _PyPy: http://pypy.org/
-.. _`context managers`: http://docs.python.org/2/library/contextlib.html 
+.. _`context managers`: http://docs.python.org/2/library/contextlib.html
 
 
 Table of Contents
@@ -32,9 +32,9 @@ Rationale
 
 * When ambiguity is the norm in the parsed language (as is the case in several legacy_ ones), an LL or LR grammar becomes contaminated with miriads of lookaheads. PEG_ parsers address ambiguity from the onset. Memoization, and relying on the exception-handling system makes backtracking very efficient.
 
-* Semantic actions, like `Abstract Syntax Tree`_ (AST_) creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser's language, and translation's target language. 
+* Semantic actions, like `Abstract Syntax Tree`_ (AST_) creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser's language, and translation's target language.
 
-* Pre-processing (like dealing with includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar. 
+* Pre-processing (like dealing with includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar.
 
 * It is easy to recruit help knowledged about a mainstream programming language (Python_ in this case); it is not so for grammar description languages. As a grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a parser. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
 
@@ -42,12 +42,12 @@ Rationale
 
 * Python_ is a great language for working in language parsing and translation.
 
-.. _`Abstract Syntax Tree`: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
-.. _AST: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
-.. _ASTs: http://en.wikipedia.org/wiki/Abstract_syntax_tree 
-.. _EBNF: http://en.wikipedia.org/wiki/Ebnf 
-.. _memoizing: http://en.wikipedia.org/wiki/Memoization 
-.. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar 
+.. _`Abstract Syntax Tree`: http://en.wikipedia.org/wiki/Abstract_syntax_tree
+.. _AST: http://en.wikipedia.org/wiki/Abstract_syntax_tree
+.. _ASTs: http://en.wikipedia.org/wiki/Abstract_syntax_tree
+.. _EBNF: http://en.wikipedia.org/wiki/Ebnf
+.. _memoizing: http://en.wikipedia.org/wiki/Memoization
+.. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar
 .. _Python: http://python.org
 .. _Ruby: http://www.ruby-lang.org/
 
@@ -70,8 +70,8 @@ A **Grako** generated parser consists of the following classes:
 The methods in the base parser class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
 
 
-.. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph 
-       
+.. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph
+
 
 Using the Tool
 ==============
@@ -95,9 +95,9 @@ The *-h* and *--help* parameters provide full usage information::
         $ python -m grako -h
         usage: grako [-h] [-m name] [-o outfile] [-v] grammar
 
-        Grako (for grammar compiler) takes grammars in a variation of EBNF as input, 
+        Grako (for grammar compiler) takes grammars in a variation of EBNF as input,
         and outputs a memoizing PEG parser in Python.
-        
+
         positional arguments:
           grammar               The file name of the grammar to generate a parser for
 
@@ -130,7 +130,7 @@ This is more or less what happens if you invoke the generated parser directly::
 
     python myparser.py inputfile startrule
 
-The generated parsers constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc. 
+The generated parsers constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc.
 
 
 
@@ -150,11 +150,11 @@ Both the semicolon (``;``) and the period (``.``) are accepted as rule definitio
 If a *name* collides with a Python_ keyword, an underscore (``_``) will be appended to it on the generated parser.
 
 If you define more than one rule with the same name::
-    
+
     name = expre1 ;
     name = expre2 ;
 
-The result will be equivalent to applying the choice operator to the 
+The result will be equivalent to applying the choice operator to the
 right-hand-side expressions::
 
     name = expre1 | expre2 ;
@@ -170,10 +170,10 @@ The expressions, in reverse order of operator precedence, can be:
     ``e1 | e2``
         Match either ``e1`` or ``e2``.
 
-    ``e1 e2`` 
+    ``e1 e2``
         Match ``e1`` and then match ``e2``.
 
-    ``e1 , e2`` 
+    ``e1 , e2``
         As above. Match ``e1`` and then match ``e2``.
 
     ``( e )``
@@ -195,14 +195,14 @@ The expressions, in reverse order of operator precedence, can be:
         Negative lookahead. Try parsing ``e`` and fail if there's a match. Do not consume any input whichever the outcome.
 
     ``'text'`` or ``"text"``
-        Match the token text within the quotation marks. 
-        
+        Match the token text within the quotation marks.
+
         **Note that** if *text* is alphanumeric, then Grako will check that the character following the token is not alphanumerc. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the ``Parser`` or the ``Buffer``, or by using a pattern expression (see below) instead of a token expression.
 
     ``?/regexp/?``
         The pattern expression. Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
 
-        The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is AST_ for the expression. 
+        The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is AST_ for the expression.
 
     ``rulename``
         Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace or comments.
@@ -215,15 +215,15 @@ The expressions, in reverse order of operator precedence, can be:
 
     ``name:e``
         Add the result of ``e`` to the AST_ using ``name`` as key. If more than one item is added with the same ``name``, the entry is converted to a list.
-    
+
     ``name+:e``
         Add the result of ``e`` to the AST_ using ``name`` as key. Force the entry to be a list even if only one element is added.
 
     ``@e``
-        The override operator. Make the AST_ for the complete rule be the AST_ for ``e``. 
-        
-        The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part. 
-        
+        The override operator. Make the AST_ for the complete rule be the AST_ for ``e``.
+
+        The override operator is useful to recover only part of the right hand side of a rule without the need to name it, and then add a semantic action to recover the interesting part.
+
         This is a typical use of the override operator::
 
             subexp = '(' @expre ')' .
@@ -246,7 +246,7 @@ When there are no named items in a rule, the AST_ consists of the elements parse
     number = ?/[0-9]+/? .
 
 without having to write::
-    
+
     number = number:?/[0-9]+/?
 
 When a rule has named elementes, the unnamed ones are excluded from the AST_ (they are ignored).
@@ -261,13 +261,13 @@ That will make the default AST_ returned to be a dict with a single item ``name`
 Abstract Syntax Trees (ASTs)
 ============================
 
-By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``. 
+By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``.
 
 AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (the ``+:`` operator) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
 
 When the ``parseinfo=True`` keyword argument has been passed to the ``Parser`` constructor, a ``parseinfo`` element is added to AST_ nodes that are *dict*-like. The element contains a *namedtuple* with the parse iformation for the node::
 
-   ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos']) 
+   ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 With the help of the ``Buffer.line_info()`` method, it is possible to recover the line, column, and original text parsed for the node. Note that when *parseinfo* is generated, the *buffer* used during parsing is kept in memory with the AST_.
 
@@ -284,7 +284,7 @@ If you don't define any whitespace characters::
 
     parser = MyParser(text, whitespace='')
 
-then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers). 
+then you will have to handle whitespace in your grammar rules (as it's often done in PEG_ parsers).
 
 
 Case Sensitivity
@@ -301,7 +301,7 @@ Comments
 ========
 
 Parsers will skip over comments specified as a regular expression using the ``comments_re`` paramenter::
-    
+
     parser = MyParser(text, comments_re="\(\*.*?\*\)")
 
 For more complex comment handling, you can override the ``Parser._eatcomments()`` method.
@@ -328,7 +328,7 @@ The abstract parser will honor as a semantic action a method declared as::
         return ast
 
 
-Templates and Translation 
+Templates and Translation
 =========================
 
 **Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parses.
@@ -343,14 +343,14 @@ To generate a parser, **Grako** constructs an object model of the parsed grammar
 
         def render_fields(self, fields):
             fields.update(exp=indent(render(self.exp)))
-    
+
         template = '''\
                     with self._if():
                     {exp}\
                     '''
 
 Every *attribute* of the object that doesn't start with ``_`` may be used as a template field, and fields can be added or modified by overriding the ``render_fields()`` method.  Fields themselves are lazily *rendered* before being expanded by the template, so a field may be an instance of a ``Renderer`` descendant.
-                    
+
 The ``rendering`` module uses a ``Formatter`` enhanced to support the rendering of items in an *iterable* one by one. The syntax to acheive that is::
 
     {fieldname:ind:sep:fmt}
@@ -399,7 +399,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 
 .. _`GNU General Public License (GPL) version 3`:  http://www.gnu.org/licenses/gpl.html
 
-**If your project requires different licensing** please contact 
+**If your project requires different licensing** please contact
 `info@resqsoft.com`_.
 
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
@@ -420,7 +420,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **Niklaus Wirth** was the chief designer of the programming languages Euler, Algol W, Pascal, Modula, Modula-2, Oberon, Oberon-2, and Oberon-07. In the last chapter of his 1976 book `Algorithms + Data Structures = Programs`_, Wirth_ creates a top-down, descent parser with recovery for the Pascal_-like, `LL(1)`_ programming language `PL/0`_. The structure of the program is that of a PEG_ parser, though the concept of PEG_ wasn't formalized until 2004.
 
-* **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004. 
+* **Bryan Ford** introduced_ PEG_ (parsing expression grammars) in 2004.
 
 * Other parser generators like `PEG.js`_ by **David Majda** inspired the work in **Grako**.
 
@@ -438,30 +438,30 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
-* **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew. My peers, and then teaching advisers **Alberto Torres**, and **Enzo Chiariotti** formed a team with **Gustavo** to challenge us with programming languages like *LATORTA* and term exams that went well into the eight hours. And, of course, there was also the *pirate patch* that should be worn on the left or right eye depending on the *LL* or *LR* challenge. 
+* **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew. My peers, and then teaching advisers **Alberto Torres**, and **Enzo Chiariotti** formed a team with **Gustavo** to challenge us with programming languages like *LATORTA* and term exams that went well into the eight hours. And, of course, there was also the *pirate patch* that should be worn on the left or right eye depending on the *LL* or *LR* challenge.
 
 * **Manuel Rey** led me through another, unfinished thesis project that taught me about what languages (spoken languages in general, and programming languages in particular) are about. I learned why languages use declensions_, and why, although the underlying words are in English_, the structure of the programs we write is more like Japanese_.
 
-* **Grako** would not have been possible without the vision, the funding, and the trust provided by **Thomas Bragg** through ResQSoft_. 
+* **Grako** would not have been possible without the vision, the funding, and the trust provided by **Thomas Bragg** through ResQSoft_.
 
-.. _Wirth: http://en.wikipedia.org/wiki/Niklaus_Wirth 
-.. _Pascal: http://en.wikipedia.org/wiki/Pascal_(programming_language) 
-.. _`PL/0`: http://en.wikipedia.org/wiki/PL/0 
-.. _`LL(1)`: http://en.wikipedia.org/wiki/LL(1) 
-.. _`Algorithms + Data Structures = Programs`: http://www.amazon.com/Algorithms-Structures-Prentice-Hall-Automatic-Computation/dp/0130224189/ 
-.. _`blog post`: http://dietbuddha.blogspot.com/2012/12/52python-encapsulating-exceptions-with.html 
-.. _`Python Weekly`: http://www.pythonweekly.com/ 
+.. _Wirth: http://en.wikipedia.org/wiki/Niklaus_Wirth
+.. _Pascal: http://en.wikipedia.org/wiki/Pascal_(programming_language)
+.. _`PL/0`: http://en.wikipedia.org/wiki/PL/0
+.. _`LL(1)`: http://en.wikipedia.org/wiki/LL(1)
+.. _`Algorithms + Data Structures = Programs`: http://www.amazon.com/Algorithms-Structures-Prentice-Hall-Automatic-Computation/dp/0130224189/
+.. _`blog post`: http://dietbuddha.blogspot.com/2012/12/52python-encapsulating-exceptions-with.html
+.. _`Python Weekly`: http://www.pythonweekly.com/
 .. _introduced: http://dl.acm.org/citation.cfm?id=964001.964011
 .. _`PEG.js`: http://pegjs.majda.cz/
 .. _UCAB: http://www.ucab.edu.ve/
 .. _USB: http://www.usb.ve/
-.. _ANTLR: http://www.antlr.org/ 
-.. _Jack: http://en.wikipedia.org/wiki/Javacc 
+.. _ANTLR: http://www.antlr.org/
+.. _Jack: http://en.wikipedia.org/wiki/Javacc
 .. _exceptions: http://www.jeffknupp.com/blog/2013/02/06/write-cleaner-python-use-exceptions/
 .. _`PyPy team`: http://pypy.org/people.html
-.. _declensions: http://en.wikipedia.org/wiki/Declension 
-.. _English: http://en.wikipedia.org/wiki/English_grammar 
-.. _Japanese: http://en.wikipedia.org/wiki/Japanese_grammar 
+.. _declensions: http://en.wikipedia.org/wiki/Declension
+.. _English: http://en.wikipedia.org/wiki/English_grammar
+.. _Japanese: http://en.wikipedia.org/wiki/Japanese_grammar
 
 Change History
 ==============
@@ -471,6 +471,7 @@ Change History
     * Optimization of *rendering engine*'s `indent()` and `trim()`.
     * Rendering of iterables using a specified separator, indent, and format.
     * Basic documentation of the *rendering engine*.
+    * Added a cache of compiled regexps to `Buffer`.
 
 - **1.1.0**
     * *BUG!* Need to preserve state when closure iterations match partially.

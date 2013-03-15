@@ -20,6 +20,7 @@ RETYPE = type(regexp.compile('.'))
 PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['filename', 'line', 'col', 'start', 'text'])
 
+
 class Buffer(object):
     def __init__(self, text,
                  filename=None,
@@ -42,6 +43,7 @@ class Buffer(object):
         self._preprocess()
         self._build_line_cache()
         self._len = len(self.text)
+        self._re_cache = {}
 
     def _preprocess(self):
         pass
@@ -141,10 +143,15 @@ class Buffer(object):
 
     def matchre(self, pattern, ignorecase=None):
         ignorecase = ignorecase if ignorecase is not None else self.ignorecase
+
         if isinstance(pattern, RETYPE):
             re = pattern
+        elif pattern in self._re_cache:
+            re = self._re_cache[pattern]
         else:
             re = regexp.compile(pattern, regexp.IGNORECASE if ignorecase else 0)
+            self._re_cache[re] = re
+
         matched = re.match(self.text, self.pos)
         if matched:
             token = matched.group()
@@ -160,7 +167,7 @@ class Buffer(object):
         for i, c in enumerate(self.text):
             if c == '\n':
                 n += 1
-                cache.append(PosLine(i , n))
+                cache.append(PosLine(i, n))
         cache.append(PosLine(len(self.text), n + 1))
         self._linecache = cache
         self._linecount = n
