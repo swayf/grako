@@ -468,10 +468,10 @@ Change History
 
 - **tip**
     * Lazy rendering of template fields.
-    * Optimization of *rendering engine*'s `indent()` and `trim()`.
+    * Optimization of *rendering engine*'s ``indent()`` and ``trim()``.
     * Rendering of iterables using a specified separator, indent, and format.
     * Basic documentation of the *rendering engine*.
-    * Added a cache of compiled regexps to `Buffer`.
+    * Added a cache of compiled regexps to ``Buffer``.
 
 - **1.1.0**
     * *BUG!* Need to preserve state when closure iterations match partially.
