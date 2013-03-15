@@ -137,7 +137,6 @@ class Parser(ParseContext):
         self._add_cst_node(token)
         return token
 
-
     def _pattern(self, pattern, node_name=None, force_list=False):
         token = self._buffer.matchre(pattern)
         if token is None:
@@ -180,4 +179,3 @@ class Parser(ParseContext):
         self._next_token()
         if not self._buffer.atend():
             raise FailedParse(self._buffer, 'Expecting end of text.')
-
