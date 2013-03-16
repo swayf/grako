@@ -466,7 +466,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-- **tip**
+- **1.2.0**
     * Lazy rendering of template fields.
     * Optimization of *rendering engine*'s ``indent()`` and ``trim()``.
     * Rendering of iterables using a specified separator, indent, and format.
