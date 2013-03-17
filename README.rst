@@ -130,7 +130,7 @@ This is more or less what happens if you invoke the generated parser directly::
 
     python myparser.py inputfile startrule
 
-The generated parsers constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, etc.
+The generated parsers' constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, and more (see below).
 
 
 
@@ -208,7 +208,7 @@ The expressions, in reverse order of operator precedence, can be:
         Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace or comments.
 
     ``()``
-        The empty expression. Match nothing.
+        The empty expression. Succeed without advancing over input.
 
     ``>>``
         The cut expression. After this point, prevent other options from being considered even if the current option fails to parse.
@@ -230,8 +230,8 @@ The expressions, in reverse order of operator precedence, can be:
 
         The AST_ returned for the ``subexp`` rule will be the AST_ recovered from invoking ``expre``, without having to write a semantic action.
 
-        Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
-
+..        Combined with named rules (see below), the ``@`` operator allows creating exactly the required AST_ without the need for semantic rules::
+..
             closure:closure = @expre '*' .
 
 
