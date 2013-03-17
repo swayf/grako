@@ -406,7 +406,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 Contact and Updates
 ===================
 
-To discuss **Grako** and to receive notifications about new releales, please join the low-volume the `Grako Forum`_ at *Google Groups*.
+To discuss **Grako** and to receive notifications about new releales, please join the low-volume `Grako Forum`_ at *Google Groups*.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 
