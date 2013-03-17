@@ -116,7 +116,7 @@ The *-h* and *--help* parameters provide full usage information::
 Using the Generated Parser
 ==========================
 
-To use the generated parser, just subclass the base or the abstract parser, create an instance of it, and invoke its ``parse()`` method passing the text to parse and the starting rule's name as parameter::
+To use the generated parser, just subclass the base or the abstract parser, create an instance of it, and invoke its ``parse()`` method passing the grammar to parse and the starting rule's name as parameter::
 
     class MyParser(MyParserBase):
         pass
@@ -202,7 +202,7 @@ The expressions, in reverse order of operator precedence, can be:
     ``?/regexp/?``
         The pattern expression. Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
 
-        The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is AST_ for the expression.
+        The ``regexp`` is passed *as-is* to the Python_ *re* module, using ``re.match()`` at the current position in the text. The matched text is the AST_ for the expression.
 
     ``rulename``
         Invoke the rule named ``rulename``. To help with lexical aspects of grammars, rules with names that begin with an uppercase letter will not advance the input over whitespace or comments.
@@ -241,7 +241,7 @@ The expressions, in reverse order of operator precedence, can be:
     ``(*`` *comment* ``*)``
         Comments may appear anywhere in the text.
 
-When there are no named items in a rule, the AST_ consists of the elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules. You will have an AST_ created for::
+When there are no named items in a rule, the AST_ consists of the elements parsed by the rule, either a single item or a list. This default behavior makes it easier to write simple rules::
 
     number = ?/[0-9]+/? .
 
@@ -251,11 +251,11 @@ without having to write::
 
 When a rule has named elementes, the unnamed ones are excluded from the AST_ (they are ignored).
 
-It is also possible to add an AST_ name to a rule::
+..    It is also possible to add an AST_ name to a rule::
 
-    name:rule = expre;
+..      name:rule = expre;
 
-That will make the default AST_ returned to be a dict with a single item ``name`` as key, and the AST_ from the right-hand side of the rule as value.
+..    That will make the default AST_ returned to be a dict with a single item ``name`` as key, and the AST_ from the right-hand side of the rule as value.
 
 
 Abstract Syntax Trees (ASTs)
@@ -331,25 +331,22 @@ The abstract parser will honor as a semantic action a method declared as::
 Templates and Translation
 =========================
 
-**Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parses.
+**Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parsers.
 
 Translation in **Grako** is *template-based*, but instead of defining or using a complext templating engine (yet another language), it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
 
-To generate a parser, **Grako** constructs an object model of the parsed grammar. Each node in the model is a descendant of ``rendering.Renderer``, and knows how to render itself. This is an example taken from **Grako**'s source code::
+To generate a parser, **Grako** constructs an object model of the parsed grammar. Each node in the model is a descendant of ``rendering.Renderer``, and knows how to render itself. Templates are left-trimmed on whitespace, like Python_ *doc-comments* are. This is an example taken from **Grako**'s source code::
 
     class LookaheadGrammar(_DecoratorGrammar):
 
         ...
 
-        def render_fields(self, fields):
-            fields.update(exp=indent(render(self.exp)))
-
         template = '''\
                     with self._if():
-                    {exp}\
+                    {exp:1::}\
                     '''
 
-Every *attribute* of the object that doesn't start with ``_`` may be used as a template field, and fields can be added or modified by overriding the ``render_fields()`` method.  Fields themselves are lazily *rendered* before being expanded by the template, so a field may be an instance of a ``Renderer`` descendant.
+Every *attribute* of the object that doesn't start with an underscore (``_``) may be used as a template field, and fields can be added or modified by overriding the ``render_fields()`` method.  Fields themselves are *lazily rendered* before being expanded by the template, so a field may be an instance of a ``Renderer`` descendant.
 
 The ``rendering`` module uses a ``Formatter`` enhanced to support the rendering of items in an *iterable* one by one. The syntax to acheive that is::
 
@@ -365,7 +362,8 @@ The extended format can also be used with non-iterables, in which case the rende
 
 The default multiplier for ``ind`` is ``4``, but that can be ovrriden using ``n*m`` (for example ``3*1``) in the format.
 
-**Note** Using a newline (`\n`) as separator will interfere with trimming of templates. To use newline as separator, specify it as `\\n`, and the renderer will understand the intention.
+**Note**
+    Using a newline (`\n`) as separator will interfere with left trimming and indentation of templates. To use newline as separator, specify it as `\\n`, and the renderer will understand the intention.
 
 The (lack of) Documentation
 ===========================
@@ -383,7 +381,7 @@ Examples
 
 The file ``etc/grako.ebnf`` contains a grammar for the **Grako** EBNF_ language written in the same language. It is used in the *bootstrap* test suite to prove that **Grako** can generate a parser to parse its own language.
 
-The project ``examples/regexp`` contains a regexp-to-EBNF translator and parser generator. The project has no practical use, but it's a complete, end-to-end example of how to implement translators using **Grako**.
+The project ``examples/regexp`` contains a regexp-to-EBNF translator and parser generator. The project has no practical use, but it's a complete, end-to-end example of how to implement a translator using **Grako**.
 
 
 License
@@ -399,7 +397,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 
 .. _`GNU General Public License (GPL) version 3`:  http://www.gnu.org/licenses/gpl.html
 
-**If your project requires different licensing** please contact
+*If your project requires different licensing* please contact
 `info@resqsoft.com`_.
 
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
@@ -408,7 +406,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 Contact and Updates
 ===================
 
-To comment **Grako** and to receive notifications about new releales, please join the low-volume the `Grako Forum`_ at *Google Groups*.
+To discuss **Grako** and to receive notifications about new releales, please join the low-volume the `Grako Forum`_ at *Google Groups*.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 
