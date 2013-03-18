@@ -19,23 +19,33 @@ import time
 from .util import simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
-from .exceptions import *  # @UnusedWildImport
 from .ast import AST
 from .contexts import ParseContext, ParseInfo
+from .exceptions import (FailedParse,
+                         FailedToken,
+                         FailedPattern,
+                         FailedLookahead,
+                         FailedRef,
+                         FailedCut,
+                         GrammarError)
+
 
 def check(result):
     assert isinstance(result, _Grammar), str(result)
 
+
 def dot(x, y, k):
-    return set([ (a + b)[:k] for a in x for b in y])
+    return set([(a + b)[:k] for a in x for b in y])
+
 
 def urepr(obj):
     return repr(obj).lstrip('u')
 
+
 class ModelContext(ParseContext):
     def __init__(self, rules, text, filename, trace, **kwargs):
         super(ModelContext, self).__init__(trace=trace, **kwargs)
-        self.rules = {rule.name :rule for rule in rules}
+        self.rules = {rule.name: rule for rule in rules}
         self._buffer = Buffer(text, filename=filename)
         self._buffer.goto(0)
 
@@ -49,6 +59,7 @@ class ModelContext(ParseContext):
 
     def _find_rule(self, name):
         return self.rules[name]
+
 
 class _Grammar(Renderer):
     def __init__(self):
@@ -205,6 +216,7 @@ class LookaheadGrammar(_DecoratorGrammar):
                 {exp:1::}\
                 '''
 
+
 class LookaheadNotGrammar(_DecoratorGrammar):
     def __str__(self):
         return '!' + self.exp
@@ -221,7 +233,6 @@ class LookaheadNotGrammar(_DecoratorGrammar):
             pass
         finally:
             ctx._pop_ast()  # simply discard
-
 
     template = '''\
                 with self._ifnot():
@@ -346,7 +357,7 @@ class RepeatGrammar(_DecoratorGrammar):
     def parse(self, ctx):
         ctx._push_cst()
         try:
-            f = lambda : self.exp.parse(ctx)
+            f = lambda: self.exp.parse(ctx)
             result = ctx._repeat(f)
             cst = ctx.cst
         finally:
@@ -354,11 +365,11 @@ class RepeatGrammar(_DecoratorGrammar):
         ctx._add_cst_node(cst)
         return result
 
-
     def _first(self, k, F):
+        efirst = self.exp._first(k, F)
         result = {()}
         for _i in range(k):
-            result = dot(result, self.exp._first(k, F), k)
+            result = dot(result, efirst, k)
         return {()} | result
 
     def __str__(self):
@@ -386,7 +397,7 @@ class RepeatOneGrammar(RepeatGrammar):
         try:
             with ctx._try():
                 head = self.exp.parse(ctx)
-            f = lambda : self.exp.parse(ctx)
+            f = lambda: self.exp.parse(ctx)
             result = [head] + ctx._repeat(f)
             cst = ctx.cst
         finally:
@@ -395,9 +406,10 @@ class RepeatOneGrammar(RepeatGrammar):
         return result
 
     def _first(self, k, F):
+        efirst = self.exp._first(k, F)
         result = {()}
         for _i in range(k):
-            result = dot(result, self.exp._first(k, F), k)
+            result = dot(result, efirst, k)
         return result
 
     def __str__(self):
@@ -480,11 +492,11 @@ class NamedGrammar(_DecoratorGrammar):
         name = self.name
         if iskeyword(name):
             name += '_'
-        fields.update(
-                      n=self.counter(),
+        fields.update(n=self.counter(),
                       name=name,
                       force_list=', force_list=True' if self.force_list else ''
                       )
+
     template = '''
                 {exp}
                 self.ast.add('{name}', _e{force_list})\
@@ -603,7 +615,6 @@ class RuleGrammar(NamedGrammar):
         cache[key] = result
         return result
 
-
     def _first(self, k, F):
         if self._first_set:
             return self._first_set
@@ -620,8 +631,7 @@ class RuleGrammar(NamedGrammar):
             ast_name_clause = '\nself.ast = AST(%s=self.ast)\n' % self.ast_name_
         else:
             ast_name_clause = ''
-        fields.update(
-                      name=name,
+        fields.update(name=name,
                       ast_name_clause=ast_name_clause
                       )
 
@@ -631,6 +641,7 @@ class RuleGrammar(NamedGrammar):
                 {exp:1::}{ast_name_clause}
 
                 '''
+
 
 class Grammar(Renderer):
     def __init__(self, name, rules):
@@ -684,7 +695,6 @@ class Grammar(Renderer):
                       abstract_rules=abstract_rules,
                       version=time.strftime('%y.%j.%H.%M.%S', time.gmtime())
                       )
-
 
     abstract_rule_template = '''
             def {name}(self, ast):
