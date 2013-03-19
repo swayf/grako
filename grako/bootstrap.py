@@ -256,15 +256,14 @@ class GrakoParserRoot(Parser):
         self._call('choice', 'expre')
 
     def _rule_(self):
-        p = self._pos
-        try:
-            ast_name = self._call('word')
-            self._token(':')
-            self._cut()
-            self.ast.add('ast_name', str(ast_name))
-        except FailedParse:
-            self._goto(p)
-        self._call('word', 'name')
+        # p = self._pos
+        # try:
+        #     ast_name = self._call('word')
+        #     self._token(':')
+        #     self.ast.add('ast_name', str(ast_name))
+        # except FailedParse:
+        #     self._goto(p)
+        # self._call('word', 'name')
         self._token('=')
         self._cut()
         self._call('expre', 'rhs')

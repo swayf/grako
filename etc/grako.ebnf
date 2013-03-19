@@ -4,7 +4,7 @@ grammar = rules:{rule}+ $ ;
 
 rule:rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
 
-expre = choice | sequence;
+expre : choice | sequence;
 
 choice:choice = options+:sequence {'|' >> options:sequence}+ ;
 
