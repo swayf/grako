@@ -85,22 +85,27 @@ class GrakoParserRoot(Parser):
 
     def _pattern_(self):
         self._token('?/')
+        self._cut()
         self._pattern(r'(.*?)(?=/\?)', 'pattern')
         self._token('/?')
 
     def _cut_(self):
         self._token('>>', 'cut')
+        self._cut()
 
     def _eof_(self):
         self._token('$')
+        self._cut()
 
     def _subexp_(self):
         self._token('(')
+        self._cut()
         self._call('expre', 'exp')
         self._token(')')
 
     def _optional_(self):
         self._token('[')
+        self._cut()
         self._call('expre', 'optional')
         self._token(']')
 
@@ -110,6 +115,7 @@ class GrakoParserRoot(Parser):
 
     def _repeat_(self):
         self._token('{')
+        self._cut()
         self._call('expre', 'repeat')
         self._token('}')
         if not self._try_token('*'):
@@ -120,14 +126,17 @@ class GrakoParserRoot(Parser):
 
     def _special_(self):
         self._token('?(')
+        self._cut()
         self._pattern(r'(.*)\)?', 'special')
 
     def _kif_(self):
         self._token('&')
+        self._cut()
         self._call('term', 'kif')
 
     def _knot_(self):
         self._token('!')
+        self._cut()
         self._call('term', 'knot')
 
     def _atom_(self):
@@ -192,6 +201,7 @@ class GrakoParserRoot(Parser):
         name = self._call('qualified')
         if not self._try_token('+:', 'force_list'):
             self._token(':')
+        self._cut()
         self.ast.add('name', name)
         try:
             self._call('element', 'value')
@@ -233,6 +243,7 @@ class GrakoParserRoot(Parser):
             try:
                 with self._try():
                     self._token('|')
+                    self._cut()
                     self._call('sequence', 'options')
             except FailedCut as e:
                 self._goto(p)
@@ -249,11 +260,13 @@ class GrakoParserRoot(Parser):
         try:
             ast_name = self._call('word')
             self._token(':')
+            self._cut()
             self.ast.add('ast_name', str(ast_name))
         except FailedParse:
             self._goto(p)
         self._call('word', 'name')
         self._token('=')
+        self._cut()
         self._call('expre', 'rhs')
         if not self._try_token(';'):
             self._token('.')
@@ -265,6 +278,7 @@ class GrakoParserRoot(Parser):
             try:
                 with self._try():
                     self._call('rule', 'rules')
+                    self._cut()
             except FailedParse:
                 self._goto(p)
                 break
