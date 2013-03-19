@@ -464,7 +464,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-- **tip**
+- **1.2.1**
     * Align bootstrap parser with generated parser framework.
     * Add *cuts* to bootstrap parser so errors are reported closer to their origin.
     * *(minor) BUG!* `FailedCut` exceptions must translate to their nested exeption so the reported line and column make sense.
