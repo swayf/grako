@@ -7,7 +7,7 @@ to any position in the parsed text, and still recover accurate information
 about source lines and content.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-# FIXME: There could be a file buffer using random access
+# TODO: There could be a file buffer using random access
 import re as regexp
 import string
 from bisect import bisect as bisect

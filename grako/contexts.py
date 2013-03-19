@@ -10,6 +10,7 @@ from . import buffering
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
+
 class ParseContext(object):
     def __init__(self,
                  whitespace=None,
@@ -290,4 +291,3 @@ class ParseContext(object):
             self._pop_cst()
         self._add_cst_node(cst)
         return result
-

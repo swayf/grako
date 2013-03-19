@@ -10,6 +10,7 @@ exception system to backtrack).
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+
 class GrakoException(Exception):
     pass
 
@@ -121,4 +122,3 @@ class FailedLookahead(FailedParse):
     @property
     def message(self):
         return 'failed lookahead'
-

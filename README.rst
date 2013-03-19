@@ -464,6 +464,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
+- **tip**
+    * Lint using flake8_.
+
 - **1.2.0**
     * Lazy rendering of template fields.
     * Optimization of *rendering engine*'s ``indent()`` and ``trim()``.
@@ -483,3 +486,4 @@ Change History
 - **1.0.0**
     First feature-complete release.
 
+.. _flake8: https://pypi.python.org/pypi/flake8

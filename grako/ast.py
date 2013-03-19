@@ -7,6 +7,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 __all__ = ['AST']
 
+
 class AST(dict):
     """
     A dictionary with attribute-style access. It maps attribute access to

@@ -3,12 +3,14 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 import collections
 
-__all__ = ['simplify', 'memoize', 'trim', 'indent']
+
+__all__ = ['simplify', 'trim', 'indent']
 
 if sys.version_info[0] >= 3:
     strtype = str  # @ReservedAssignmet
 else:
     strtype = basestring
+
 
 def ustr(s):
     if sys.version_info[0] >= 3:
@@ -16,13 +18,16 @@ def ustr(s):
     else:
         return unicode(s)
 
+
 def simplify(x):
     if isinstance(x, list) and len(x) == 1:
         return simplify(x[0])
     return x
 
+
 def isiter(value):
     return isinstance(value, collections.Iterable) and not isinstance(value, strtype)
+
 
 def trim(text, tabwidth=4):
     """
@@ -45,6 +50,7 @@ def trim(text, tabwidth=4):
     while i < len(trimmed) and not trimmed[i]:
         i += 1
     return '\n'.join(trimmed[i:])
+
 
 def indent(text, indent=1, multiplier=4):
     """ Indent the given block of text by indent*4 spaces

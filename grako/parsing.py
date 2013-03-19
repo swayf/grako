@@ -15,8 +15,12 @@ Parser.parse() will take the text to parse directly, or an instance of the
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 from . import buffering
-from .exceptions import *  # @UnusedWildImport
 from .contexts import ParseContext, ParseInfo
+from .exceptions import (FailedParse,
+                         FailedToken,
+                         FailedPattern,
+                         FailedRef,
+                         MissingSemanticFor)
 
 
 class AbstractParserMixin(object):
