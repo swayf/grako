@@ -256,6 +256,7 @@ class GrakoParserRoot(Parser):
         self._call('choice', 'expre')
 
     def _rule_(self):
+        # FIXME: This doesn't work, and it's usefullness is doubtfull.
         # p = self._pos
         # try:
         #     ast_name = self._call('word')
@@ -263,7 +264,7 @@ class GrakoParserRoot(Parser):
         #     self.ast.add('ast_name', str(ast_name))
         # except FailedParse:
         #     self._goto(p)
-        # self._call('word', 'name')
+        self._call('word', 'name')
         self._token('=')
         self._cut()
         self._call('expre', 'rhs')

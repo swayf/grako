@@ -2,17 +2,17 @@ grammar = rules:{rule}+ $ ;
 
 (* a comment *)
 
-rule:rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
+rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
 
-expre : choice | sequence;
+expre = choice | sequence;
 
-choice:choice = options+:sequence {'|' >> options:sequence}+ ;
+choice = options+:sequence {'|' >> options:sequence}+ ;
 
 sequence = @element {[','] @element} ;
 
 element = named | override | term ;
 
-named:named = name:qualified [force_list:'+'] ':' value:element ;
+named = name:qualified [force_list:'+'] ':' value:element ;
 
 override = '@' @element ;
 
@@ -45,6 +45,6 @@ qualified = ?/[-_A-Za-z0-9]+(?:\.[-_A-Za-z0-9]+)*/? ;
 
 word = ?/[-_A-Za-z0-9]+/? ;
 
-pattern:pattern = '?/' >> pattern:?/(.*?)(?=/\?)/? '/?' ;
+pattern = '?/' >> pattern:?/(.*?)(?=/\?)/? '/?' ;
 
 eof = '$' ;
