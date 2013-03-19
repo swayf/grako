@@ -466,6 +466,7 @@ Change History
 
 - **tip**
     * Lint using flake8_.
+    * Added *cuts* to boostrap parser so errors are reproted closer to their origin.
 
 - **1.2.0**
     * Lazy rendering of template fields.
