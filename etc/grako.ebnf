@@ -1,50 +1,125 @@
-grammar = rules:{rule}+ $ ;
+grammar
+    =
+    rules:{rule}+
+    $
+    ;
 
-(* a comment *)
+rule
+    =
+    name:word '=' >> rhs:expre ('.' | ';') >>
+    ;
 
-rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
+expre
+    =
+    choice | sequence
+    ;
 
-expre = choice | sequence;
+choice
+    =
+    options+:sequence {'|' >> options:sequence}+
+    ;
 
-choice = options+:sequence {'|' >> options:sequence}+ ;
+sequence
+    =
+    @element {[','] @element}
+    ;
 
-sequence = @element {[','] @element} ;
+element
+    =
+    named | override | term
+    ;
 
-element = named | override | term ;
+named
+    =
+    name:qualified [force_list:'+'] ':' value:element
+    ;
 
-named = name:qualified [force_list:'+'] ':' value:element ;
+override
+    =
+    '@' @element
+    ;
 
-override = '@' @element ;
+term
+    =
+      void
+    | subexp
+    | repeat
+    | optional
+    | special
+    | kif
+    | knot
+    | atom
+    ;
 
-term = void | subexp | repeat | optional | special | kif | knot | atom ;
+subexp
+    =
+    '(' >> @expre ')' >>
+    ;
 
-subexp = '(' >> @expre ')' >> ;
+repeat
+    =
+    '{' >> repeat:expre '}' >> plus:['-' | '+'] >>
+    ;
 
-repeat = '{' >> repeat:expre '}' >> plus:['-' | '+'] >> ;
+optional
+    = '[' >> @expre ']' >>
+    ;
 
-optional = '[' >> @expre ']' >> ;
+special
+    = '?(' >> @?/(.*)/? ')?' >>
+    ;
 
-special = '?(' >> @?/(.*)/? ')?' >> ;
+kif
+    =
+    '&' @term
+    ;
 
-kif =  '&' @term ;
+knot
+    =
+    '!' @term
+    ;
 
-knot = '!' @term ;
+atom
+    =
+      cut
+    | token
+    | call
+    | pattern
+    | eof
+    ;
 
-atom = cut | token | call | pattern | eof ;
+call
+    =
+    word
+    ;
 
+void
+    =
+    '()'
+    ;
 
-call = word ;
+cut
+    =
+    '>>'
+    ;
 
-void = '()' ;
+token
+    =
+      '"' @?/([^"]|\\")*/? '"'
+    | "'" @?/([^']|\\')*/? "'"
+    ;
 
-cut = '>>' ;
+qualified
+    =
+    ?/[-_A-Za-z0-9]+(?:\.[-_A-Za-z0-9]+)*/?
+    ;
 
-token = '"' @?/([^"]|\\")*/? '"' | "'" @?/([^']|\\')*/? "'" ;
+word
+    =
+    ?/[-_A-Za-z0-9]+/?
+    ;
 
-qualified = ?/[-_A-Za-z0-9]+(?:\.[-_A-Za-z0-9]+)*/? ;
-
-word = ?/[-_A-Za-z0-9]+/? ;
-
-pattern = '?/' >> pattern:?/(.*?)(?=/\?)/? '/?' ;
+pattern
+    = '?/' >> pattern:?/(.*?)(?=/\?)/? '/?' ;
 
 eof = '$' ;
