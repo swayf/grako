@@ -1,6 +1,16 @@
+(*
+ * This grammar defines the Grako variation of EBNF.
+ *
+ * Grako uses its own hand-written bootstrap parser, and this
+ * grammar is only used for testing.
+ *
+ * See the accompanying README for details.
+ *
+ *)
+
 grammar
     =
-    rules:{rule}+
+    @{rule}+
     $
     ;
 
@@ -11,7 +21,8 @@ rule
 
 expre
     =
-    choice | sequence
+      choice
+    | sequence
     ;
 
 choice
@@ -26,7 +37,9 @@ sequence
 
 element
     =
-    named | override | term
+      named
+    | override
+    | term
     ;
 
 named
@@ -62,11 +75,13 @@ repeat
     ;
 
 optional
-    = '[' >> @expre ']' >>
+    =
+    '[' >> @expre ']' >>
     ;
 
 special
-    = '?(' >> @?/(.*)/? ')?' >>
+    =
+    '?(' >> @?/(.*)/? ')?' >>
     ;
 
 kif
@@ -120,6 +135,11 @@ word
     ;
 
 pattern
-    = '?/' >> pattern:?/(.*?)(?=/\?)/? '/?' ;
+    =
+    '?/' >> @?/(.*?)(?=/\?)/? '/?'
+    ;
 
-eof = '$' ;
+eof
+    =
+    '$'
+    ;
