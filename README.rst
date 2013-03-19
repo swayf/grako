@@ -465,11 +465,13 @@ Change History
 ==============
 
 - **tip**
+    * Align bootstrap parser with generated parser framework.
+    * Add *cuts* to bootstrap parser so errors are reported closer to their origin.
+    * *(minor) BUG!* `FailedCut` exceptions must translate to their nested exeption so the reported line and column make sense.
+    * Prettify the sample **Grako** grammar.
+    * Remove or comment-out code for tagged/named rule names. They don't work, and their usefulness is doubtful.
     * Spell-check this document with `Vim spell`_.
     * Lint using flake8_.
-    * Added *cuts* to bootstrap parser so errors are reported closer to their origin.
-    * Prettified the sample **Grako** grammar.
-    * Removed or commented-out code for tagged/named rule names. They don't work, and their usefulness is doubtful.
 
 - **1.2.0**
     * Lazy rendering of template fields.

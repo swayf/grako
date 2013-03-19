@@ -237,20 +237,13 @@ class GrakoParserRoot(Parser):
         self._repeater(f)
 
     def _choice_(self):
+        def options():
+            self._token('|')
+            self._cut()
+            self._call('sequence', 'options')
+
         self._call('sequence', 'options', True)
-        while True:
-            p = self._pos
-            try:
-                with self._try():
-                    self._token('|')
-                    self._cut()
-                    self._call('sequence', 'options')
-            except FailedCut as e:
-                self._goto(p)
-                raise e.nested
-            except FailedParse:
-                self._goto(p)
-                break
+        self._repeat(options, False)
 
     def _expre_(self):
         self._call('choice', 'expre')
@@ -265,6 +258,7 @@ class GrakoParserRoot(Parser):
         # except FailedParse:
         #     self._goto(p)
         self._call('word', 'name')
+        self._cut()
         self._token('=')
         self._cut()
         self._call('expre', 'rhs')
@@ -272,18 +266,14 @@ class GrakoParserRoot(Parser):
             self._token('.')
 
     def _grammar_(self):
-        self._call('rule', 'rules')
-        while True:
-            p = self._pos
-            try:
-                with self._try():
-                    self._call('rule', 'rules')
-                    self._cut()
-            except FailedParse:
-                self._goto(p)
-                break
-        self._next_token()
-        self._check_eof()
+        try:
+            self._call('rule', 'rules')
+            f = lambda: self._call('rule', 'rules')
+            self._repeat(f, True)
+            self._next_token()
+            self._check_eof()
+        except FailedCut as e:
+            raise e.nested
 
 
 class GrakoParserBase(GrakoParserRoot):
