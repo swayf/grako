@@ -6,7 +6,7 @@ Grako
 
 **Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decision making or backtracking. *Positive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level. The use of Python_'s `context managers`_ considerably reduces the size of the generated parsers for enhanced CPU cache hits.
 
-**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 2500 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependecies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
+**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 2500 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependencies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity
 
@@ -56,7 +56,7 @@ The Generated Parsers
 
 A **Grako** generated parser consists of the following classes:
 
-* A root class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overridden, etc).::
+* A root class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overridden, etc.).::
 
     def _myrulename_(self):
 
@@ -197,7 +197,7 @@ The expressions, in reverse order of operator precedence, can be:
     ``'text'`` or ``"text"``
         Match the token text within the quotation marks.
 
-        **Note that** if *text* is alphanumeric, then Grako will check that the character following the token is not alphanumeric. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the ``Parser`` or the ``Buffer``, or by using a pattern expression (see below) instead of a token expression.
+        **Note that** if *text* is alphanumeric, then **Grako** will check that the character following the token is not alphanumeric. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the ``Parser`` or the ``Buffer``, or by using a pattern expression (see below) instead of a token expression.
 
     ``?/regexp/?``
         The pattern expression. Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
@@ -469,7 +469,7 @@ Change History
     * Add *cuts* to bootstrap parser so errors are reported closer to their origin.
     * *(minor) BUG!* `FailedCut` exceptions must translate to their nested exeption so the reported line and column make sense.
     * Prettify the sample **Grako** grammar.
-    * Remove or comment-out code for tagged/named rule names. They don't work, and their usefulness is doubtful.
+    * Remove or comment-out code for tagged/named rule names (they don't work, and their usefulness is doubtful).
     * Spell-check this document with `Vim spell`_.
     * Lint using flake8_.
 
@@ -483,7 +483,7 @@ Change History
 - **1.1.0**
     * *BUG!* Need to preserve state when closure iterations match partially.
     * Improved performance by also memoizing exception results and advancement over whitespace and comments.
-    * Work with unicode while rendering.
+    * Work with Unicode while rendering.
     * Improved consistency between the way generated parsers and models parse.
     * Added a table of contents to this *README*.
     * Document ``parseinfo`` and default it to *False*.
