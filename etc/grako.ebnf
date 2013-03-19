@@ -1,50 +1,145 @@
-grammar = rules:{rule}+ $ ;
+(*
+ * This grammar defines the Grako variation of EBNF.
+ *
+ * Grako uses its own hand-written bootstrap parser, and this
+ * grammar is only used for testing.
+ *
+ * See the accompanying README for details.
+ *
+ *)
 
-(* a comment *)
+grammar
+    =
+    @{rule}+
+    $
+    ;
 
-rule:rule = [ast_name:word ':'] name:word '=' >> rhs:expre ('.' | ';') >> ;
+rule
+    =
+    name:word '=' >> rhs:expre ('.' | ';') >>
+    ;
 
-expre = choice | sequence;
+expre
+    =
+      choice
+    | sequence
+    ;
 
-choice:choice = options+:sequence {'|' >> options:sequence}+ ;
+choice
+    =
+    options+:sequence {'|' >> options:sequence}+
+    ;
 
-sequence = @element {[','] @element} ;
+sequence
+    =
+    @element {[','] @element}
+    ;
 
-element = named | override | term ;
+element
+    =
+      named
+    | override
+    | term
+    ;
 
-named:named = name:qualified [force_list:'+'] ':' value:element ;
+named
+    =
+    name:qualified [force_list:'+'] ':' value:element
+    ;
 
-override = '@' @element ;
+override
+    =
+    '@' @element
+    ;
 
-term = void | subexp | repeat | optional | special | kif | knot | atom ;
+term
+    =
+      void
+    | subexp
+    | repeat
+    | optional
+    | special
+    | kif
+    | knot
+    | atom
+    ;
 
-subexp = '(' >> @expre ')' >> ;
+subexp
+    =
+    '(' >> @expre ')' >>
+    ;
 
-repeat = '{' >> repeat:expre '}' >> plus:['-' | '+'] >> ;
+repeat
+    =
+    '{' >> repeat:expre '}' >> plus:['-' | '+'] >>
+    ;
 
-optional = '[' >> @expre ']' >> ;
+optional
+    =
+    '[' >> @expre ']' >>
+    ;
 
-special = '?(' >> @?/(.*)/? ')?' >> ;
+special
+    =
+    '?(' >> @?/(.*)/? ')?' >>
+    ;
 
-kif =  '&' @term ;
+kif
+    =
+    '&' @term
+    ;
 
-knot = '!' @term ;
+knot
+    =
+    '!' @term
+    ;
 
-atom = cut | token | call | pattern | eof ;
+atom
+    =
+      cut
+    | token
+    | call
+    | pattern
+    | eof
+    ;
 
+call
+    =
+    word
+    ;
 
-call = word ;
+void
+    =
+    '()'
+    ;
 
-void = '()' ;
+cut
+    =
+    '>>'
+    ;
 
-cut = '>>' ;
+token
+    =
+      '"' @?/([^"]|\\")*/? '"'
+    | "'" @?/([^']|\\')*/? "'"
+    ;
 
-token = '"' @?/([^"]|\\")*/? '"' | "'" @?/([^']|\\')*/? "'" ;
+qualified
+    =
+    ?/[-_A-Za-z0-9]+(?:\.[-_A-Za-z0-9]+)*/?
+    ;
 
-qualified = ?/[-_A-Za-z0-9]+(?:\.[-_A-Za-z0-9]+)*/? ;
+word
+    =
+    ?/[-_A-Za-z0-9]+/?
+    ;
 
-word = ?/[-_A-Za-z0-9]+/? ;
+pattern
+    =
+    '?/' >> @?/(.*?)(?=/\?)/? '/?'
+    ;
 
-pattern:pattern = '?/' >> pattern:?/(.*?)(?=/\?)/? '/?' ;
-
-eof = '$' ;
+eof
+    =
+    '$'
+    ;

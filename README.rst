@@ -4,9 +4,9 @@ Grako
 
 **Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs memoizing_ PEG_ parsers in Python_.
 
-**Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decison making or backtracking. *Possitive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level. The use of Python_'s `context managers`_ considerably reduces the size of the generated parsers for enhanced CPU cache hits.
+**Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decision making or backtracking. *Positive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level. The use of Python_'s `context managers`_ considerably reduces the size of the generated parsers for enhanced CPU cache hits.
 
-**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 2500 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependecies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
+**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 2500 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependencies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity
 
@@ -36,7 +36,7 @@ Rationale
 
 * Pre-processing (like dealing with includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar.
 
-* It is easy to recruit help knowledged about a mainstream programming language (Python_ in this case); it is not so for grammar description languages. As a grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a parser. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something's hard to explain to an university student, it's probably too complicated).
+* It is easy to recruit help with knowledge about a mainstream programming language (Python_ in this case); it is not so for grammar description languages. As a grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a parser. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something is hard to explain to an university student, it's probably too complicated).
 
 * Generated parsers should be humanly-readable and debuggable. Looking at the generated source code is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself. It's inconvenient to trust generated code that you cannot understand.
 
@@ -56,7 +56,7 @@ The Generated Parsers
 
 A **Grako** generated parser consists of the following classes:
 
-* A root class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overriden, etc)::
+* A root class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overridden, etc.).::
 
     def _myrulename_(self):
 
@@ -163,7 +163,7 @@ Rule names that start with an uppercase character::
 
    FRAGMENT = ?/[a-z]+/?
 
-*do not* advance over whitespace before begining to parse. This feature becomes handy when defining complex lexical elements, as it allows breaking them into several rules.
+*do not* advance over whitespace before beginning to parse. This feature becomes handy when defining complex lexical elements, as it allows breaking them into several rules.
 
 The expressions, in reverse order of operator precedence, can be:
 
@@ -197,7 +197,7 @@ The expressions, in reverse order of operator precedence, can be:
     ``'text'`` or ``"text"``
         Match the token text within the quotation marks.
 
-        **Note that** if *text* is alphanumeric, then Grako will check that the character following the token is not alphanumerc. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the ``Parser`` or the ``Buffer``, or by using a pattern expression (see below) instead of a token expression.
+        **Note that** if *text* is alphanumeric, then **Grako** will check that the character following the token is not alphanumeric. This is done to prevent tokens like *IN* matching when the text ahead is *INITIALIZE*. This feature can be turned off by passing ``nameguard=False`` to the ``Parser`` or the ``Buffer``, or by using a pattern expression (see below) instead of a token expression.
 
     ``?/regexp/?``
         The pattern expression. Match the Python_ regular expression ``regexp`` at the current text position. Unlike other expressions, this one does not advance over whitespace or comments. For that, place the ``regexp`` as the only term in its own rule.
@@ -236,7 +236,7 @@ The expressions, in reverse order of operator precedence, can be:
 
 
     ``$``
-        The *end of text* symbol. Verify thad the end of the input text has been reached.
+        The *end of text* symbol. Verify that the end of the input text has been reached.
 
     ``(*`` *comment* ``*)``
         Comments may appear anywhere in the text.
@@ -249,7 +249,7 @@ without having to write::
 
     number = number:?/[0-9]+/?
 
-When a rule has named elementes, the unnamed ones are excluded from the AST_ (they are ignored).
+When a rule has named elements, the unnamed ones are excluded from the AST_ (they are ignored).
 
 ..    It is also possible to add an AST_ name to a rule::
 
@@ -265,7 +265,7 @@ By default, and AST_ is either a *list* (for *closures* and rules without named 
 
 AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (the ``+:`` operator) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
 
-When the ``parseinfo=True`` keyword argument has been passed to the ``Parser`` constructor, a ``parseinfo`` element is added to AST_ nodes that are *dict*-like. The element contains a *namedtuple* with the parse iformation for the node::
+When the ``parseinfo=True`` keyword argument has been passed to the ``Parser`` constructor, a ``parseinfo`` element is added to AST_ nodes that are *dict*-like. The element contains a *namedtuple* with the parse information for the node::
 
    ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
@@ -274,7 +274,7 @@ With the help of the ``Buffer.line_info()`` method, it is possible to recover th
 Whitespace
 ==========
 
-By default, **Grako** generated parsers skip the usual whitespace charactes (whatever Python_ defines as ``string.whitespace``), but you can change that behaviour by passing a ``whitespace`` parameter to your parser. For example::
+By default, **Grako** generated parsers skip the usual whitespace characters (whatever Python_ defines as ``string.whitespace``), but you can change that behaviour by passing a ``whitespace`` parameter to your parser. For example::
 
     parser = MyParser(text, whitespace='\t ')
 
@@ -300,7 +300,7 @@ The change will affect both token and pattern matching.
 Comments
 ========
 
-Parsers will skip over comments specified as a regular expression using the ``comments_re`` paramenter::
+Parsers will skip over comments specified as a regular expression using the ``comments_re`` parameter::
 
     parser = MyParser(text, comments_re="\(\*.*?\*\)")
 
@@ -312,7 +312,7 @@ Semantic Actions
 
 There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars and provide for poor modularization from the parser execution perspective.
 
-The overridable, per-rule methods in the generated abstract parser provide enough opportunity to do semantics as a rule post-processing operation, like verifications (like for inadecuate use of keywords), or AST_ transformation.
+The overridable, per-rule methods in the generated abstract parser provide enough opportunity to do semantics as a rule post-processing operation, like verifications (like for inadequate use of keywords), or AST_ transformation.
 
 For finer-grained control it is enough to declare more rules, as the impact on the parsing times will be minimal.
 
@@ -333,7 +333,7 @@ Templates and Translation
 
 **Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parsers.
 
-Translation in **Grako** is *template-based*, but instead of defining or using a complext templating engine (yet another language), it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
+Translation in **Grako** is *template-based*, but instead of defining or using a complex templating engine (yet another language), it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
 
 To generate a parser, **Grako** constructs an object model of the parsed grammar. Each node in the model is a descendant of ``rendering.Renderer``, and knows how to render itself. Templates are left-trimmed on whitespace, like Python_ *doc-comments* are. This is an example taken from **Grako**'s source code::
 
@@ -348,7 +348,7 @@ To generate a parser, **Grako** constructs an object model of the parsed grammar
 
 Every *attribute* of the object that doesn't start with an underscore (``_``) may be used as a template field, and fields can be added or modified by overriding the ``render_fields()`` method.  Fields themselves are *lazily rendered* before being expanded by the template, so a field may be an instance of a ``Renderer`` descendant.
 
-The ``rendering`` module uses a ``Formatter`` enhanced to support the rendering of items in an *iterable* one by one. The syntax to acheive that is::
+The ``rendering`` module uses a ``Formatter`` enhanced to support the rendering of items in an *iterable* one by one. The syntax to achieve that is::
 
     {fieldname:ind:sep:fmt}
 
@@ -360,7 +360,7 @@ The extended format can also be used with non-iterables, in which case the rende
 
      indent(fmt % render(value), ind)
 
-The default multiplier for ``ind`` is ``4``, but that can be ovrriden using ``n*m`` (for example ``3*1``) in the format.
+The default multiplier for ``ind`` is ``4``, but that can be overridden using ``n*m`` (for example ``3*1``) in the format.
 
 **Note**
     Using a newline (`\\n`) as separator will interfere with left trimming and indentation of templates. To use newline as separator, specify it as `\\\\n`, and the renderer will understand the intention.
@@ -371,7 +371,7 @@ The (lack of) Documentation
 
     1. Inline documentation easily goes out of phase with what the code actually does. It is an equivalent and more productive effort to provide out-of-line documentation.
 
-    2. Minimal and understandable code with meaningful identifiers makes comments redundant or unnecesary.
+    2. Minimal and understandable code with meaningful identifiers makes comments redundant or unnecessary.
 
 Still, comments are provided for *non-obvious intentions* in the code, and each **Grako** module carries a doc-comment describing its purpose.
 
@@ -422,7 +422,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * Other parser generators like `PEG.js`_ by **David Majda** inspired the work in **Grako**.
 
-* **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ nesletter, curated by **Rahul Chaudhary**
+* **William Thompson** inspired the use of context managers with his `blog post`_ that I knew about through the invaluable `Python Weekly`_ newsletter, curated by **Rahul Chaudhary**
 
 * **Jeff Knupp** explains why **Grako**'s use of exceptions_ is sound, so I don't have to.
 
@@ -464,7 +464,13 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-- **tip**
+- **1.2.1**
+    * Align bootstrap parser with generated parser framework.
+    * Add *cuts* to bootstrap parser so errors are reported closer to their origin.
+    * *(minor) BUG!* `FailedCut` exceptions must translate to their nested exeption so the reported line and column make sense.
+    * Prettify the sample **Grako** grammar.
+    * Remove or comment-out code for tagged/named rule names (they don't work, and their usefulness is doubtful).
+    * Spell-check this document with `Vim spell`_.
     * Lint using flake8_.
 
 - **1.2.0**
@@ -477,7 +483,7 @@ Change History
 - **1.1.0**
     * *BUG!* Need to preserve state when closure iterations match partially.
     * Improved performance by also memoizing exception results and advancement over whitespace and comments.
-    * Work with unicode while rendering.
+    * Work with Unicode while rendering.
     * Improved consistency between the way generated parsers and models parse.
     * Added a table of contents to this *README*.
     * Document ``parseinfo`` and default it to *False*.
@@ -486,4 +492,5 @@ Change History
 - **1.0.0**
     First feature-complete release.
 
+.. _`Vim spell`:  http://vimdoc.sourceforge.net/htmldoc/spell.html
 .. _flake8: https://pypi.python.org/pypi/flake8
