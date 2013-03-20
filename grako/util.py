@@ -62,3 +62,7 @@ def indent(text, indent=1, multiplier=4):
         sindent = ' ' * multiplier * indent
         text = '\n'.join(sindent + t for t in text.splitlines())
     return text
+
+
+def format_if(fmt, values):
+    return fmt % values if values else ''
