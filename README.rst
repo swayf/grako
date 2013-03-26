@@ -466,6 +466,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
+- **tip**
+    * Report all the rules missing in a grammar before aborting.
+
 - **1.2.1**
     * Align bootstrap parser with generated parser framework.
     * Add *cuts* to bootstrap parser so errors are reported closer to their origin.

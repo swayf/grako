@@ -7,10 +7,8 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import sys
 import os
 import argparse
-from .buffering import Buffer
-from .parsing import Parser
 from .bootstrap import GrakoGrammarGenerator
-from .exceptions import *
+from .exceptions import GrakoException
 
 DESCRIPTION = ('Grako (for grammar compiler) takes grammars'
                ' in a variation of EBNF as input, and outputs a memoizing'
@@ -38,9 +36,11 @@ argparser.add_argument('-t', '--trace',
                        action='store_true'
                        )
 
+
 def genmodel(name, grammar, trace=False, filename=None):
     parser = GrakoGrammarGenerator(name, trace=trace)
     return parser.parse(grammar, filename=filename)
+
 
 def gencode(name, grammar, trace=False, filename=None):
     model = genmodel(name, grammar, trace=trace, filename=filename)
@@ -49,7 +49,8 @@ def gencode(name, grammar, trace=False, filename=None):
 
 def main():
     import logging
-    logging.basicConfig()
+    logging.basicConfig(format='%(levelname)s: %(message)s')
+    log = logging.getLogger()
     try:
         args = argparser.parse_args()
     except Exception as e:
@@ -73,7 +74,7 @@ def main():
         else:
             print(parser)
     except GrakoException as e:
-        print(e)
+        log.error(str(e))
 
 if __name__ == '__main__':
     main()
