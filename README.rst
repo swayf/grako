@@ -2,7 +2,7 @@
 Grako
 =====
 
-**Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs memoizing_ (*Packrat*) PEG_ parsers in Python_.
+**Grako** (for *grammar compiler*) is a tool that takes grammars in a variation of EBNF_ as input, and outputs memoizing_ (Packrat_) PEG_ parsers in Python_.
 
 **Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decision making or backtracking. *Positive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level, and delegation to Python_'s re_ module for *lexemes* allows for (Perl_-like) powerful and efficient lexical analysis. The use of Python_'s `context managers`_ considerably reduces the size of the generated parsers for enhanced CPU-cache hits.
 
@@ -50,6 +50,7 @@ Rationale
 .. _EBNF: http://en.wikipedia.org/wiki/Ebnf
 .. _memoizing: http://en.wikipedia.org/wiki/Memoization
 .. _PEG: http://en.wikipedia.org/wiki/Parsing_expression_grammar
+.. _Packrat: http://bford.info/packrat/
 .. _Python: http://python.org
 .. _Ruby: http://www.ruby-lang.org/
 
@@ -436,6 +437,10 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under three thousand lines of code, would not have been possible without Python_.
 
+* **Kota Mizushima** welcomed me to the `CSAIL at MIT`_ `PEG and Packrat parsing mailing list`_, and
+  immediately offered ideas and pointed me to docummentation about the implementation of **cut** in
+  modern parsers.
+
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
 * **Gustavo Lau** was my professor of *Language Theory* at USB_, and he was kind enough to be my tutor in a thesis project on programming languages that was more than I could chew. My peers, and then teaching advisers **Alberto Torres**, and **Enzo Chiariotti** formed a team with **Gustavo** to challenge us with programming languages like *LATORTA* and term exams that went well into the eight hours. And, of course, there was also the *pirate patch* that should be worn on the left or right eye depending on the *LL* or *LR* challenge.
@@ -462,12 +467,15 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _declensions: http://en.wikipedia.org/wiki/Declension
 .. _English: http://en.wikipedia.org/wiki/English_grammar
 .. _Japanese: http://en.wikipedia.org/wiki/Japanese_grammar
+.. _`CSAIL at MIT`:  http://www.csail.mit.edu/
+.. _`PEG and Packrat parsing mailing list`: https://lists.csail.mit.edu/mailman/listinfo/peg
 
 Change History
 ==============
 
 - **tip**
     * Report all the rules missing in a grammar before aborting.
+    * Update credits.
 
 - **1.2.1**
     * Align bootstrap parser with generated parser framework.
