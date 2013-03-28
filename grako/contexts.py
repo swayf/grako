@@ -160,7 +160,13 @@ class ParseContext(object):
     def _cut(self):
         self._cut_stack[-1] = True
         # Kota Mizushima says we can throw away any prior memoization
-        self._memoization_cache = dict()
+        cutpos = self._pos
+        cache = self._memoization_cache
+        keys = cache.keys()
+        for key in keys:
+            p, _ = key
+            if p < cutpos:
+                del cache[key]
 
     def _push_cut(self):
         self._cut_stack.append(False)
