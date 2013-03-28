@@ -165,7 +165,7 @@ class ParseContext(object):
         #   http://goo.gl/VaGpj
         cutpos = self._pos
         cache = self._memoization_cache
-        cutkeys = ((p, n) for p, n in cache.keys if p < cutpos)
+        cutkeys = ((p, n) for p, n in cache.keys() if p < cutpos)
         for key in cutkeys:
             del cache[key]
 
