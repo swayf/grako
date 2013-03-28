@@ -160,6 +160,15 @@ class ParseContext(object):
     def _cut(self):
         self._cut_stack[-1] = True
 
+        # Kota Mizushima says we can throw away
+        # memoizations for previous positions.
+        #   http://goo.gl/VaGpj
+        cutpos = self._pos
+        cache = self._memoization_cache
+        cutkeys = ((p, n) for p, n in cache.keys() if p < cutpos)
+        for key in cutkeys:
+            del cache[key]
+
     def _push_cut(self):
         self._cut_stack.append(False)
 
