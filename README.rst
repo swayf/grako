@@ -437,9 +437,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under three thousand lines of code, would not have been possible without Python_.
 
-* **Kota Mizushima** welcomed me to the `CSAIL at MIT`_ `PEG and Packrat parsing mailing list`_, and
-  immediately offered ideas and pointed me to docummentation about the implementation of **cut** in
-  modern parsers.
+* **Kota Mizushima** welcomed me to the `CSAIL at MIT`_ `PEG and Packrat parsing mailing list`_, and immediately offered ideas and pointed me to docummentation about the implementation of **cut** in modern parsers. The optimization of memoization information is thanks to one of his papers.
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
@@ -474,6 +472,7 @@ Change History
 ==============
 
 - **tip**
+    * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete.
     * Report all the rules missing in a grammar before aborting.
     * Update credits.
 
