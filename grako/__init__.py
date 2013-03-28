@@ -8,7 +8,7 @@ import sys
 import os
 import argparse
 from .bootstrap import GrakoGrammarGenerator
-from .exceptions import GrakoException
+from .exceptions import *
 
 DESCRIPTION = ('Grako (for grammar compiler) takes grammars'
                ' in a variation of EBNF as input, and outputs a memoizing'
