@@ -160,8 +160,8 @@ class ParseContext(object):
     def _cut(self):
         self._cut_stack[-1] = True
 
-        # Kota Mizushima says we can throw away
-        # memoizations for previous positions.
+        # Kota Mizushima et al say that we can throw away
+        # memos for previous positions in the buffer.
         #   http://goo.gl/VaGpj
         cutpos = self._pos
         cache = self._memoization_cache
