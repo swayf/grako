@@ -107,6 +107,7 @@ class GrakoParserRoot(Parser):
         self._token('[')
         self._cut()
         self._call('expre', 'optional')
+        self._cut()
         self._token(']')
 
     def _plus_(self):
@@ -257,7 +258,10 @@ class GrakoParserRoot(Parser):
         self._cut()
         self._call('expre', 'rhs')
         if not self._try_token(';'):
-            self._token('.')
+            try:
+                self._token('.')
+            except FailedParse:
+                self._error('expecting one of: ; .')
 
     def _grammar_(self):
         self._call('rule', 'rules')
