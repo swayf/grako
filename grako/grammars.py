@@ -618,7 +618,8 @@ class Grammar(Renderer):
     def parse(self, text, start=None, filename=None, trace=False, **kwargs):
         ctx = ModelContext(self.rules, text, filename, trace=trace, **kwargs)
         start_rule = ctx._find_rule(start) if start else self.rules[0]
-        return start_rule.parse(ctx)
+        with ctx._choice():
+            return start_rule.parse(ctx)
 
     def __str__(self):
         return '\n\n'.join(str(rule) for rule in self.rules) + '\n'

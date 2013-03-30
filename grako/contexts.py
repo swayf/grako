@@ -231,14 +231,18 @@ class ParseContext(object):
         finally:
             self._pop_cut()
 
-    _optional = _option
-
     @contextmanager
     def _choice(self):
         try:
             yield
         except FailedCut as e:
             raise e.nested
+
+    @contextmanager
+    def _optional(self):
+        with self._choice():
+            with self._option():
+                yield
 
     @contextmanager
     def _group(self):

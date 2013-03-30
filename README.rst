@@ -471,10 +471,9 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-- **tip**
+- **1.3.0-rc.1**
     * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
     * Make sure that *cut* actually applies to the nearest fork.
-    * Got rid of the ``FailedCut`` exception.
     * Finish aligning model parsing with generated code parsing. Performance should now favor model parsing (because less code means more CPU-cache hits), but model parsing doesn't yet provide for semantic actions.
     * Report all the rules missing in a grammar before aborting.
     * Minor performance optimizations.
