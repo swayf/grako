@@ -270,10 +270,13 @@ class ParseContext(object):
         while True:
             self._push_cut()
             try:
+                p = self._pos
                 with self._try():
                     value = f()
                 if value is not None:
                     result.append(value)
+                if self._pos == p:
+                    self._error('empty closure')
             except FailedParse:
                 if self._is_cut_set():
                     raise
