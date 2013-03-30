@@ -5,7 +5,7 @@ import re
 from contextlib import contextmanager
 from collections import namedtuple
 from .ast import AST
-from .exceptions import FailedParse, FailedLookahead
+from .exceptions import FailedParse, FailedCut, FailedLookahead
 from . import buffering
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
@@ -223,13 +223,22 @@ class ParseContext(object):
         try:
             with self._try():
                 yield
-        except FailedParse:
+        except FailedCut:
+            raise
+        except FailedParse as e:
             if self._is_cut_set():
-                raise
+                raise FailedCut(e)
         finally:
             self._pop_cut()
 
     _optional = _option
+
+    @contextmanager
+    def _choice(self):
+        try:
+            yield
+        except FailedCut as e:
+            raise e.nested
 
     @contextmanager
     def _group(self):
@@ -277,9 +286,11 @@ class ParseContext(object):
                     result.append(value)
                 if self._pos == p:
                     self._error('empty closure')
-            except FailedParse:
+            except FailedCut:
+                raise
+            except FailedParse as e:
                 if self._is_cut_set():
-                    raise
+                    raise FailedCut(e)
                 return result
             finally:
                 self._pop_cut()

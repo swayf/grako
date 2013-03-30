@@ -32,7 +32,7 @@ choice
 
 sequence
     =
-    @element {[','] @element}
+    @element {[',' >>] @element}
     ;
 
 element

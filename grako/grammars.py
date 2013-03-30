@@ -21,7 +21,6 @@ import time
 from .util import indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
-from .ast import AST
 from .contexts import ParseContext, ParseInfo
 from .exceptions import (FailedParse,
                          FailedToken,
@@ -265,13 +264,14 @@ class ChoiceGrammar(_Grammar):
         self.options = options
 
     def parse(self, ctx):
-        for o in self.options:
-            with ctx._option():
-                return o.parse(ctx)
-        firstset = ' '.join(str(urepr(f[0])) for f in self.firstset if f)
-        if firstset:
-            raise FailedParse(ctx.buf, 'one of {%s}' % firstset)
-        raise FailedParse(ctx.buf, 'no available options')
+        with ctx._choice():
+            for o in self.options:
+                with ctx._option():
+                    return o.parse(ctx)
+            firstset = ' '.join(str(urepr(f[0])) for f in self.firstset if f)
+            if firstset:
+                raise FailedParse(ctx.buf, 'one of {%s}' % firstset)
+            raise FailedParse(ctx.buf, 'no available options')
 
     def _validate(self, rules):
         return all(o._validate(rules) for o in self.options)
@@ -316,7 +316,8 @@ class ChoiceGrammar(_Grammar):
                     _e = None
                 {options}
                     self._error({error})
-                _e = choice{n}() \
+                with self._choice():
+                    _e = choice{n}() \
                 '''
 
 

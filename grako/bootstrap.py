@@ -107,6 +107,7 @@ class GrakoParserRoot(Parser):
         self._token('[')
         self._cut()
         self._call('expre', 'optional')
+        self._cut()
         self._token(']')
 
     def _plus_(self):
