@@ -5,7 +5,7 @@ import re
 from contextlib import contextmanager
 from collections import namedtuple
 from .ast import AST
-from .exceptions import FailedParse, FailedCut, FailedLookahead
+from .exceptions import FailedParse, FailedLookahead
 from . import buffering
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
@@ -223,11 +223,9 @@ class ParseContext(object):
         try:
             with self._try():
                 yield
-        except FailedCut:
-            raise
-        except FailedParse as e:
+        except FailedParse:
             if self._is_cut_set():
-                self._error(e, FailedCut)
+                raise
         finally:
             self._pop_cut()
 
@@ -260,12 +258,11 @@ class ParseContext(object):
         try:
             yield
         except FailedParse:
-            self._goto(p)
             pass
         else:
-            self._goto(p)
             self._error('', etype=FailedLookahead)
         finally:
+            self._goto(p)
             self._pop_ast()  # simply discard
 
     def _repeater(self, f):
@@ -273,17 +270,17 @@ class ParseContext(object):
         while True:
             self._push_cut()
             try:
+                p = self._pos
                 with self._try():
                     value = f()
                 if value is not None:
                     result.append(value)
-            except FailedCut:
-                raise
-            except FailedParse as e:
+                if self._pos == p:
+                    self._error('empty closure')
+            except FailedParse:
                 if self._is_cut_set():
-                    self._error(e, FailedCut)
-                else:
-                    return result
+                    raise
+                return result
             finally:
                 self._pop_cut()
 
