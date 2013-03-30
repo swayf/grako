@@ -32,9 +32,9 @@ Rationale
 
 * To deal with programming languages in which important statement words (can't call them keywords) may be used as identifiers in programs, the parser must be able to lead the lexer. The parser must also lead the lexer to parse languages in which the meaning of input symbols may change with context, like Ruby_.
 
-* When ambiguity is the norm in the parsed language (as is the case in several legacy_ ones), an LL or LR grammar becomes contaminated with miriads of lookaheads. PEG_ parsers address ambiguity from the onset. Memoization, and relying on the exception-handling system makes backtracking very efficient.
+* When ambiguity is the norm in the parsed language (as is the case in several legacy_ ones), an LL or LR grammar becomes contaminated with myriads of lookaheads. PEG_ parsers address ambiguity from the onset. Memoization, and relying on the exception-handling system makes backtracking very efficient.
 
-* Semantic actions, like `Abstract Syntax Tree`_ (AST_) creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser's language, and translation's target language.
+* Semantic actions, like `Abstract Syntax Tree`_ (AST_)  transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser's language, and translation's target language. Most grammar parsers do not check that the embedded semantic actions have correct syntax, so errors get reported at awkward moments, and against the generated code, not against the source.
 
 * Pre-processing (like dealing with includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar.
 
@@ -79,7 +79,7 @@ The methods in the base parser class return the same AST_ received as parameter,
 Using the Tool
 ==============
 
-**Grako** is run from the commandline::
+**Grako** is run from the command line::
 
     $ python -m grako
 
@@ -264,7 +264,7 @@ When a rule has named elements, the unnamed ones are excluded from the AST_ (the
 Abstract Syntax Trees (ASTs)
 ============================
 
-By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``.
+By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard ``dict`` syntax, ``ast['key']``, or as attributes, ``ast.key``.
 
 AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (the ``+:`` operator) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
 
@@ -319,7 +319,7 @@ The overridable, per-rule methods in the generated abstract parser provide enoug
 
 For finer-grained control it is enough to declare more rules, as the impact on the parsing times will be minimal.
 
-If pre-processing is required at some point, it is enough to place invocations of empty rules where appropiate::
+If pre-processing is required at some point, it is enough to place invocations of empty rules where appropriate::
 
     myrule = first_part preproc {second_part} ;
 
@@ -336,7 +336,7 @@ Templates and Translation
 
 **Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parsers.
 
-Translation in **Grako** is *template-based*, but instead of defining or using a complex templating engine (yet another language), it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
+Translation in **Grako** is *template-based*, but instead of defining or using a complex templating engine (yet another language), it relies on the simple but powerful ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
 
 To generate a parser, **Grako** constructs an object model of the parsed grammar. Each node in the model is a descendant of ``rendering.Renderer``, and knows how to render itself. Templates are left-trimmed on whitespace, like Python_ *doc-comments* are. This is an example taken from **Grako**'s source code::
 
@@ -409,7 +409,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 Contact and Updates
 ===================
 
-To discuss **Grako** and to receive notifications about new releales, please join the low-volume `Grako Forum`_ at *Google Groups*.
+To discuss **Grako** and to receive notifications about new releases, please join the low-volume `Grako Forum`_ at *Google Groups*.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 
@@ -437,7 +437,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under three thousand lines of code, would not have been possible without Python_.
 
-* **Kota Mizushima** welcomed me to the `CSAIL at MIT`_ `PEG and Packrat parsing mailing list`_, and immediately offered ideas and pointed me to docummentation about the implementation of **cut** in modern parsers. The optimization of memoization information is thanks to one of his papers.
+* **Kota Mizushima** welcomed me to the `CSAIL at MIT`_ `PEG and Packrat parsing mailing list`_, and immediately offered ideas and pointed me to documentation about the implementation of **cut** in modern parsers. The optimization of memoization information is thanks to one of his papers.
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
@@ -472,14 +472,19 @@ Change History
 ==============
 
 - **tip**
-    * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete.
+    * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
+    * Make sure that *cut* actually applies to the nearest fork.
+    * Got rid of the ``FailedCut`` exception.
+    * Finish aligning model parsing with generated code parsing. Performance should now favor model parsing (because less code means more CPU-cache hits), but model parsing doesn't yet provide for semantic actions.
     * Report all the rules missing in a grammar before aborting.
+    * Minor performance optimizations.
+    * Align the sample *etc/grako.ebnf* grammar to the language parsed by the bootstrap parser.
     * Update credits.
 
 - **1.2.1**
     * Align bootstrap parser with generated parser framework.
     * Add *cuts* to bootstrap parser so errors are reported closer to their origin.
-    * *(minor) BUG!* `FailedCut` exceptions must translate to their nested exeption so the reported line and column make sense.
+    * *(minor) BUG!* ``FailedCut`` exceptions must translate to their nested exeption so the reported line and column make sense.
     * Prettify the sample **Grako** grammar.
     * Remove or comment-out code for tagged/named rule names (they don't work, and their usefulness is doubtful).
     * Spell-check this document with `Vim spell`_.
