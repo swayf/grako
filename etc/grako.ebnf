@@ -16,7 +16,7 @@ grammar
 
 rule
     =
-    name:word '=' >> rhs:expre ('.' | ';') >>
+    word '=' >> rhs:expre ('.' | ';') >>
     ;
 
 expre
@@ -44,7 +44,7 @@ element
 
 named
     =
-    name:qualified [force_list:'+'] ':' value:element
+    name:word [force_list:'+'] ':' value:element
     ;
 
 override
@@ -120,13 +120,17 @@ cut
 
 token
     =
-      '"' @?/([^"]|\\")*/? '"'
-    | "'" @?/([^']|\\')*/? "'"
+    dqstring | sqstring
     ;
 
-qualified
+dqstring
     =
-    ?/[-_A-Za-z0-9]+(?:\.[-_A-Za-z0-9]+)*/?
+    '"' >> @?/([^"]|\\")*/? '"'
+    ;
+
+sqstring
+    =
+    "'" >> @?/([^']|\\')*/? "'"
     ;
 
 word
