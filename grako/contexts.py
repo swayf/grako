@@ -260,12 +260,11 @@ class ParseContext(object):
         try:
             yield
         except FailedParse:
-            self._goto(p)
             pass
         else:
-            self._goto(p)
             self._error('', etype=FailedLookahead)
         finally:
+            self._goto(p)
             self._pop_ast()  # simply discard
 
     def _repeater(self, f):
