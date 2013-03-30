@@ -35,8 +35,7 @@ from .grammars import (ChoiceGrammar,
                        SpecialGrammar,
                        TokenGrammar,
                        VoidGrammar)
-from .exceptions import (FailedCut,
-                         FailedParse)
+from .exceptions import FailedParse
 
 __all__ = ['GrakoParser', 'GrakoGrammarGenerator']
 
@@ -203,18 +202,12 @@ class GrakoParserRoot(Parser):
             self._token(':')
         self._cut()
         self.ast.add('name', name)
-        try:
-            self._call('element', 'value')
-        except FailedParse as e:
-            raise FailedCut(self._buffer, e)
+        self._call('element', 'value')
 
     def _override_(self):
         self._token('@')
         self._cut()
-        try:
-            self._call('element', '@')
-        except FailedParse as e:
-            raise FailedCut(self._buffer, e)
+        self._call('element', '@')
 
     def _element_(self):
         with self._option():
@@ -266,14 +259,11 @@ class GrakoParserRoot(Parser):
             self._token('.')
 
     def _grammar_(self):
-        try:
-            self._call('rule', 'rules')
-            f = lambda: self._call('rule', 'rules')
-            self._repeat(f, True)
-            self._next_token()
-            self._check_eof()
-        except FailedCut as e:
-            raise e.nested
+        self._call('rule', 'rules')
+        f = lambda: self._call('rule', 'rules')
+        self._repeat(f, True)
+        self._next_token()
+        self._check_eof()
 
 
 class GrakoParserBase(GrakoParserRoot):
