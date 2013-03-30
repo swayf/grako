@@ -96,16 +96,6 @@ class FailedRef(FailedParseBase):
         return "could not resolve reference to rule '%s'" % self.name
 
 
-class FailedCut(FailedParse):
-    def __init__(self, buf, nested):
-        super(FailedCut, self).__init__(buf, nested.item)
-        self.nested = nested
-
-    @property
-    def message(self):
-        return self.nested.message
-
-
 class FailedChoice(FailedParse):
     @property
     def message(self):
