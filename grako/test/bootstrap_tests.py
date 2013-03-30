@@ -9,22 +9,22 @@ import os
 import json
 from grako.bootstrap import GrakoParser, GrakoGrammarGenerator
 
+
 def main():
     if not os.path.isdir('tmp'):
         os.mkdir('tmp')
     print('-' * 20, 'phase 0 - parse using the bootstrap grammar')
     text = open('etc/grako.ebnf').read()
-    g = GrakoParser('Grako')
+    g = GrakoParser('Grako', parseinfo=False)
     g.parse(text)
     open('tmp/0.ebnf', 'w').write(text)
 
     print('-' * 20, 'phase 1 - parse with parser generator')
     text = open('tmp/0.ebnf').read()
-    g = GrakoGrammarGenerator('Grako')
+    g = GrakoGrammarGenerator('Grako', parseinfo=False)
     g.parse(text)
     generated_grammar1 = str(g.ast['grammar'])
     open('tmp/1.ebnf', 'w').write(generated_grammar1)
-
 
     print('-' * 20, 'phase 2 - parse previous output with the parser generator')
     text = open('tmp/1.ebnf').read()
@@ -36,21 +36,19 @@ def main():
 
     print('-' * 20, 'phase 3 - repeat')
     text = open('tmp/2.ebnf').read()
-    g = GrakoGrammarGenerator('Grako')
-    g.parse(text)
-    generated_grammar3 = str(g.ast['grammar'])
-    open('tmp/3.ebnf', 'w').write(generated_grammar3)
-    assert generated_grammar3 == generated_grammar2
+    g = GrakoParser('Grako', parseinfo=False)
+    ast3 = g.parse(text)
+    open('tmp/3.ast', 'w').write(json.dumps(ast3, indent=2))
 
     print('-' * 20, 'phase 4 - repeat')
-    text = open('tmp/3.ebnf').read()
+    text = open('tmp/2.ebnf').read()
     g = GrakoGrammarGenerator('Grako')
     g.parse(text)
     parser = g.ast['grammar']
 #    pprint(parser.first_sets, indent=2, depth=3)
     generated_grammar4 = str(parser)
     open('tmp/4.ebnf', 'w').write(generated_grammar4)
-    assert generated_grammar4 == generated_grammar3
+    assert generated_grammar4 == generated_grammar2
 
     print('-' * 20, 'phase 5 - parse using the grammar model')
     text = open('tmp/4.ebnf').read()
