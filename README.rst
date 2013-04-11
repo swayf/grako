@@ -471,16 +471,13 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-- **1.3.0-rc.2**
-    * Ensure compatibility with Python_ 2.7.4 and 3.3.1.
-
-- **1.3.0-rc.1**
+- **1.3.0**
     * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
     * Make sure that *cut* actually applies to the nearest fork.
     * Finish aligning model parsing with generated code parsing. Performance should now favor model parsing (because less code means more CPU-cache hits), but model parsing doesn't yet provide for semantic actions.
     * Report all the rules missing in a grammar before aborting.
-    * Minor performance optimizations.
     * Align the sample *etc/grako.ebnf* grammar to the language parsed by the bootstrap parser.
+    * Ensure compatibility with Python_ 2.7.4 and 3.3.1.
     * Update credits.
 
 - **1.2.1**
