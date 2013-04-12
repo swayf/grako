@@ -551,6 +551,9 @@ class RuleGrammar(NamedGrammar):
                 node.add('parseinfo', ParseInfo(ctx._buffer, name, pos, ctx._pos))
 #            if self.ast_name:
 #                node = AST([(self.ast_name, node)])
+            semantic_rule = ctx._find_semantic_rule(name)
+            if semantic_rule:
+                node = semantic_rule(node)
         finally:
             ctx._pop_ast()
         result = (node, ctx.pos)
