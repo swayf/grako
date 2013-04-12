@@ -167,12 +167,6 @@ class Parser(ParseContext):
             raise FailedRef(self._buffer, name)
         return rule
 
-    def _find_semantic_rule(self, name):
-        result = getattr(self, name, None)
-        if result is None or not isinstance(result, type(self._find_rule)):
-            return None
-        return result
-
     def _eof(self):
         return self._buffer.atend()
 
