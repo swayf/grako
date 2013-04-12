@@ -7,7 +7,7 @@ to any position in the parsed text, and still recover accurate information
 about source lines and content.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-# FIXME: There could be a file buffer using random access
+# TODO: There could be a file buffer using random access
 import re as regexp
 import string
 from bisect import bisect as bisect
@@ -19,6 +19,7 @@ RETYPE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
 LineInfo = namedtuple('LineInfo', ['filename', 'line', 'col', 'start', 'text'])
+
 
 class Buffer(object):
     def __init__(self, text,
@@ -36,11 +37,13 @@ class Buffer(object):
         self.nameguard = nameguard
         self._fileinfo = self.get_fileinfo(text, filename)
         self._linecache = []
+        self._linecount = 0
         self._pos = 0
         self._len = 0
         self._preprocess()
         self._build_line_cache()
         self._len = len(self.text)
+        self._re_cache = {}
 
     def _preprocess(self):
         pass
@@ -140,10 +143,15 @@ class Buffer(object):
 
     def matchre(self, pattern, ignorecase=None):
         ignorecase = ignorecase if ignorecase is not None else self.ignorecase
+
         if isinstance(pattern, RETYPE):
             re = pattern
+        elif pattern in self._re_cache:
+            re = self._re_cache[pattern]
         else:
             re = regexp.compile(pattern, regexp.IGNORECASE if ignorecase else 0)
+            self._re_cache[re] = re
+
         matched = re.match(self.text, self.pos)
         if matched:
             token = matched.group()
@@ -159,9 +167,14 @@ class Buffer(object):
         for i, c in enumerate(self.text):
             if c == '\n':
                 n += 1
-                cache.append(PosLine(i , n))
+                cache.append(PosLine(i, n))
         cache.append(PosLine(len(self.text), n + 1))
         self._linecache = cache
+        self._linecount = n
+
+    @property
+    def linecount(self):
+        return self._linecount
 
     def line_info(self, pos=None):
         if pos is None:

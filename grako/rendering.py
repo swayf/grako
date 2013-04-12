@@ -8,6 +8,7 @@ import itertools
 import string
 from .util import trim, ustr, isiter, strtype, indent
 
+
 def render(item, join='', **fields):
     """ Render the given item
     """
@@ -29,8 +30,9 @@ class RenderingFormatter(string.Formatter):
             return super(RenderingFormatter, self).format_field(render(value), spec)
 
         ind, sep, fmt = spec.split(':')
-        if not fmt:
-            fmt = '%s'
+        if sep == '\\n':
+            sep = '\n'
+
         if not ind:
             ind = 0
             mult = 0
@@ -41,10 +43,14 @@ class RenderingFormatter(string.Formatter):
         ind = int(ind)
         mult = int(mult)
 
+        if not fmt:
+            fmt = '%s'
+
         if isiter(value):
             return indent(sep.join(fmt % render(v) for v in value), ind, mult)
         else:
             return indent(fmt % render(value), ind, mult)
+
 
 class Renderer(object):
     template = ''
@@ -62,7 +68,7 @@ class Renderer(object):
         pass
 
     def render(self, template=None, **fields):
-        fields.update({k:v for k, v in vars(self).items() if not k.startswith('_')})
+        fields.update({k: v for k, v in vars(self).items() if not k.startswith('_')})
 
         override = self.render_fields(fields)
         if template is None:
@@ -75,4 +81,3 @@ class Renderer(object):
             return self.formatter.format(trim(template), **fields)
         except KeyError as e:
             raise KeyError(str(e), type(self))
-

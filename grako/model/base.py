@@ -8,6 +8,7 @@ from ..rendering import Renderer
 
 EOLCOL = 50
 
+
 class Context(object):
     """ Context for source code generation.
 
@@ -21,7 +22,6 @@ class Context(object):
         self.buf = buf
         self._symbols = dict()
         self.__dict__.update(kwargs)
-
 
 
 class Node(Renderer):
@@ -57,7 +57,7 @@ class Node(Renderer):
     @property
     def text(self):
         if self.parseinfo:
-            return self.line_info.text
+            return self.line_info.text.strip('\n')
 
     def __str__(self):
         return self.render()

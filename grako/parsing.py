@@ -15,8 +15,12 @@ Parser.parse() will take the text to parse directly, or an instance of the
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 from . import buffering
-from .exceptions import *  # @UnusedWildImport
 from .contexts import ParseContext, ParseInfo
+from .exceptions import (FailedParse,
+                         FailedToken,
+                         FailedPattern,
+                         FailedRef,
+                         MissingSemanticFor)
 
 
 class AbstractParserMixin(object):
@@ -137,7 +141,6 @@ class Parser(ParseContext):
         self._add_cst_node(token)
         return token
 
-
     def _pattern(self, pattern, node_name=None, force_list=False):
         token = self._buffer.matchre(pattern)
         if token is None:
@@ -180,4 +183,3 @@ class Parser(ParseContext):
         self._next_token()
         if not self._buffer.atend():
             raise FailedParse(self._buffer, 'Expecting end of text.')
-

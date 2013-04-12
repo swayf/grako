@@ -10,6 +10,7 @@ from . import buffering
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
+
 class ParseContext(object):
     def __init__(self,
                  whitespace=None,
@@ -55,6 +56,10 @@ class ParseContext(object):
     @property
     def _pos(self):
         return self._buffer.pos
+
+    @property
+    def linecount(self):
+        return self._buffer.linecount
 
     def _goto(self, pos):
         self._buffer.goto(pos)
@@ -155,6 +160,15 @@ class ParseContext(object):
     def _cut(self):
         self._cut_stack[-1] = True
 
+        # Kota Mizushima et al say that we can throw away
+        # memos for previous positions in the buffer.
+        #   http://goo.gl/VaGpj
+        cutpos = self._pos
+        cache = self._memoization_cache
+        cutkeys = [(p, n) for p, n in cache.keys() if p < cutpos]
+        for key in cutkeys:
+            del cache[key]
+
     def _push_cut(self):
         self._cut_stack.append(False)
 
@@ -213,11 +227,22 @@ class ParseContext(object):
             raise
         except FailedParse as e:
             if self._is_cut_set():
-                self._error(e, FailedCut)
+                raise FailedCut(e)
         finally:
             self._pop_cut()
 
-    _optional = _option
+    @contextmanager
+    def _choice(self):
+        try:
+            yield
+        except FailedCut as e:
+            raise e.nested
+
+    @contextmanager
+    def _optional(self):
+        with self._choice():
+            with self._option():
+                yield
 
     @contextmanager
     def _group(self):
@@ -246,12 +271,11 @@ class ParseContext(object):
         try:
             yield
         except FailedParse:
-            self._goto(p)
             pass
         else:
-            self._goto(p)
             self._error('', etype=FailedLookahead)
         finally:
+            self._goto(p)
             self._pop_ast()  # simply discard
 
     def _repeater(self, f):
@@ -259,17 +283,19 @@ class ParseContext(object):
         while True:
             self._push_cut()
             try:
+                p = self._pos
                 with self._try():
                     value = f()
                 if value is not None:
                     result.append(value)
+                if self._pos == p:
+                    self._error('empty closure')
             except FailedCut:
                 raise
             except FailedParse as e:
                 if self._is_cut_set():
-                    self._error(e, FailedCut)
-                else:
-                    return result
+                    raise FailedCut(e)
+                return result
             finally:
                 self._pop_cut()
 
@@ -286,4 +312,3 @@ class ParseContext(object):
             self._pop_cst()
         self._add_cst_node(cst)
         return result
-

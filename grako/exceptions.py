@@ -10,6 +10,7 @@ exception system to backtrack).
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+
 class GrakoException(Exception):
     pass
 
@@ -96,8 +97,9 @@ class FailedRef(FailedParseBase):
 
 
 class FailedCut(FailedParse):
-    def __init__(self, buf, nested):
-        super(FailedCut, self).__init__(buf, nested.item)
+    def __init__(self, nested):
+        super(FailedCut, self).__init__(nested.buf, nested.item)
+        self.pos = nested.pos
         self.nested = nested
 
     @property
@@ -121,4 +123,3 @@ class FailedLookahead(FailedParse):
     @property
     def message(self):
         return 'failed lookahead'
-
