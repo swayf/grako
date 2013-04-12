@@ -25,7 +25,7 @@ from .exceptions import (FailedParse,
 
 class AbstractParserMixin(object):
     def _find_semantic_rule(self, name):
-        result = getattr(self, name, None)
+        result = super(AbstractParserMixin, self)._find_semantic_rule(name)
         if result is None or not isinstance(result, type(self._find_rule)):
             raise MissingSemanticFor(name)
         return result
