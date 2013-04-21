@@ -10,7 +10,7 @@ setup(
     scripts=['scripts/grako'],
     url='http://bitbucket.org/apalala/grako',
     license='GNU General Public License v3 (GPLv3)',
-    description='EBNF to PEG parser generator.',
+    description='An generator of PEG/Packrat parsers from EBNF grammars.',
     long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
