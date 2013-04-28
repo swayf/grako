@@ -471,6 +471,10 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
+- **tip**
+    * Semantic actions can now be implemented by a delegate, so translations can be done using the grammar model, without generating code for the parser. For compatibility with previous versions, the default delegate is ``self``. This feature is also a step towards making it easier to have multiple translation targets for the same grammar.
+    * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
+
 - **1.3.0**
     * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
     * Make sure that *cut* actually applies to the nearest fork.
