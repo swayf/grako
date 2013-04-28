@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
-import re
 from contextlib import contextmanager
 from collections import namedtuple
 from .ast import AST
@@ -18,23 +17,15 @@ class ParseContext(object):
     def __init__(self,
                  buffer=None,
                  semantics=None,
-                 whitespace=None,
-                 comments_re=None,
-                 ignorecase=False,
                  parseinfo=False,
                  trace=False,
-                 nameguard=True,
                  encoding='utf-8'):
         super(ParseContext, self).__init__()
 
         self._buffer = buffer
         self.semantics = semantics if semantics is not None else self
-        self.whitespace = whitespace
-        self.comments_re = comments_re
-        self.ignorecase = ignorecase
         self.encoding = encoding
         self.parseinfo = parseinfo
-        self.nameguard = nameguard
 
         self._ast_stack = []
         self._concrete_stack = [None]
@@ -74,21 +65,8 @@ class ParseContext(object):
     def _goto(self, pos):
         self._buffer.goto(pos)
 
-    def _eatwhitespace(self):
-        self._buffer.eatwhitespace()
-
-    def _eatcomments(self):
-        if self.comments_re is not None:
-            opts = re.MULTILINE if '\n' in self.comments_re else 0
-            while self._buffer.matchre(self.comments_re, opts):
-                pass
-
     def _next_token(self):
-        p = None
-        while self._pos != p:
-            p = self._pos
-            self._eatwhitespace()
-            self._eatcomments()
+        self._buffer.next_token()
 
     @property
     def ast(self):

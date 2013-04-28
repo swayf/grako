@@ -34,16 +34,18 @@ class CheckSemanticsMixin(object):
 
 class Parser(ParseContext):
 
-    def parse(self, text, rule_name, filename=None, semantics=None, **kwargs):
+    def parse(self,
+              text,
+              rule_name,
+              filename=None,
+              semantics=None,
+              **kwargs):
         try:
             if isinstance(text, buffering.Buffer):
                 buffer = text
             else:
                 buffer = buffering.Buffer(text,
                                           filename=filename,
-                                          whitespace=self.whitespace,
-                                          ignorecase=self.ignorecase,
-                                          nameguard=self.nameguard,
                                           **kwargs)
             self._reset_context(buffer, semantics=semantics)
             self._push_ast()

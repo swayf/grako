@@ -7,7 +7,7 @@ import sys
 sys.path.append('tmp')
 import os
 import json
-from grako.bootstrap import GrakoParser, GrakoGrammarGenerator
+from grako.bootstrap import GrakoParser, GrakoGrammarGenerator, COMMENTS_RE
 
 
 def main():
@@ -81,7 +81,7 @@ def main():
     assert generated_grammar9 == generated_grammar1
 
     print('-' * 20, 'phase 10 - Parse with a model using a semantics')
-    g10 = g9.parse(text, semantics=semantics, comments_re=semantics.comments_re)
+    g10 = g9.parse(text, semantics=semantics, comments_re=COMMENTS_RE)
     open('tmp/10.ebnf', 'w').write(str(g10))
     gencode10 = g10.render()
     open('tmp/10.py', 'w').write(gencode10)

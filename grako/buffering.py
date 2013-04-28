@@ -25,6 +25,7 @@ class Buffer(object):
     def __init__(self, text,
                  filename=None,
                  whitespace=None,
+                 comments_re=None,
                  ignorecase=False,
                  trace=False,
                  nameguard=True,
@@ -33,6 +34,7 @@ class Buffer(object):
         self.text = text
         self.filename = filename if filename is not None else ''
         self.whitespace = set(whitespace if whitespace is not None else string.whitespace)
+        self.comments_re = comments_re
         self.ignorecase = ignorecase
         self.trace = trace
         self.nameguard = nameguard
@@ -105,6 +107,19 @@ class Buffer(object):
         while p < le and self.text[p] in ws:
             p += 1
         self._pos = p
+
+    def eatcomments(self):
+        if self.comments_re is not None:
+            opts = regexp.MULTILINE if '\n' in self.comments_re else 0
+            while self.matchre(self.comments_re, opts):
+                pass
+
+    def next_token(self):
+        p = None
+        while self._pos != p:
+            p = self._pos
+            self.eatwhitespace()
+            self.eatcomments()
 
     def skip_to(self, c):
         p = self._pos

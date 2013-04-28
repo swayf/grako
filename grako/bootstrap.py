@@ -14,6 +14,7 @@ in the .grammars module.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 from collections import OrderedDict
+from .buffering import Buffer
 from .parsing import Parser
 from .util import simplify
 from .grammars import (ChoiceGrammar,
@@ -45,14 +46,17 @@ COMMENTS_RE = r'\(\*(?:.|\n)*?\*\)'
 class GrakoParserRoot(Parser):
 
     def __init__(self, grammar_name, trace=False, **kwargs):
-        super(GrakoParserRoot, self).__init__(comments_re=COMMENTS_RE,
-                                              ignorecase=True,
-                                              trace=trace,
+        super(GrakoParserRoot, self).__init__(trace=trace,
                                               **kwargs)
         self.grammar_name = grammar_name
 
-    def parse(self, text, rule='grammar', filename=None):
-        return super(GrakoParserRoot, self).parse(text, rule, filename=filename)
+    def parse(self, text, rule='grammar', filename=None, **kwargs):
+        if not isinstance(text, Buffer):
+            text = Buffer(text, comments_re=COMMENTS_RE, **kwargs)
+        return super(GrakoParserRoot, self).parse(text,
+                                                  rule,
+                                                  filename=filename,
+                                                  **kwargs)
 
     def _void_(self):
         self._token('()', 'void')
