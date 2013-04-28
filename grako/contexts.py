@@ -13,7 +13,7 @@ ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 class ParseContext(object):
     def __init__(self,
-                 delegate=None,
+                 semantics=None,
                  whitespace=None,
                  comments_re=None,
                  ignorecase=False,
@@ -24,7 +24,7 @@ class ParseContext(object):
                  bufferClass=buffering.Buffer):
         super(ParseContext, self).__init__()
 
-        self.delegate = delegate if delegate is not None else self
+        self.semantics = semantics if semantics else self
         self.whitespace = whitespace
         self.comments_re = comments_re
         self.ignorecase = ignorecase
@@ -44,13 +44,15 @@ class ParseContext(object):
             self._trace_event = lambda x: ()
             self._trace_match = lambda x, y: ()
 
-    def _reset_context(self):
+    def _reset_context(self, semantics=None):
         self._buffer = None
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
+        if semantics is not None:
+            self.semantics = semantics
 
     def goto(self, pos):
         self._buffer.goto(pos)
@@ -187,7 +189,9 @@ class ParseContext(object):
         return None
 
     def _find_semantic_rule(self, name):
-        result = getattr(self.delegate, name, None)
+        if self.semantics is None:
+            return None
+        result = getattr(self.semantics, name, None)
         if result is None or not isinstance(result, type(self._find_semantic_rule)):
             return None
         return result

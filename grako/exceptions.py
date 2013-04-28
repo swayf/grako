@@ -31,6 +31,10 @@ class ParseError(GrakoException):
     pass
 
 
+class FailedSemantics(ParseError):
+    pass
+
+
 class FailedParseBase(ParseError):
     def __init__(self, buf, item):
         self.buf = buf
@@ -111,12 +115,6 @@ class FailedChoice(FailedParse):
     @property
     def message(self):
         return 'no viable option'
-
-
-class FailedReservedWord(FailedParse):
-    @property
-    def message(self):
-        return "'%s' is a reserved word" % self.item
 
 
 class FailedLookahead(FailedParse):

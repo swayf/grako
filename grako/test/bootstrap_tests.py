@@ -60,7 +60,7 @@ def main():
     open('tmp/gencode6.py', 'w').write(gencode6)
 
     print('-' * 20, 'phase 7 - import generated code')
-    from gencode6 import GrakoParserBase as GenParser  # @UnresolvedImport
+    from gencode6 import GrakoParser as GenParser  # @UnresolvedImport
 
     print('-' * 20, 'phase 8 - compile using generated code')
     parser = GenParser(trace=False)
@@ -72,16 +72,16 @@ def main():
     assert ast5 == ast8
 #    assert json8 == open('etc/check.js').read()
 
-    print('-' * 20, 'phase 9 - Generate parser with delegate')
+    print('-' * 20, 'phase 9 - Generate parser with semantics')
     text = open('etc/grako.ebnf').read()
-    delegate = GrakoGrammarGenerator('Grako')
-    g9 = delegate.parse(text)
+    semantics = GrakoGrammarGenerator('Grako')
+    g9 = semantics.parse(text)
     generated_grammar9 = str(g9)
     open('tmp/9.ebnf', 'w').write(generated_grammar9)
     assert generated_grammar9 == generated_grammar1
 
-    print('-' * 20, 'phase 10 - Parse with a model using a delegate')
-    g10 = g9.parse(text, delegate=delegate, comments_re=delegate.comments_re)
+    print('-' * 20, 'phase 10 - Parse with a model using a semantics')
+    g10 = g9.parse(text, semantics=semantics, comments_re=semantics.comments_re)
     open('tmp/10.ebnf', 'w').write(str(g10))
     gencode10 = g10.render()
     open('tmp/10.py', 'w').write(gencode10)

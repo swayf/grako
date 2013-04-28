@@ -658,22 +658,22 @@ class Grammar(Renderer):
 
                 __version__ = '{version}'
 
-                class {name}ParserRoot(Parser):
+                class {name}Parser(Parser):
                 {rules}
 
 
-                class Abstract{name}Parser(AbstractParserMixin, {name}ParserRoot):
+                class {name}SemanticParser(CheckSemanticsMixin, {name}Parser):
                     pass
 
 
-                class {name}ParserBase({name}ParserRoot):
+                class {name}Semantics(object):
                 {abstract_rules}
 
                 def main(filename, startrule):
                     import json
                     with open(filename) as f:
                         text = f.read()
-                    parser = {name}ParserBase(parseinfo=False)
+                    parser = {name}Parser(parseinfo=False)
                     ast = parser.parse(text, startrule, filename=filename)
                     print('AST:')
                     print(ast)
@@ -686,7 +686,7 @@ class Grammar(Renderer):
                     import sys
                     if '-l' in sys.argv:
                         print('Rules:')
-                        for r in {name}ParserBase.rule_list():
+                        for r in {name}Parser.rule_list():
                             print(r)
                         print()
                     elif len(sys.argv) == 3:
