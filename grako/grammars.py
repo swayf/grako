@@ -12,8 +12,7 @@ error messages when a choice fails to parse. FOLLOW(k) and LA(k) should be
 computed, but they are not.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-import logging
-log = logging.getLogger('grako.grammars')
+import sys
 import re
 from copy import deepcopy
 from keyword import iskeyword
@@ -491,7 +490,7 @@ class RuleRefGrammar(_Grammar):
 
     def _validate(self, rules):
         if self.name not in rules:
-            log.error("Reference to unknown rule '%s'." % self.name)
+            print("Reference to unknown rule '%s'." % self.name, file=sys.stderr)
             return False
         return True
 
@@ -595,13 +594,12 @@ class Grammar(Renderer):
         assert isinstance(rules, list), str(rules)
         self.name = name
         self.rules = rules
-        if not self._validate():
+        if not self._validate({r.name for r in self.rules}):
             raise GrammarError('Unknown rules, no parser generated.')
         self._first_sets = self._calc_first_sets()
 
-    def _validate(self):
-        ruledict = {r.name for r in self.rules}
-        return all(rule._validate(ruledict) for rule in self.rules)
+    def _validate(self, ruleset):
+        return all(rule._validate(ruleset) for rule in self.rules)
 
     @property
     def first_sets(self):

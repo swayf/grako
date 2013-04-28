@@ -16,7 +16,7 @@ grammar
 
 rule
     =
-    word '=' >> rhs:expre ('.' | ';') >>
+    name:word '=' >> rhs:expre ('.' | ';') >>
     ;
 
 expre
