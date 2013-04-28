@@ -36,16 +36,16 @@ class Parser(ParseContext):
 
     def parse(self, text, rule_name, filename=None, semantics=None, **kwargs):
         try:
-            self._reset_context(semantics=semantics)
             if isinstance(text, buffering.Buffer):
-                self._buffer = text
+                buffer = text
             else:
-                self._buffer = self.bufferClass(text,
-                                                filename=filename,
-                                                whitespace=self.whitespace,
-                                                ignorecase=self.ignorecase,
-                                                nameguard=self.nameguard,
-                                                **kwargs)
+                buffer = buffering.Buffer(text,
+                                          filename=filename,
+                                          whitespace=self.whitespace,
+                                          ignorecase=self.ignorecase,
+                                          nameguard=self.nameguard,
+                                          **kwargs)
+            self._reset_context(buffer, semantics=semantics)
             self._push_ast()
             return self._call(rule_name, rule_name)
         finally:

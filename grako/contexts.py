@@ -8,6 +8,10 @@ from .ast import AST
 from .exceptions import FailedParse, FailedCut, FailedLookahead
 from . import buffering
 
+
+__all__ = ['ParseInfo', 'ParseContext']
+
+
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 
@@ -20,17 +24,15 @@ class ParseContext(object):
                  parseinfo=False,
                  trace=False,
                  nameguard=True,
-                 encoding='utf-8',
-                 bufferClass=buffering.Buffer):
+                 encoding='utf-8'):
         super(ParseContext, self).__init__()
 
-        self.semantics = semantics if semantics else self
+        self.semantics = semantics if semantics is not None else self
         self.whitespace = whitespace
         self.comments_re = comments_re
         self.ignorecase = ignorecase
         self.encoding = encoding
         self.parseinfo = parseinfo
-        self.bufferClass = bufferClass
         self.nameguard = nameguard
 
         self._buffer = None
@@ -44,8 +46,8 @@ class ParseContext(object):
             self._trace_event = lambda x: ()
             self._trace_match = lambda x, y: ()
 
-    def _reset_context(self, semantics=None):
-        self._buffer = None
+    def _reset_context(self, buffer=None, semantics=None):
+        self._buffer = buffer
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
@@ -53,6 +55,10 @@ class ParseContext(object):
         self._memoization_cache = dict()
         if semantics is not None:
             self.semantics = semantics
+        if self.semantics is not None:
+            set_buffer = getattr(self.semantics, 'set_buffer', None)
+            if set_buffer is not None:
+                set_buffer(buffer)
 
     def goto(self, pos):
         self._buffer.goto(pos)
