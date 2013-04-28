@@ -2,12 +2,13 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
 import grako
-import regexp_parser
+import regex_parser
 
 PARSER_FILENAME = 'genparser.py'
 
+
 def main():
-    grammar = regexp_parser.translate('(a|b)*')
+    grammar = regex_parser.translate('(a|b)*')
     model = grako.genmodel('Regexp', grammar)
     model.parse('aaabbaba', 'S0')
     try:

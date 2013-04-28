@@ -20,12 +20,13 @@ from .exceptions import (FailedParse,
                          FailedToken,
                          FailedPattern,
                          FailedRef,
+                         FailedSemantics,
                          MissingSemanticFor)
 
 
-class AbstractParserMixin(object):
+class CheckSemanticsMixin(object):
     def _find_semantic_rule(self, name):
-        result = super(AbstractParserMixin, self)._find_semantic_rule(name)
+        result = super(CheckSemanticsMixin, self)._find_semantic_rule(name)
         if result is None or not isinstance(result, type(self._find_rule)):
             raise MissingSemanticFor(name)
         return result
@@ -33,18 +34,20 @@ class AbstractParserMixin(object):
 
 class Parser(ParseContext):
 
-    def parse(self, text, rule_name, filename=None, **kwargs):
+    def parse(self,
+              text,
+              rule_name,
+              filename=None,
+              semantics=None,
+              **kwargs):
         try:
-            self._reset_context()
             if isinstance(text, buffering.Buffer):
-                self._buffer = text
+                buffer = text
             else:
-                self._buffer = self.bufferClass(text,
-                                                filename=filename,
-                                                whitespace=self.whitespace,
-                                                ignorecase=self.ignorecase,
-                                                nameguard=self.nameguard,
-                                                **kwargs)
+                buffer = buffering.Buffer(text,
+                                          filename=filename,
+                                          **kwargs)
+            self._reset_context(buffer, semantics=semantics)
             self._push_ast()
             return self._call(rule_name, rule_name)
         finally:
@@ -110,7 +113,10 @@ class Parser(ParseContext):
                 node.add('parseinfo', ParseInfo(self._buffer, name, pos, self._pos))
             semantic_rule = self._find_semantic_rule(name)
             if semantic_rule:
-                node = semantic_rule(node)
+                try:
+                    node = semantic_rule(node)
+                except FailedSemantics as e:
+                    self._error(str(e), FailedParse)
             result = (node, self._pos)
 
             cache[key] = result

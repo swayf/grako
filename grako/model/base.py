@@ -17,9 +17,8 @@ class Context(object):
         that are used anonymously.
     """
 
-    def __init__(self, buf, **kwargs):
+    def __init__(self, **kwargs):
         super(Context, self).__init__()
-        self.buf = buf
         self._symbols = dict()
         self.__dict__.update(kwargs)
 
@@ -52,7 +51,7 @@ class Node(Renderer):
     @property
     def line_info(self):
         if self.parseinfo:
-            return self.ctx.buf.line_info(self.parseinfo.pos)
+            return self.parseinfo.buffer.line_info(self.parseinfo.pos)
 
     @property
     def text(self):

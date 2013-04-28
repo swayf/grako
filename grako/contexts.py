@@ -1,39 +1,32 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
-import re
 from contextlib import contextmanager
 from collections import namedtuple
 from .ast import AST
 from .exceptions import FailedParse, FailedCut, FailedLookahead
-from . import buffering
+
+
+__all__ = ['ParseInfo', 'ParseContext']
+
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 
 class ParseContext(object):
     def __init__(self,
-                 delegate=None,
-                 whitespace=None,
-                 comments_re=None,
-                 ignorecase=False,
+                 buffer=None,
+                 semantics=None,
                  parseinfo=False,
                  trace=False,
-                 nameguard=True,
-                 encoding='utf-8',
-                 bufferClass=buffering.Buffer):
+                 encoding='utf-8'):
         super(ParseContext, self).__init__()
 
-        self.delegate = delegate if delegate is not None else self
-        self.whitespace = whitespace
-        self.comments_re = comments_re
-        self.ignorecase = ignorecase
+        self._buffer = buffer
+        self.semantics = semantics if semantics is not None else self
         self.encoding = encoding
         self.parseinfo = parseinfo
-        self.bufferClass = bufferClass
-        self.nameguard = nameguard
 
-        self._buffer = None
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
@@ -44,13 +37,19 @@ class ParseContext(object):
             self._trace_event = lambda x: ()
             self._trace_match = lambda x, y: ()
 
-    def _reset_context(self):
-        self._buffer = None
+    def _reset_context(self, buffer=None, semantics=None):
+        self._buffer = buffer
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
+        if semantics is not None:
+            self.semantics = semantics
+        if self.semantics is not None:
+            set_buffer = getattr(self.semantics, 'set_buffer', None)
+            if set_buffer is not None:
+                set_buffer(buffer)
 
     def goto(self, pos):
         self._buffer.goto(pos)
@@ -66,21 +65,8 @@ class ParseContext(object):
     def _goto(self, pos):
         self._buffer.goto(pos)
 
-    def _eatwhitespace(self):
-        self._buffer.eatwhitespace()
-
-    def _eatcomments(self):
-        if self.comments_re is not None:
-            opts = re.MULTILINE if '\n' in self.comments_re else 0
-            while self._buffer.matchre(self.comments_re, opts):
-                pass
-
     def _next_token(self):
-        p = None
-        while self._pos != p:
-            p = self._pos
-            self._eatwhitespace()
-            self._eatcomments()
+        self._buffer.next_token()
 
     @property
     def ast(self):
@@ -187,7 +173,9 @@ class ParseContext(object):
         return None
 
     def _find_semantic_rule(self, name):
-        result = getattr(self.delegate, name, None)
+        if self.semantics is None:
+            return None
+        result = getattr(self.semantics, name, None)
         if result is None or not isinstance(result, type(self._find_semantic_rule)):
             return None
         return result

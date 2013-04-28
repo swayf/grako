@@ -2,6 +2,7 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from grako.rendering import Renderer
 
+
 class Model(Renderer):
     def __init__(self):
         self.n = None
@@ -18,13 +19,14 @@ class Model(Renderer):
 
         '''
 
-class Regexp(Model):
+
+class Regex(Model):
     def __init__(self, exp):
-        super(Regexp, self).__init__()
+        super(Regex, self).__init__()
         self.exp = exp
 
     def _set_rule_numbers(self, s):
-        s = super(Regexp, self)._set_rule_numbers(s)
+        s = super(Regex, self)._set_rule_numbers(s)
         return self.exp._set_rule_numbers(s)
 
     def render_fields(self, fields):
@@ -35,7 +37,6 @@ class Regexp(Model):
 
         {exp}
         '''
-
 
 
 class Choice(Model):
@@ -101,6 +102,7 @@ class Closure(Model):
 
             '''
 
+
 class Literal(Model):
     def __init__(self, exp):
         super(Literal, self).__init__()
@@ -120,4 +122,3 @@ class Empty(Model):
             S{n} = () .
 
             '''
-
