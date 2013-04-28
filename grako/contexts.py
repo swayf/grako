@@ -6,7 +6,6 @@ from contextlib import contextmanager
 from collections import namedtuple
 from .ast import AST
 from .exceptions import FailedParse, FailedCut, FailedLookahead
-from . import buffering
 
 
 __all__ = ['ParseInfo', 'ParseContext']
@@ -17,6 +16,7 @@ ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 class ParseContext(object):
     def __init__(self,
+                 buffer=None,
                  semantics=None,
                  whitespace=None,
                  comments_re=None,
@@ -27,6 +27,7 @@ class ParseContext(object):
                  encoding='utf-8'):
         super(ParseContext, self).__init__()
 
+        self._buffer = buffer
         self.semantics = semantics if semantics is not None else self
         self.whitespace = whitespace
         self.comments_re = comments_re
@@ -35,7 +36,6 @@ class ParseContext(object):
         self.parseinfo = parseinfo
         self.nameguard = nameguard
 
-        self._buffer = None
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []

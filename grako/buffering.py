@@ -27,7 +27,8 @@ class Buffer(object):
                  whitespace=None,
                  ignorecase=False,
                  trace=False,
-                 nameguard=True):
+                 nameguard=True,
+                 **kwargs):
         self.original_text = text
         self.text = text
         self.filename = filename if filename is not None else ''

@@ -42,10 +42,12 @@ def urepr(obj):
 
 
 class ModelContext(ParseContext):
-    def __init__(self, rules, text, filename, trace, **kwargs):
-        super(ModelContext, self).__init__(trace=trace, **kwargs)
+    def __init__(self, rules, buffer=None, semantics=None, trace=False, **kwargs):
+        super(ModelContext, self).__init__(buffer=buffer,
+                                           semantics=semantics,
+                                           trace=trace,
+                                           **kwargs)
         self.rules = {rule.name: rule for rule in rules}
-        self._buffer = Buffer(text, filename=filename)
         self._buffer.goto(0)
 
     @property
@@ -618,8 +620,19 @@ class Grammar(Renderer):
             rule._first_set = F[rule.name]
         return F
 
-    def parse(self, text, start=None, filename=None, trace=False, **kwargs):
-        ctx = ModelContext(self.rules, text, filename, trace=trace, **kwargs)
+    def parse(self, text,
+                    start=None,
+                    filename=None,
+                    semantics=None,
+                    trace=False,
+                    **kwargs):
+        if not isinstance(text, Buffer):
+            text = Buffer(text, filename=filename, **kwargs)
+        ctx = ModelContext(self.rules,
+                           buffer=text,
+                           semantics=semantics,
+                           trace=trace,
+                           **kwargs)
         start_rule = ctx._find_rule(start) if start else self.rules[0]
         with ctx._choice():
             return start_rule.parse(ctx)
