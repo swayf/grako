@@ -5,6 +5,7 @@ the described language.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 from . import tool
+from .exceptions import FailedParse
 
 genmodel = tool.genmodel
 gencode = tool.gencode
