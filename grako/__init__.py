@@ -6,6 +6,9 @@ the described language.
 from __future__ import print_function, division, absolute_import, unicode_literals
 from . import tool
 
+genmodel = tool.genmodel
+gencode = tool.gencode
+
 
 def main():
     tool.main()
