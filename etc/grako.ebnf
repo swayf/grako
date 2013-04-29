@@ -71,7 +71,7 @@ subexp
 
 repeat
     =
-    '{' >> repeat:expre '}' >> plus:['-' | '+'] >>
+    '{' >> repeat:expre '}' >> (plus:['-' | '+'] | ['*']) >>
     ;
 
 optional
