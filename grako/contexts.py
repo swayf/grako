@@ -19,7 +19,8 @@ class ParseContext(object):
                  semantics=None,
                  parseinfo=False,
                  trace=False,
-                 encoding='utf-8'):
+                 encoding='utf-8',
+                 **kwargs):
         super(ParseContext, self).__init__()
 
         self._buffer = buffer

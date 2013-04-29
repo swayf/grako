@@ -47,6 +47,7 @@ class Parser(ParseContext):
                 buffer = buffering.Buffer(text,
                                           filename=filename,
                                           **kwargs)
+            self.parseinfo = kwargs.pop('parseinfo', self.parseinfo)
             self._reset_context(buffer, semantics=semantics)
             self._push_ast()
             return self._call(rule_name, rule_name)
