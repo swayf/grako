@@ -334,7 +334,7 @@ class GrakoSemantics(object):
         return ast
 
     def repeat(self, ast):
-        if 'plus' in ast:
+        if ast.plus:
             return RepeatOneGrammar(ast.repeat)
         return RepeatGrammar(ast.repeat)
 
