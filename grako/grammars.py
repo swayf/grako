@@ -25,6 +25,7 @@ from .exceptions import (FailedParse,
                          FailedToken,
                          FailedPattern,
                          FailedRef,
+                         FailedSemantics,
                          GrammarError)
 
 
@@ -554,7 +555,10 @@ class RuleGrammar(NamedGrammar):
 #                node = AST([(self.ast_name, node)])
             semantic_rule = ctx._find_semantic_rule(name)
             if semantic_rule:
-                node = semantic_rule(node)
+                try:
+                    node = semantic_rule(node)
+                except FailedSemantics as e:
+                    ctx._error(str(e), FailedParse)
         finally:
             ctx._pop_ast()
         result = (node, ctx.pos)
