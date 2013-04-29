@@ -203,7 +203,7 @@ class LookaheadGrammar(_DecoratorGrammar):
 
     def parse(self, ctx):
         with ctx._if():
-            super(LookaheadNotGrammar, self).parse(ctx)
+            super(LookaheadGrammar, self).parse(ctx)
 
     template = '''\
                 with self._if():
