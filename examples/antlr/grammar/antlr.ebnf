@@ -177,13 +177,19 @@ atom
     =
     ['^'|'!']
     @(
-      negative
+      eof
+    | negative
     | syntactic_predicate
     | subexp
     | range
     | terminal
     | non_terminal
     )
+    ;
+
+eof
+    =
+    'EOF'
     ;
 
 range
