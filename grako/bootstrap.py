@@ -57,17 +57,20 @@ class GrakoParserBase(Parser):
         self._token('()', 'void')
 
     def _token_(self):
+        self._call('TOKEN')
+
+    def _TOKEN_(self):
         with self._option():
             self._token("'")
             self._cut()
-            self._pattern(r"(?:[^'\\]|\\')*", '@')
+            self._pattern(r"(?:[^'\\\n]|\\'|\\\\)*", '@')
             self._token("'")
             return
 
         with self._option():
             self._token('"')
             self._cut()
-            self._pattern(r'(?:[^"\\]|\\")*', '@')
+            self._pattern(r'(?:[^"\\\n]|\\"|\\\\)*', '@')
             self._token('"')
             return
 
@@ -83,6 +86,9 @@ class GrakoParserBase(Parser):
         self._call('word')
 
     def _pattern_(self):
+        self._call('PATTERN')
+
+    def _PATTERN_(self):
         self._token('?/')
         self._cut()
         self._pattern(r'(.*?)(?=/\?)', '@')

@@ -3,7 +3,8 @@ include *.rst
 includee Makefile
 include etc/grako.ebnf
 recursive-include examples *
+recursive-include examples/antlr *
 recursive-exclude examples *.pyc
 recursive-exclude examples genparser.py
 recursive-exclude examples parser_base.py
-global exclude *.pyc 
+global exclude *.pyc

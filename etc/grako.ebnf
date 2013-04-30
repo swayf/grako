@@ -120,17 +120,17 @@ cut
 
 token
     =
-    dqstring | sqstring
+    DQSTRING | SQSTRING
     ;
 
-dqstring
+DQSTRING
     =
-    '"' >> @?/([^"]|\\")*/? '"'
+    '"' >> @?/([^"\\\n]|\\"|\\\\)*/? '"'
     ;
 
-sqstring
+SQSTRING
     =
-    "'" >> @?/([^']|\\')*/? "'"
+    "'" >> @?/([^'\\\n]|\\'|\\\\)*/? "'"
     ;
 
 word
@@ -139,6 +139,11 @@ word
     ;
 
 pattern
+    =
+    PATTERN
+    ;
+
+PATTERN
     =
     '?/' >> @?/(.*?)(?=/\?)/? '/?'
     ;

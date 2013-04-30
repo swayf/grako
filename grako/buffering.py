@@ -198,7 +198,9 @@ class Buffer(object):
         n = bisect(self._linecache, PosLine(pos, 0))
         start, line = self._linecache[n - 1]
         col = pos - start - 1
-        text = self.text[start:self._linecache[n].pos]
+        start = max(0, start)
+        end = max(start, self._linecache[n].pos)
+        text = self.text[start:end]
         return LineInfo(self.filename, line, col, start, text)
 
     def get_line(self, n=None):

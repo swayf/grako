@@ -21,12 +21,14 @@ class ParseContext(object):
                  parseinfo=False,
                  trace=False,
                  encoding='utf-8',
+                 comments_re=None,
                  **kwargs):
         super(ParseContext, self).__init__()
 
         self._buffer = buffer
         self.semantics = semantics if semantics is not None else self
         self.encoding = encoding
+        self.comments_re = comments_re
         self.parseinfo = parseinfo
 
         self._ast_stack = []
