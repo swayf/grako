@@ -409,9 +409,7 @@ License
 .. _ResQSoft:  http://www.resqsoft.com/
 .. _`Juancarlo Añez`: mailto:apalala@gmail.com
 
-You may use the tool under the terms of the `GNU General Public License (GPL) version 3`_ as described in the enclosed **LICENSE.txt** file.
-
-.. _`GNU General Public License (GPL) version 3`:  http://www.gnu.org/licenses/gpl.html
+You may use the tool under the terms of the `BSD-style License` as described in the enclosed **LICENSE.txt** file.
 
 *If your project requires different licensing* please contact
 `info@resqsoft.com`_.
