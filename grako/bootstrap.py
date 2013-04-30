@@ -16,7 +16,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from collections import OrderedDict
 from .buffering import Buffer
 from .parsing import Parser
-from .util import simplify
+from .util import simplify_list
 from .grammars import (ChoiceGrammar,
                        CutGrammar,
                        EOFGrammar,
@@ -279,17 +279,17 @@ class GrakoParserBase(Parser):
 class GrakoParser(GrakoParserBase):
 
     def subexp(self, ast):
-        return simplify(ast.exp)
+        return simplify_list(ast.exp)
 
     def element(self, ast):
-        return simplify(ast)
+        return simplify_list(ast)
 
     def sequence(self, ast):
-        return simplify(ast.sequence)
+        return simplify_list(ast.sequence)
 
     def choice(self, ast):
         if len(ast.options) == 1:
-            return simplify(ast.options)
+            return simplify_list(ast.options)
         return ast
 
 
@@ -372,7 +372,7 @@ class GrakoSemantics(object):
         seq = ast.sequence
         assert isinstance(seq, list), str(seq)
         if len(seq) == 1:
-            return simplify(seq)
+            return simplify_list(seq)
         return SequenceGrammar(seq)
 
     def choice(self, ast):

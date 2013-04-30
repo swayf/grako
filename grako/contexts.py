@@ -4,6 +4,7 @@ import sys
 from functools import wraps
 from contextlib import contextmanager
 from collections import namedtuple
+from .util import to_list
 from .ast import AST
 from .exceptions import FailedParse, FailedCut, FailedLookahead
 
@@ -308,11 +309,7 @@ class ParseContext(object):
             with self._try():
                 one = [f()] if plus else []
             result = one + self._repeater(f)
-            cst = self.cst
-            if cst is None:
-                cst = []
-            elif not isinstance(cst, list):
-                cst = [cst]
+            cst = to_list(self.cst)
         finally:
             self._pop_cst()
         self._add_cst_node(cst)

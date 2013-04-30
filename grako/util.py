@@ -4,12 +4,21 @@ import sys
 import collections
 
 
-__all__ = ['simplify', 'trim', 'indent']
+__all__ = ['simplify_list', 'trim', 'indent']
 
 if sys.version_info[0] >= 3:
     strtype = str  # @ReservedAssignmet
 else:
     strtype = basestring
+
+
+def to_list(o):
+    if o is None:
+        return []
+    elif isinstance(o, list):
+        return o
+    else:
+        return [o]
 
 
 def ustr(s):
@@ -19,9 +28,9 @@ def ustr(s):
         return unicode(s)
 
 
-def simplify(x):
+def simplify_list(x):
     if isinstance(x, list) and len(x) == 1:
-        return simplify(x[0])
+        return simplify_list(x[0])
     return x
 
 
