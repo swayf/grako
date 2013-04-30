@@ -8,3 +8,4 @@
 ^examples/.*/grako$
 genparser.py$
 parser_base.py$
+docs/_build/
