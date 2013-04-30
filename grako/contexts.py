@@ -33,10 +33,7 @@ class ParseContext(object):
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
-        if not trace:
-            self._trace = lambda x: ()
-            self._trace_event = lambda x: ()
-            self._trace_match = lambda x, y: ()
+        self.trace = trace
 
     def _reset_context(self, buffer=None, semantics=None):
         self._buffer = buffer
@@ -178,13 +175,15 @@ class ParseContext(object):
         return result
 
     def _trace(self, msg, *params):
-        print(unicode(msg % params).encode(self.encoding), file=sys.stderr)
+        if self.trace:
+            print(unicode(msg % params).encode(self.encoding), file=sys.stderr)
 
     def _trace_event(self, event):
-        self._trace('%s   %s \n\t%s', event, self._rulestack(), self._buffer.lookahead())
+        if self.trace:
+            self._trace('%s   %s \n\t%s', event, self._rulestack(), self._buffer.lookahead())
 
     def _trace_match(self, token, name=None):
-        if self._trace:
+        if self.trace:
             name = name if name else ''
             self._trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 

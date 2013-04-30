@@ -48,6 +48,7 @@ class Parser(ParseContext):
                                           filename=filename,
                                           **kwargs)
             self.parseinfo = kwargs.pop('parseinfo', self.parseinfo)
+            self.trace = kwargs.pop('trace', self.trace)
             self._reset_context(buffer, semantics=semantics)
             self._push_ast()
             return self._call(rule_name, rule_name)
