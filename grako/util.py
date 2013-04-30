@@ -60,7 +60,7 @@ def indent(text, indent=1, multiplier=4):
     text = ustr(text)
     if indent >= 0:
         sindent = ' ' * multiplier * indent
-        text = '\n'.join(sindent + t for t in text.splitlines())
+        text = '\n'.join((sindent + t).rstrip() for t in text.splitlines())
     return text
 
 

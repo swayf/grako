@@ -14,6 +14,7 @@ in the .grammars module.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 from collections import OrderedDict
+from .buffering import Buffer
 from .parsing import Parser
 from .util import simplify
 from .grammars import (ChoiceGrammar,
@@ -35,24 +36,22 @@ from .grammars import (ChoiceGrammar,
                        SpecialGrammar,
                        TokenGrammar,
                        VoidGrammar)
-from .exceptions import (FailedCut,
-                         FailedParse)
+from .exceptions import FailedParse
 
 __all__ = ['GrakoParser', 'GrakoGrammarGenerator']
 
 COMMENTS_RE = r'\(\*(?:.|\n)*?\*\)'
 
 
-class GrakoParserRoot(Parser):
+class GrakoParserBase(Parser):
 
-    def __init__(self, grammar_name, trace=False):
-        super(GrakoParserRoot, self).__init__(comments_re=COMMENTS_RE,
-                                              ignorecase=True,
-                                              trace=trace)
-        self.grammar_name = grammar_name
-
-    def parse(self, text, rule='grammar', filename=None):
-        return super(GrakoParserRoot, self).parse(text, rule, filename=filename)
+    def parse(self, text, rule='grammar', filename=None, **kwargs):
+        if not isinstance(text, Buffer):
+            text = Buffer(text, comments_re=COMMENTS_RE, **kwargs)
+        return super(GrakoParserBase, self).parse(text,
+                                                  rule,
+                                                  filename=filename,
+                                                  **kwargs)
 
     def _void_(self):
         self._token('()', 'void')
@@ -61,32 +60,32 @@ class GrakoParserRoot(Parser):
         with self._option():
             self._token("'")
             self._cut()
-            self._pattern(r"(?:[^'\\]|\\')*", 'token')
+            self._pattern(r"(?:[^'\\]|\\')*", '@')
             self._token("'")
             return
 
         with self._option():
             self._token('"')
             self._cut()
-            self._pattern(r'(?:[^"\\]|\\")*', 'token')
+            self._pattern(r'(?:[^"\\]|\\")*', '@')
             self._token('"')
             return
 
         raise FailedParse(self._buffer, '<"> or' + "<'>")
 
     def _word_(self):
-        self._pattern(r'[A-Za-z0-9_]+', 'word')
+        self._pattern(r'[A-Za-z0-9_]+')
 
     def _qualified_(self):
         self._pattern(r'[A-Za-z0-9_]+(?:\.[-_A-Za-z0-9]+)*', 'qualified')
 
     def _call_(self):
-        self._call('word', 'call')
+        self._call('word')
 
     def _pattern_(self):
         self._token('?/')
         self._cut()
-        self._pattern(r'(.*?)(?=/\?)', 'pattern')
+        self._pattern(r'(.*?)(?=/\?)', '@')
         self._token('/?')
 
     def _cut_(self):
@@ -100,13 +99,14 @@ class GrakoParserRoot(Parser):
     def _subexp_(self):
         self._token('(')
         self._cut()
-        self._call('expre', 'exp')
+        self._call('expre', '@')
         self._token(')')
 
     def _optional_(self):
         self._token('[')
         self._cut()
-        self._call('expre', 'optional')
+        self._call('expre', '@')
+        self._cut()
         self._token(']')
 
     def _plus_(self):
@@ -141,61 +141,61 @@ class GrakoParserRoot(Parser):
 
     def _atom_(self):
         with self._option():
-            self._call('void', 'atom')
+            self._call('void')
             self._cut()
             return
         with self._option():
-            self._call('cut', 'atom')
+            self._call('cut')
             self._cut()
             return
         with self._option():
-            self._call('token', 'atom')
+            self._call('token')
             self._cut()
             return
         with self._option():
-            self._call('call', 'atom')
+            self._call('call')
             self._cut()
             return
         with self._option():
-            self._call('pattern', 'atom')
+            self._call('pattern')
             self._cut()
             return
         with self._option():
-            self._call('eof', 'atom')
+            self._call('eof')
             self._cut()
             return
-        raise FailedParse(self._buffer, 'atom')
+        self._error('expecting atom')
 
     def _term_(self):
         with self._option():
-            self._call('atom', 'term')
+            self._call('atom')
             self._cut()
             return
         with self._option():
-            self._call('subexp', 'term')
+            self._call('subexp')
             self._cut()
             return
         with self._option():
-            self._call('repeat', 'term')
+            self._call('repeat')
             self._cut()
             return
         with self._option():
-            self._call('optional', 'term')
+            self._call('optional')
             self._cut()
             return
         with self._option():
-            self._call('special', 'term')
+            self._call('special')
             self._cut()
             return
         with self._option():
-            self._call('kif', 'term')
+            self._call('kif')
             self._cut()
             return
         with self._option():
-            self._call('knot', 'term')
+            self._call('knot')
             self._cut()
             return
-        raise FailedParse(self._buffer, 'term')
+        self._error('expecting term')
 
     def _named_(self):
         name = self._call('qualified')
@@ -203,33 +203,27 @@ class GrakoParserRoot(Parser):
             self._token(':')
         self._cut()
         self.ast.add('name', name)
-        try:
-            self._call('element', 'value')
-        except FailedParse as e:
-            raise FailedCut(self._buffer, e)
+        self._call('element', 'value')
 
     def _override_(self):
         self._token('@')
         self._cut()
-        try:
-            self._call('element', '@')
-        except FailedParse as e:
-            raise FailedCut(self._buffer, e)
+        self._call('element', '@')
 
     def _element_(self):
         with self._option():
-            self._call('named', 'element')
+            self._call('named')
             self._cut()
             return
         with self._option():
-            self._call('override', 'element')
+            self._call('override')
             self._cut()
             return
         with self._option():
-            self._call('term', 'element')
+            self._call('term')
             self._cut()
             return
-        raise FailedParse(self._buffer, 'element')
+        self._error('element')
 
     def _sequence_(self):
         self._call('element', 'sequence', True)
@@ -246,7 +240,7 @@ class GrakoParserRoot(Parser):
         self._repeat(options, False)
 
     def _expre_(self):
-        self._call('choice', 'expre')
+        self._call('choice')
 
     def _rule_(self):
         # FIXME: This doesn't work, and it's usefullness is doubtfull.
@@ -263,142 +257,26 @@ class GrakoParserRoot(Parser):
         self._cut()
         self._call('expre', 'rhs')
         if not self._try_token(';'):
-            self._token('.')
+            try:
+                self._token('.')
+            except FailedParse:
+                self._error('expecting one of: ; .')
 
     def _grammar_(self):
-        try:
-            self._call('rule', 'rules')
-            f = lambda: self._call('rule', 'rules')
-            self._repeat(f, True)
-            self._next_token()
-            self._check_eof()
-        except FailedCut as e:
-            raise e.nested
-
-
-class GrakoParserBase(GrakoParserRoot):
-    def token(self, ast):
-        return ast
-
-    def word(self, ast):
-        return ast
-
-    def pattern(self, ast):
-        return ast
-
-    def cut(self, ast):
-        return ast
-
-    def void(self, ast):
-        return ast
-
-    def subexp(self, ast):
-        return ast
-
-    def optional(self, ast):
-        return ast
-
-    def repeat(self, ast):
-        return ast
-
-    def special(self, ast):
-        return ast
-
-    def kif(self, ast):
-        return ast
-
-    def knot(self, ast):
-        return ast
-
-    def atom(self, ast):
-        return ast
-
-    def term(self, ast):
-        return ast.term
-
-    def named(self, ast):
-        return ast
-
-    def override(self, ast):
-        return ast
-
-    def element(self, ast):
-        return ast
-
-    def sequence(self, ast):
-        return ast
-
-    def choice(self, ast):
-        return ast
-
-    def expre(self, ast):
-        return ast
-
-    def rule(self, ast):
-        return ast
-
-    def grammar(self, ast):
-        return ast
+        self._call('rule', 'rules')
+        f = lambda: self._call('rule', 'rules')
+        self._repeat(f, True)
+        self._next_token()
+        self._check_eof()
 
 
 class GrakoParser(GrakoParserBase):
 
-    def token(self, ast):
-        return ast
-
-    def word(self, ast):
-        return ast
-
-    def call(self, ast):
-        return ast
-
-    def pattern(self, ast):
-        return ast
-
-    def cut(self, ast):
-        return ast
-
-    def eof(self, ast):
-        return ast
-
-    def void(self, ast):
-        return ast
-
     def subexp(self, ast):
         return simplify(ast.exp)
 
-    def optional(self, ast):
-        return ast
-
-    def plus(self, ast):
-        return ast
-
-    def repeat(self, ast):
-        return ast
-
-    def special(self, ast):
-        return ast
-
-    def kif(self, ast):
-        return ast
-
-    def knot(self, ast):
-        return ast
-
-    def atom(self, ast):
-        return ast.atom
-
-    def term(self, ast):
-        return ast.term
-
-    def named(self, ast):
-        return ast
-
-    def override(self, ast):
-        return ast
-
     def element(self, ast):
-        return simplify(ast.element)
+        return simplify(ast)
 
     def sequence(self, ast):
         return simplify(ast.sequence)
@@ -408,36 +286,34 @@ class GrakoParser(GrakoParserBase):
             return simplify(ast.options)
         return ast
 
-    def expre(self, ast):
-        return simplify(ast.expre)
 
-    def rule(self, ast):
-        return ast
-
-    def grammar(self, ast):
-        return ast
+class GrakoGrammarGenerator(GrakoParser):
+    def __init__(self, grammar_name, semantics=None, **kwargs):
+        if semantics is None:
+            semantics = GrakoSemantics(grammar_name)
+        super(GrakoGrammarGenerator, self).__init__(semantics=semantics, **kwargs)
 
 
-class GrakoGrammarGenerator(GrakoParserBase):
-
-    def __init__(self, grammar_name, trace=False):
-        super(GrakoGrammarGenerator, self).__init__(grammar_name, trace=trace)
+class GrakoSemantics(object):
+    def __init__(self, grammar_name):
+        super(GrakoSemantics, self).__init__()
+        self.grammar_name = grammar_name
         self.rules = OrderedDict()
 
     def token(self, ast):
-        return TokenGrammar(ast.token)
+        return TokenGrammar(ast)
 
     def word(self, ast):
-        return ast.word
+        return ast
 
     def qualified(self, ast):
         return ast.qualified
 
     def call(self, ast):
-        return RuleRefGrammar(ast.call)
+        return RuleRefGrammar(ast)
 
     def pattern(self, ast):
-        return PatternGrammar(ast.pattern)
+        return PatternGrammar(ast)
 
     def cut(self, ast):
         return CutGrammar()
@@ -449,16 +325,16 @@ class GrakoGrammarGenerator(GrakoParserBase):
         return VoidGrammar()
 
     def subexp(self, ast):
-        return GroupGrammar(ast.exp)
+        return GroupGrammar(ast)
 
     def optional(self, ast):
-        return OptionalGrammar(ast.optional)
+        return OptionalGrammar(ast)
 
     def plus(self, ast):
         return ast
 
     def repeat(self, ast):
-        if 'plus' in ast:
+        if ast.plus:
             return RepeatOneGrammar(ast.repeat)
         return RepeatGrammar(ast.repeat)
 
@@ -472,10 +348,10 @@ class GrakoGrammarGenerator(GrakoParserBase):
         return LookaheadNotGrammar(ast.knot)
 
     def atom(self, ast):
-        return ast.atom
+        return ast
 
     def term(self, ast):
-        return ast.term
+        return ast
 
     def named(self, ast):
         return NamedGrammar(ast.name, ast.value, 'force_list' in ast)
@@ -484,7 +360,7 @@ class GrakoGrammarGenerator(GrakoParserBase):
         return OverrideGrammar(ast)
 
     def element(self, ast):
-        return ast.element
+        return ast
 
     def sequence(self, ast):
         seq = ast.sequence
@@ -499,7 +375,7 @@ class GrakoGrammarGenerator(GrakoParserBase):
         return ChoiceGrammar(ast.options)
 
     def expre(self, ast):
-        return ast.expre
+        return ast
 
     def rule(self, ast):
         ast_name = ast.ast_name

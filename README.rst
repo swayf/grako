@@ -1,3 +1,12 @@
+    *At least for the people who send me mail about a new language that they're
+designing, the general advice is: do it to learn about how to write a
+compiler. Don't have any expectations that anyone will use it, unless you hook up with some sort of organization in a position to push it hard. It's a
+lottery, and some can buy a lot of the tickets. There are plenty of beautiful languages (more beautiful than C) that didn't catch on. But someone does win the lottery, and doing a language at least teaches you something.*
+
+    **Dennis Ritchie** (1941-2011)
+    Creator of the C programming language and of UNIX
+
+
 =====
 Grako
 =====
@@ -32,9 +41,9 @@ Rationale
 
 * To deal with programming languages in which important statement words (can't call them keywords) may be used as identifiers in programs, the parser must be able to lead the lexer. The parser must also lead the lexer to parse languages in which the meaning of input symbols may change with context, like Ruby_.
 
-* When ambiguity is the norm in the parsed language (as is the case in several legacy_ ones), an LL or LR grammar becomes contaminated with miriads of lookaheads. PEG_ parsers address ambiguity from the onset. Memoization, and relying on the exception-handling system makes backtracking very efficient.
+* When ambiguity is the norm in the parsed language (as is the case in several legacy_ ones), an LL or LR grammar becomes contaminated with myriads of lookaheads. PEG_ parsers address ambiguity from the onset. Memoization, and relying on the exception-handling system makes backtracking very efficient.
 
-* Semantic actions, like `Abstract Syntax Tree`_ (AST_) creation or transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser's language, and translation's target language.
+* Semantic actions, like `Abstract Syntax Tree`_ (AST_)  transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser's language, and translation's target language. Most grammar parsers do not check that the embedded semantic actions have correct syntax, so errors get reported at awkward moments, and against the generated code, not against the source.
 
 * Pre-processing (like dealing with includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar.
 
@@ -59,13 +68,13 @@ The Generated Parsers
 
 A **Grako** generated parser consists of the following classes:
 
-* A root class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overridden, etc.).::
+* A *parser* class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overridden, etc.).::
 
     def _myrulename_(self):
 
-* An *abstract* parser class that inherits from the root parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
+* An *semantics check parser* class that inherits from the base parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
 
-* An base class with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
+* A *semantics delegate class* one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
 
     def myrulename(self, ast):
         return ast
@@ -79,7 +88,7 @@ The methods in the base parser class return the same AST_ received as parameter,
 Using the Tool
 ==============
 
-**Grako** is run from the commandline::
+**Grako** is run from the command line::
 
     $ python -m grako
 
@@ -134,6 +143,10 @@ This is more or less what happens if you invoke the generated parser directly::
     python myparser.py inputfile startrule
 
 The generated parsers' constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, and more (see below).
+
+To add semantic actions, just pass a semantic delegate to the parse method::
+
+    model = parser.parse(text, rule_name='start', semantics=MySemantics())
 
 
 
@@ -264,7 +277,7 @@ When a rule has named elements, the unnamed ones are excluded from the AST_ (the
 Abstract Syntax Trees (ASTs)
 ============================
 
-By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard dict syntax, ``ast['key']``, or as attributes, ``ast.key``.
+By default, and AST_ is either a *list* (for *closures* and rules without named elements), or *dict*-derived object that contains one item for every named element in the grammar rule. Items can be accessed through the standard ``dict`` syntax, ``ast['key']``, or as attributes, ``ast.key``.
 
 AST_ entries are single values if only one item was associated with a name, or lists if more than one item was matched. There's a provision in the grammar syntax (the ``+:`` operator) to force an AST_ entry to be a list even if only one element was matched. The value for named elements that were not found during the parse (perhaps because they are optional) is ``None``.
 
@@ -319,7 +332,7 @@ The overridable, per-rule methods in the generated abstract parser provide enoug
 
 For finer-grained control it is enough to declare more rules, as the impact on the parsing times will be minimal.
 
-If pre-processing is required at some point, it is enough to place invocations of empty rules where appropiate::
+If pre-processing is required at some point, it is enough to place invocations of empty rules where appropriate::
 
     myrule = first_part preproc {second_part} ;
 
@@ -336,7 +349,7 @@ Templates and Translation
 
 **Grako** doesn't impose a way to create translators with it, but it exposes the facilities it uses to generate the Python_ source code for parsers.
 
-Translation in **Grako** is *template-based*, but instead of defining or using a complex templating engine (yet another language), it relies on the simple but powerfull ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
+Translation in **Grako** is *template-based*, but instead of defining or using a complex templating engine (yet another language), it relies on the simple but powerful ``string.Formatter`` of the Python_ standard library. The templates are simple strings that, in **Grako**'s style, are inlined with the code.
 
 To generate a parser, **Grako** constructs an object model of the parsed grammar. Each node in the model is a descendant of ``rendering.Renderer``, and knows how to render itself. Templates are left-trimmed on whitespace, like Python_ *doc-comments* are. This is an example taken from **Grako**'s source code::
 
@@ -409,7 +422,7 @@ You may use the tool under the terms of the `GNU General Public License (GPL) ve
 Contact and Updates
 ===================
 
-To discuss **Grako** and to receive notifications about new releales, please join the low-volume `Grako Forum`_ at *Google Groups*.
+To discuss **Grako** and to receive notifications about new releases, please join the low-volume `Grako Forum`_ at *Google Groups*.
 
 .. _`Grako Forum`:  https://groups.google.com/forum/?fromgroups#!forum/grako
 
@@ -437,7 +450,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 * **Guido van Rossum** created and has lead the development of the Python_ programming environment for over a decade. A tool like **Grako**, at under three thousand lines of code, would not have been possible without Python_.
 
-* **Kota Mizushima** welcomed me to the `CSAIL at MIT`_ `PEG and Packrat parsing mailing list`_, and immediately offered ideas and pointed me to docummentation about the implementation of **cut** in modern parsers. The optimization of memoization information is thanks to one of his papers.
+* **Kota Mizushima** welcomed me to the `CSAIL at MIT`_ `PEG and Packrat parsing mailing list`_, and immediately offered ideas and pointed me to documentation about the implementation of **cut** in modern parsers. The optimization of memoization information is thanks to one of his papers.
 
 * **My students** at UCAB_ inspired me to think about how grammar-based parser generation could be made more approachable.
 
@@ -472,14 +485,25 @@ Change History
 ==============
 
 - **tip**
-    * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete.
+    * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
+    * Semantic actions can now be implemented by a delegate, so translations can be done using the grammar model, without generating code for the parser. For compatibility with previous versions, the default delegate is ``self``. This feature is also a step towards making it easier to have multiple translation targets for the same grammar.
+    * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
+    * The bootstar parser was refactored to use semantic delegates.
+    * Proved that grammar models can be pickled, unpickled, and reused.
+
+- **1.3.0**
+    * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
+    * Make sure that *cut* actually applies to the nearest fork.
+    * Finish aligning model parsing with generated code parsing. Performance should now favor model parsing (because less code means more CPU-cache hits), but model parsing doesn't yet provide for semantic actions.
     * Report all the rules missing in a grammar before aborting.
+    * Align the sample *etc/grako.ebnf* grammar to the language parsed by the bootstrap parser.
+    * Ensure compatibility with Python_ 2.7.4 and 3.3.1.
     * Update credits.
 
 - **1.2.1**
     * Align bootstrap parser with generated parser framework.
     * Add *cuts* to bootstrap parser so errors are reported closer to their origin.
-    * *(minor) BUG!* `FailedCut` exceptions must translate to their nested exeption so the reported line and column make sense.
+    * *(minor) BUG!* ``FailedCut`` exceptions must translate to their nested exeption so the reported line and column make sense.
     * Prettify the sample **Grako** grammar.
     * Remove or comment-out code for tagged/named rule names (they don't work, and their usefulness is doubtful).
     * Spell-check this document with `Vim spell`_.

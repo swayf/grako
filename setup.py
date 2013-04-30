@@ -3,14 +3,14 @@ from distutils.core import setup
 
 setup(
     name='grako',
-    version='1.2.1',
+    version='1.3.0',
     author='Juancarlo Añez',
     author_email='apalala@gmail.com',
     packages=['grako', 'grako.model', 'grako.test'],
     scripts=['scripts/grako'],
     url='http://bitbucket.org/apalala/grako',
     license='GNU General Public License v3 (GPLv3)',
-    description='EBNF to PEG parser generator.',
+    description='An generator of PEG/Packrat parsers from EBNF grammars.',
     long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -21,7 +21,6 @@ setup(
         'Environment :: Console',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Topic :: Software Development :: Code Generators',
         'Topic :: Software Development :: Compilers',

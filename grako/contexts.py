@@ -1,54 +1,53 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
-import re
 from contextlib import contextmanager
 from collections import namedtuple
 from .ast import AST
 from .exceptions import FailedParse, FailedCut, FailedLookahead
-from . import buffering
+
+
+__all__ = ['ParseInfo', 'ParseContext']
+
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 
 class ParseContext(object):
     def __init__(self,
-                 whitespace=None,
-                 comments_re=None,
-                 ignorecase=False,
+                 buffer=None,
+                 semantics=None,
                  parseinfo=False,
                  trace=False,
-                 nameguard=True,
                  encoding='utf-8',
-                 bufferClass=buffering.Buffer):
+                 **kwargs):
         super(ParseContext, self).__init__()
 
-        self.whitespace = whitespace
-        self.comments_re = comments_re
-        self.ignorecase = ignorecase
+        self._buffer = buffer
+        self.semantics = semantics if semantics is not None else self
         self.encoding = encoding
         self.parseinfo = parseinfo
-        self.bufferClass = bufferClass
-        self.nameguard = nameguard
 
-        self._buffer = None
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
-        if not trace:
-            self._trace = lambda x: ()
-            self._trace_event = lambda x: ()
-            self._trace_match = lambda x, y: ()
+        self.trace = trace
 
-    def _reset_context(self):
-        self._buffer = None
+    def _reset_context(self, buffer=None, semantics=None):
+        self._buffer = buffer
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
+        if semantics is not None:
+            self.semantics = semantics
+        if self.semantics is not None:
+            set_buffer = getattr(self.semantics, 'set_buffer', None)
+            if set_buffer is not None:
+                set_buffer(buffer)
 
     def goto(self, pos):
         self._buffer.goto(pos)
@@ -57,28 +56,11 @@ class ParseContext(object):
     def _pos(self):
         return self._buffer.pos
 
-    @property
-    def linecount(self):
-        return self._buffer.linecount
-
     def _goto(self, pos):
         self._buffer.goto(pos)
 
-    def _eatwhitespace(self):
-        self._buffer.eatwhitespace()
-
-    def _eatcomments(self):
-        if self.comments_re is not None:
-            opts = re.MULTILINE if '\n' in self.comments_re else 0
-            while self._buffer.matchre(self.comments_re, opts):
-                pass
-
     def _next_token(self):
-        p = None
-        while self._pos != p:
-            p = self._pos
-            self._eatwhitespace()
-            self._eatcomments()
+        self._buffer.next_token()
 
     @property
     def ast(self):
@@ -165,7 +147,7 @@ class ParseContext(object):
         #   http://goo.gl/VaGpj
         cutpos = self._pos
         cache = self._memoization_cache
-        cutkeys = ((p, n) for p, n in cache.keys() if p < cutpos)
+        cutkeys = [(p, n) for p, n in cache.keys() if p < cutpos]
         for key in cutkeys:
             del cache[key]
 
@@ -185,16 +167,23 @@ class ParseContext(object):
         return None
 
     def _find_semantic_rule(self, name):
-        return None
+        if self.semantics is None:
+            return None
+        result = getattr(self.semantics, name, None)
+        if result is None or not isinstance(result, type(self._find_semantic_rule)):
+            return None
+        return result
 
     def _trace(self, msg, *params):
-        print(unicode(msg % params).encode(self.encoding), file=sys.stderr)
+        if self.trace:
+            print(unicode(msg % params).encode(self.encoding), file=sys.stderr)
 
     def _trace_event(self, event):
-        self._trace('%s   %s \n\t%s', event, self._rulestack(), self._buffer.lookahead())
+        if self.trace:
+            self._trace('%s   %s \n\t%s', event, self._rulestack(), self._buffer.lookahead())
 
     def _trace_match(self, token, name=None):
-        if self._trace:
+        if self.trace:
             name = name if name else ''
             self._trace('MATCHED <%s> /%s/\n\t%s', token, name, self._buffer.lookahead())
 
@@ -227,11 +216,22 @@ class ParseContext(object):
             raise
         except FailedParse as e:
             if self._is_cut_set():
-                self._error(e, FailedCut)
+                raise FailedCut(e)
         finally:
             self._pop_cut()
 
-    _optional = _option
+    @contextmanager
+    def _choice(self):
+        try:
+            yield
+        except FailedCut as e:
+            raise e.nested
+
+    @contextmanager
+    def _optional(self):
+        with self._choice():
+            with self._option():
+                yield
 
     @contextmanager
     def _group(self):
@@ -260,12 +260,11 @@ class ParseContext(object):
         try:
             yield
         except FailedParse:
-            self._goto(p)
             pass
         else:
-            self._goto(p)
             self._error('', etype=FailedLookahead)
         finally:
+            self._goto(p)
             self._pop_ast()  # simply discard
 
     def _repeater(self, f):
@@ -273,29 +272,33 @@ class ParseContext(object):
         while True:
             self._push_cut()
             try:
+                p = self._pos
                 with self._try():
                     value = f()
                 if value is not None:
                     result.append(value)
+                if self._pos == p:
+                    self._error('empty closure')
             except FailedCut:
                 raise
             except FailedParse as e:
                 if self._is_cut_set():
-                    self._error(e, FailedCut)
-                else:
-                    return result
+                    raise FailedCut(e)
+                return result
             finally:
                 self._pop_cut()
 
     def _repeat(self, f, plus=False):
         self._push_cst()
         try:
-            one = []
-            if plus:
-                with self._try():
-                    one = [f()]
+            with self._try():
+                one = [f()] if plus else []
             result = one + self._repeater(f)
             cst = self.cst
+            if cst is None:
+                cst = []
+            elif not isinstance(cst, list):
+                cst = [cst]
         finally:
             self._pop_cst()
         self._add_cst_node(cst)
