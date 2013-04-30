@@ -132,7 +132,7 @@ class GroupGrammar(_DecoratorGrammar):
         return '(%s)' % str(self.exp).strip()
 
     template = '''\
-                with self._group():
+                with self._group() as _e:
                 {exp:1::}
                     _e = self.cst
                 '''
@@ -266,7 +266,7 @@ class ChoiceGrammar(_Grammar):
         self.options = options
 
     def parse(self, ctx):
-        with ctx._choice():
+        with ctx._choice_context():
             for o in self.options:
                 with ctx._option():
                     return o.parse(ctx)
@@ -308,18 +308,17 @@ class ChoiceGrammar(_Grammar):
             return super(ChoiceGrammar, self).render(**fields)
 
     option_template = '''\
-                    with self._option():
+                    with self._option() as _e:
                     {option}
                         return _e\
                     '''
 
     template = '''\
+                @self._choice
                 def choice{n}():
-                    _e = None
                 {options}
                     self._error({error})
-                with self._choice():
-                    _e = choice{n}() \
+                _e = choice{n}() \
                 '''
 
 
@@ -347,10 +346,11 @@ class RepeatGrammar(_DecoratorGrammar):
         return super(RepeatGrammar, self).render(**fields)
 
     template = '''
-                def repeat{n}():
+                @self._closure
+                def closure{n}():
                 {exp:1::}
                     return _e
-                _e = self._repeat(repeat{n})\
+                _e = closure{n}()\
                 '''
 
 
@@ -373,10 +373,11 @@ class RepeatOneGrammar(RepeatGrammar):
         fields.update(n=self.counter())
 
     template = '''
-                def repeat{n}():
+                @self._closure_plus
+                def closure{n}():
                 {exp:1::}
                     return _e
-                _e = self._repeat(repeat{n}, plus=True)\
+                _e = closure{n}()\
                 '''
 
 
@@ -393,8 +394,7 @@ class OptionalGrammar(_DecoratorGrammar):
         return '[%s]' % str(self.exp)
 
     template = '''\
-                with self._optional():
-                    _e = None
+                with self._optional() as _e:
                 {exp:1::}\
                 '''
 
@@ -574,6 +574,7 @@ class RuleGrammar(NamedGrammar):
         return '%s = %s ;' % (self.name, str(self.exp).strip())
 
     def render_fields(self, fields):
+        self.reset_counter()
         name = self.name
         if iskeyword(name):
             name += '_'
@@ -635,7 +636,7 @@ class Grammar(Renderer):
                            semantics=semantics,
                            trace=trace, **kwargs)
         start_rule = ctx._find_rule(start) if start else self.rules[0]
-        with ctx._choice():
+        with ctx._choice_context():
             return start_rule.parse(ctx)
 
     def codegen(self):

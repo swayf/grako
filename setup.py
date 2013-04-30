@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function, division, absolute_import, unicode_literals
 from distutils.core import setup
 
 setup(
     name='grako',
-    version='1.3.0',
+    version='1.4.0',
     author='Juancarlo Añez',
     author_email='apalala@gmail.com',
     packages=['grako', 'grako.model', 'grako.test'],
     scripts=['scripts/grako'],
     url='http://bitbucket.org/apalala/grako',
-    license='GNU General Public License v3 (GPLv3)',
-    description='An generator of PEG/Packrat parsers from EBNF grammars.',
+    license='BSD License',
+    description='A generator of PEG/Packrat parsers from EBNF grammars.',
     long_description=open('README.rst').read(),
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Development Status :: 5 - Production/Stable',
+        'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
