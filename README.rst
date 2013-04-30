@@ -1,3 +1,12 @@
+    *At least for the people who send me mail about a new language that they're
+designing, the general advice is: do it to learn about how to write a
+compiler. Don't have any expectations that anyone will use it, unless you hook up with some sort of organization in a position to push it hard. It's a
+lottery, and some can buy a lot of the tickets. There are plenty of beautiful languages (more beautiful than C) that didn't catch on. But someone does win the lottery, and doing a language at least teaches you something.*
+
+    **Dennis Ritchie** (1941-2011)
+    Creator of the C programming language and of UNIX
+
+
 =====
 Grako
 =====
@@ -59,13 +68,13 @@ The Generated Parsers
 
 A **Grako** generated parser consists of the following classes:
 
-* A root class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overridden, etc.).::
+* A *parser* class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overridden, etc.).::
 
     def _myrulename_(self):
 
-* An *abstract* parser class that inherits from the root parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
+* An *semantics check parser* class that inherits from the base parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
 
-* An base class with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
+* A *semantics delegate class* one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
 
     def myrulename(self, ast):
         return ast
@@ -134,6 +143,10 @@ This is more or less what happens if you invoke the generated parser directly::
     python myparser.py inputfile startrule
 
 The generated parsers' constructors accept named arguments to specify whitespace characters, the regular expression for comments, case sensitivity, verbosity, and more (see below).
+
+To add semantic actions, just pass a semantic delegate to the parse method::
+
+    model = parser.parse(text, rule_name='start', semantics=MySemantics())
 
 
 
@@ -470,6 +483,13 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 
 Change History
 ==============
+
+- **tip**
+    * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
+    * Semantic actions can now be implemented by a delegate, so translations can be done using the grammar model, without generating code for the parser. For compatibility with previous versions, the default delegate is ``self``. This feature is also a step towards making it easier to have multiple translation targets for the same grammar.
+    * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
+    * The bootstar parser was refactored to use semantic delegates.
+    * Proved that grammar models can be pickled, unpickled, and reused.
 
 - **1.3.0**
     * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).

@@ -12,8 +12,7 @@ error messages when a choice fails to parse. FOLLOW(k) and LA(k) should be
 computed, but they are not.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
-import logging
-log = logging.getLogger('grako.grammars')
+import sys
 import re
 from copy import deepcopy
 from keyword import iskeyword
@@ -26,6 +25,7 @@ from .exceptions import (FailedParse,
                          FailedToken,
                          FailedPattern,
                          FailedRef,
+                         FailedSemantics,
                          GrammarError)
 
 
@@ -42,10 +42,12 @@ def urepr(obj):
 
 
 class ModelContext(ParseContext):
-    def __init__(self, rules, text, filename, trace, **kwargs):
-        super(ModelContext, self).__init__(trace=trace, **kwargs)
+    def __init__(self, rules, buffer=None, semantics=None, trace=False, **kwargs):
+        super(ModelContext, self).__init__(buffer=buffer,
+                                           semantics=semantics,
+                                           trace=trace,
+                                           **kwargs)
         self.rules = {rule.name: rule for rule in rules}
-        self._buffer = Buffer(text, filename=filename)
         self._buffer.goto(0)
 
     @property
@@ -201,7 +203,7 @@ class LookaheadGrammar(_DecoratorGrammar):
 
     def parse(self, ctx):
         with ctx._if():
-            super(LookaheadNotGrammar, self).parse(ctx)
+            super(LookaheadGrammar, self).parse(ctx)
 
     template = '''\
                 with self._if():
@@ -490,7 +492,7 @@ class RuleRefGrammar(_Grammar):
 
     def _validate(self, rules):
         if self.name not in rules:
-            log.error("Reference to unknown rule '%s'." % self.name)
+            print("Reference to unknown rule '%s'." % self.name, file=sys.stderr)
             return False
         return True
 
@@ -551,6 +553,12 @@ class RuleGrammar(NamedGrammar):
                 node.add('parseinfo', ParseInfo(ctx._buffer, name, pos, ctx._pos))
 #            if self.ast_name:
 #                node = AST([(self.ast_name, node)])
+            semantic_rule = ctx._find_semantic_rule(name)
+            if semantic_rule:
+                try:
+                    node = semantic_rule(node)
+                except FailedSemantics as e:
+                    ctx._error(str(e), FailedParse)
         finally:
             ctx._pop_ast()
         result = (node, ctx.pos)
@@ -591,13 +599,12 @@ class Grammar(Renderer):
         assert isinstance(rules, list), str(rules)
         self.name = name
         self.rules = rules
-        if not self._validate():
+        if not self._validate({r.name for r in self.rules}):
             raise GrammarError('Unknown rules, no parser generated.')
         self._first_sets = self._calc_first_sets()
 
-    def _validate(self):
-        ruledict = {r.name for r in self.rules}
-        return all(rule._validate(ruledict) for rule in self.rules)
+    def _validate(self, ruleset):
+        return all(rule._validate(ruleset) for rule in self.rules)
 
     @property
     def first_sets(self):
@@ -615,11 +622,24 @@ class Grammar(Renderer):
             rule._first_set = F[rule.name]
         return F
 
-    def parse(self, text, start=None, filename=None, trace=False, **kwargs):
-        ctx = ModelContext(self.rules, text, filename, trace=trace, **kwargs)
+    def parse(self, text,
+                    start=None,
+                    filename=None,
+                    semantics=None,
+                    trace=False,
+                    **kwargs):
+        if not isinstance(text, Buffer):
+            text = Buffer(text, filename=filename, **kwargs)
+        ctx = ModelContext(self.rules,
+                           buffer=text,
+                           semantics=semantics,
+                           trace=trace, **kwargs)
         start_rule = ctx._find_rule(start) if start else self.rules[0]
         with ctx._choice():
             return start_rule.parse(ctx)
+
+    def codegen(self):
+        return self.render()
 
     def __str__(self):
         return '\n\n'.join(str(rule) for rule in self.rules) + '\n'
@@ -655,22 +675,22 @@ class Grammar(Renderer):
 
                 __version__ = '{version}'
 
-                class {name}ParserRoot(Parser):
+                class {name}Parser(Parser):
                 {rules}
 
 
-                class Abstract{name}Parser(AbstractParserMixin, {name}ParserRoot):
+                class {name}SemanticParser(CheckSemanticsMixin, {name}Parser):
                     pass
 
 
-                class {name}ParserBase({name}ParserRoot):
+                class {name}Semantics(object):
                 {abstract_rules}
 
                 def main(filename, startrule):
                     import json
                     with open(filename) as f:
                         text = f.read()
-                    parser = {name}ParserBase(parseinfo=False)
+                    parser = {name}Parser(parseinfo=False)
                     ast = parser.parse(text, startrule, filename=filename)
                     print('AST:')
                     print(ast)
@@ -683,7 +703,7 @@ class Grammar(Renderer):
                     import sys
                     if '-l' in sys.argv:
                         print('Rules:')
-                        for r in {name}ParserBase.rule_list():
+                        for r in {name}Parser.rule_list():
                             print(r)
                         print()
                     elif len(sys.argv) == 3:

@@ -12,7 +12,7 @@ EXPRE = CHOICE | SEQUENCE .
 
 CHOICE = opts+:SEQUENCE {'|' >> opts+:SEQUENCE}+ .
 
-SEQUENCE = terms:{TERM }+ .
+SEQUENCE = terms:{TERM}+ .
 
 TERM = CLOSURE | ATOM .
 
