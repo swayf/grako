@@ -217,7 +217,7 @@ class PatternGrammar(_Grammar):
 
 class LookaheadGrammar(_DecoratorGrammar):
     def __str__(self):
-        return '!' + self.exp
+        return '&' + self.exp
 
     def parse(self, ctx):
         with ctx._if():
@@ -303,7 +303,7 @@ class ChoiceGrammar(_Grammar):
         return result
 
     def __str__(self):
-        return ' | '.join(str(o).strip() for o in self.options)
+        return '  ' + '\n| '.join(str(o).strip() for o in self.options)
 
     def render_fields(self, fields):
         template = trim(self.option_template)
@@ -353,7 +353,10 @@ class RepeatGrammar(_DecoratorGrammar):
         return {()} | result
 
     def __str__(self):
-        return '{%s}' % str(self.exp)
+        template = '{%s}'
+        if isinstance(self.exp, ChoiceGrammar):
+            template = trim(self.str_template)
+        return template % str(self.exp)
 
     def render_fields(self, fields):
         fields.update(n=self.counter())
@@ -371,6 +374,12 @@ class RepeatGrammar(_DecoratorGrammar):
                 _e = closure{n}()\
                 '''
 
+    str_template = '''
+            {
+            %s
+            }
+            '''
+
 
 class RepeatPlusGrammar(RepeatGrammar):
     def parse(self, ctx):
@@ -385,7 +394,7 @@ class RepeatPlusGrammar(RepeatGrammar):
         return result
 
     def __str__(self):
-        return '{%s}+' % str(self.exp)
+        return super(RepeatPlusGrammar, self).__str__() + '+'
 
     def render_fields(self, fields):
         fields.update(n=self.counter())
@@ -409,12 +418,21 @@ class OptionalGrammar(_DecoratorGrammar):
         return {()} | self.exp._first(k, F)
 
     def __str__(self):
-        return '[%s]' % str(self.exp)
+        template = '[%s]'
+        if isinstance(self.exp, ChoiceGrammar):
+            template = trim(self.str_template)
+        return template % str(self.exp)
 
     template = '''\
                 with self._optional() as _e:
                 {exp:1::}\
                 '''
+
+    str_template = '''
+            {
+            %s
+            }
+            '''
 
 
 class CutGrammar(_Grammar):
@@ -589,7 +607,7 @@ class RuleGrammar(NamedGrammar):
         return self.exp._first(k, F)
 
     def __str__(self):
-        return '%s = %s ;' % (self.name, str(self.exp).strip())
+        return trim(self.str_template) % (self.name, indent(str(self.exp)))
 
     def render_fields(self, fields):
         self.reset_counter()
@@ -609,6 +627,12 @@ class RuleGrammar(NamedGrammar):
                     _e = None
                 {exp:1::}{ast_name_clause}
 
+                '''
+    str_template = '''\
+                %s
+                    =
+                %s
+                    ;
                 '''
 
 
