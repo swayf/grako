@@ -61,7 +61,7 @@ def main():
     open('tmp/05.ast', 'w').write(json.dumps(ast5, indent=2))
 
     print('-' * 20, 'phase 06 - generate parser code')
-    gencode6 = parser.render()
+    gencode6 = parser.codegen()
     open('tmp/g06.py', 'w').write(gencode6)
 
     print('-' * 20, 'phase 07 - import generated code')
@@ -93,7 +93,7 @@ def main():
                    )
     generated_grammar10 = str(g10)
     open('tmp/10.ebnf', 'w').write(generated_grammar10)
-    gencode10 = g10.render()
+    gencode10 = g10.codegen()
     open('tmp/g10.py', 'w').write(gencode10)
 
     print('-' * 20, 'phase 11 - Pickle the model and try again.')
@@ -107,7 +107,7 @@ def main():
                     comments_re=COMMENTS_RE
                     )
     open('tmp/11.ebnf', 'w').write(str(110))
-    gencode11 = r11.render()
+    gencode11 = r11.codegen()
     open('tmp/g11.py', 'w').write(gencode11)
 
 

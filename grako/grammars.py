@@ -638,6 +638,9 @@ class Grammar(Renderer):
         with ctx._choice():
             return start_rule.parse(ctx)
 
+    def codegen(self):
+        return self.render()
+
     def __str__(self):
         return '\n\n'.join(str(rule) for rule in self.rules) + '\n'
 
