@@ -295,6 +295,10 @@ class ParseContext(object):
                 one = [f()] if plus else []
             result = one + self._repeater(f)
             cst = self.cst
+            if cst is None:
+                cst = []
+            elif not isinstance(cst, list):
+                cst = [cst]
         finally:
             self._pop_cst()
         self._add_cst_node(cst)
