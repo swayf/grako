@@ -399,6 +399,8 @@ The file ``etc/grako.ebnf`` contains a grammar for the **Grako** EBNF_ language 
 
 The project ``examples/regexp`` contains a regexp-to-EBNF translator and parser generator. The project has no practical use, but it's a complete, end-to-end example of how to implement a translator using **Grako**.
 
+The project ``examples/antlr`` contains a ANTLR_ to **Grako** grammar tanslator. It is work in progress, but it's already capable of producing a translation for the enclosed ``Python.g`` grammar. The project is a good example of the use of models and templates in translation. The sample program, ``antlr2grako.py`` generates the **Grako** gramar on standard ouput, but because the model used is **Grako**'s own, the same code can be used to directly generate a parser from an ANTLR_ grammar. Please take a look at the *README* to know about limitations.
+
 
 License
 =======
@@ -489,6 +491,7 @@ Change History
     * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
     * The bootstrap parser was refactored to use semantic delegates.
     * Proved that grammar models can be pickled, unpickled, and reused.
+    * Added the *antlr* example with an ANTLR_ to **Grako** grammar translator.
 
 - **1.3.0**
     * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
