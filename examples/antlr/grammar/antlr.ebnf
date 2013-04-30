@@ -61,7 +61,7 @@ action
 
 block
     =
-    '{' >> {(block|?/[^}]*/?)} '}'
+    '{' {(block|?/[^}]*/?)} '}'
     ;
 
 rule
@@ -110,10 +110,9 @@ element
     | gated_predicate
     | semantic_predicate
     | semantic_action
-    | syntactic_predicate
-    | optional
     | closure
     | positive_closure
+    | optional
     | atom
     ;
 
@@ -129,7 +128,13 @@ semantic_predicate
 
 semantic_action
     =
-    block
+    '{'
+        {
+            semantic_action
+        |
+            ?/[^}]/?
+        }
+    '}'
     ;
 
 syntactic_predicate
@@ -157,10 +162,11 @@ atom
     ['^'|'!']
     (
       negative
+    | syntactic_predicate
+    | subexp
     | range
     | terminal
     | rule_ref
-    | subexp
     | terminal
     | non_terminal
     )
@@ -173,7 +179,7 @@ range
 
 subexp
     =
-    '(' >>
+    '('
         [options ':' >>]
         alternatives
     ')'
@@ -181,7 +187,7 @@ subexp
 
 negative
     =
-    '~' >> (non_terminal|subexp)
+    '~' >> atom
     ;
 
 non_terminal
@@ -231,22 +237,17 @@ id
 
 name
     =
-    ?/[a-zA-Z]/? NAME_CHARS
+    ?/[a-zA-Z][A-Za-z0-9_]*/?
     ;
 
 lower_name
     =
-    ?/[a-z]/? NAME_CHARS
+    ?/[a-z][A-Za-z0-9_]*/?
     ;
 
 upper_name
     =
-    ?/[A-Z]/? NAME_CHARS
-    ;
-
-NAME_CHARS
-    =
-    ?/[A-Za-z0-9_]*/?
+    ?/[A-Z][A-Za-z0-9_]*/?
     ;
 
 char
@@ -261,11 +262,11 @@ string
 
 STRING
     =
-    '"' >> @?/([^"\n]|\\")*?/? '"'
+    '"' >> @{?/[^"\n\\]/?|ESC} '"'
     |
-    "'" >> @?/([^'\n]|\\')*?/? "'"
+    "'" >> @{?/[^'\n\\]/?|ESC} "'"
     |
-    '<<' >> {!'>>' ?/./?} '>>'
+    '<<' >> ?/(?:(?!'>>').)*/? '>>'
     ;
 
 int
@@ -275,21 +276,7 @@ int
 
 ESC
     =
-    '\' >>
-    @(
-        '\\'
+    ?/\\['"\\nrtbf]/?
     |
-        '"'
-    |
-        "'"
-    |
-        'u' XDIGIT XDIGIT XDIGIT XDIGIT
-    |
-        ?/[nrtbf>]/?
-    )
-    ;
-
-XDIGIT
-    =
-    ?/[a-fA-F0-9]/?
+    ?/\\u[a-fA-F0-9]{4}/?
     ;

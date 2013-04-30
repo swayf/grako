@@ -12,10 +12,10 @@ COMMENTS_RE = r'/\*(?:.|\n)*?\*/|//[^\n]*?\n'
 
 class ANTLRParser(ANTLRParserBase):
     def parse(self, text, filename=None, **kwargs):
-        super(ANTLRParser, self).parse(text,
-                                       'grammar',
-                                       filename=filename,
-                                       **kwargs)
+        return super(ANTLRParser, self).parse(text,
+                                              'grammar',
+                                              filename=filename,
+                                              **kwargs)
 
 
 def main(filename, trace):
@@ -26,7 +26,7 @@ def main(filename, trace):
                         comments_re=COMMENTS_RE,
                         trace=True)
         model = parser.parse(buffer, filename=filename, trace=trace)
-        print(model.gencode())
+        print(model)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
