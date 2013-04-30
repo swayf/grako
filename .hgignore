@@ -6,5 +6,6 @@
 ^dist$
 ^build$
 ^examples/.*/grako$
+^examples/.*/antlr_parser
 genparser.py$
 parser_base.py$
