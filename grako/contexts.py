@@ -295,8 +295,8 @@ class ParseContext(object):
             with self._try():
                 one = [f()] if plus else []
             result = one + self._repeater(f)
-            cst = self.cst
+#            cst = self.cst
         finally:
             self._pop_cst()
-        self._add_cst_node(cst)
+        self._add_cst_node(result)
         return result
