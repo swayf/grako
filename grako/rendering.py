@@ -61,8 +61,13 @@ class Renderer(object):
         if template is not None:
             self.template = template
 
-    def counter(self):
-        return next(self._counter)
+    @classmethod
+    def counter(cls):
+        return next(cls._counter)
+
+    @classmethod
+    def reset_counter(cls):
+        Renderer._counter = itertools.count()
 
     def render_fields(self, fields):
         pass

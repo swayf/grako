@@ -486,7 +486,8 @@ Change History
 
 - **tip**
     * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
-    * Semantic actions can now be implemented by a delegate, so translations can be done using the grammar model, without generating code for the parser. For compatibility with previous versions, the default delegate is ``self``. This feature is also a step towards making it easier to have multiple translation targets for the same grammar.
+    * Semantic actions can now be implemented by a delegate.
+    * Reset synthetic method count and use decorators for more readable parser code.
     * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
     * The bootstar parser was refactored to use semantic delegates.
     * Proved that grammar models can be pickled, unpickled, and reused.
