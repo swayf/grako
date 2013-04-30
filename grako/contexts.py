@@ -16,17 +16,18 @@ ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 class ParseContext(object):
     def __init__(self,
-                 buffer=None,
                  semantics=None,
                  parseinfo=False,
                  trace=False,
                  encoding='utf-8',
+                 comments_re=None,
                  **kwargs):
         super(ParseContext, self).__init__()
 
-        self._buffer = buffer
+        self._buffer = None
         self.semantics = semantics if semantics is not None else self
         self.encoding = encoding
+        self.comments_re = comments_re
         self.parseinfo = parseinfo
 
         self._ast_stack = []

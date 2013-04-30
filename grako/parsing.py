@@ -39,13 +39,17 @@ class Parser(ParseContext):
               rule_name,
               filename=None,
               semantics=None,
+              comments_re=None,
               **kwargs):
         try:
             if isinstance(text, buffering.Buffer):
                 buffer = text
             else:
+                if comments_re is None:
+                    comments_re = self.comments_re
                 buffer = buffering.Buffer(text,
                                           filename=filename,
+                                          comments_re=comments_re,
                                           **kwargs)
             self.parseinfo = kwargs.pop('parseinfo', self.parseinfo)
             self.trace = kwargs.pop('trace', self.trace)
