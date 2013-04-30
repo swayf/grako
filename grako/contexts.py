@@ -292,10 +292,8 @@ class ParseContext(object):
     def _repeat(self, f, plus=False):
         self._push_cst()
         try:
-            one = []
-            if plus:
-                with self._try():
-                    one = [f()]
+            with self._try():
+                one = [f()] if plus else []
             result = one + self._repeater(f)
             cst = self.cst
         finally:
