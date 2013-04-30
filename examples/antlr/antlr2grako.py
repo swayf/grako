@@ -5,6 +5,7 @@ import sys
 from os import path
 from grako.buffering import Buffer
 from antlr_parser import ANTLRParser as ANTLRParserBase
+from semantics import ANTLRSemantics
 
 
 COMMENTS_RE = r'/\*(?:.|\n)*?\*/|//[^\n]*?\n'
@@ -16,8 +17,6 @@ class ANTLRParser(ANTLRParserBase):
                                               'grammar',
                                               filename=filename,
                                               **kwargs)
-
-
 def main(filename, trace):
     parser = ANTLRParser()
     with open(filename) as f:
@@ -25,7 +24,12 @@ def main(filename, trace):
                         filename=filename,
                         comments_re=COMMENTS_RE,
                         trace=True)
-        model = parser.parse(buffer, filename=filename, trace=trace)
+        gname = path.splitext(path.basename(filename))[0]
+        semantics = ANTLRSemantics(gname)
+        model = parser.parse(buffer,
+                             filename=filename,
+                             semantics=semantics,
+                             trace=trace)
         print(model)
 
 if __name__ == '__main__':

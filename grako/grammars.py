@@ -90,6 +90,24 @@ class VoidGrammar(_Grammar):
     template = 'pass'
 
 
+class FailGrammar(_Grammar):
+    def __str__(self):
+        return '!()'
+
+    template = 'self._fail()'
+
+
+class CommentGrammar(_Grammar):
+    def __init__(self, text):
+        super(CommentGrammar, self).__init__()
+        self.text = text.strip()
+
+    def __str__(self):
+        return self.render()
+
+    template = '(* {text} *)'
+
+
 class EOFGrammar(_Grammar):
     def parse(self, ctx):
         ctx._next_token()
@@ -213,7 +231,7 @@ class LookaheadGrammar(_DecoratorGrammar):
 
 class LookaheadNotGrammar(_DecoratorGrammar):
     def __str__(self):
-        return '!' + self.exp
+        return '!' + str(self.exp)
 
     def parse(self, ctx):
         with ctx._ifnot():
@@ -354,7 +372,7 @@ class RepeatGrammar(_DecoratorGrammar):
                 '''
 
 
-class RepeatOneGrammar(RepeatGrammar):
+class RepeatPlusGrammar(RepeatGrammar):
     def parse(self, ctx):
         f = lambda: self.exp.parse(ctx)
         return ctx._repeat(f, plus=True)

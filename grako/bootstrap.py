@@ -29,7 +29,7 @@ from .grammars import (ChoiceGrammar,
                        OverrideGrammar,
                        PatternGrammar,
                        RepeatGrammar,
-                       RepeatOneGrammar,
+                       RepeatPlusGrammar,
                        RuleGrammar,
                        RuleRefGrammar,
                        SequenceGrammar,
@@ -341,7 +341,7 @@ class GrakoSemantics(object):
 
     def repeat(self, ast):
         if ast.plus:
-            return RepeatOneGrammar(ast.repeat)
+            return RepeatPlusGrammar(ast.repeat)
         return RepeatGrammar(ast.repeat)
 
     def special(self, ast):
