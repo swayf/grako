@@ -13,7 +13,7 @@ grammar
     [tokens]
     {scope}
     {action}
-    {rule}+
+    rules:{rule}+
     $
     ;
 
@@ -67,13 +67,13 @@ block
 rule
     =
     ['protected'|'public'|'private'|'fragment']
-    id ['!'] [arg]
+    name:id ['!'] [arg]
     ['returns' arg]
     ['trhows' id {',' id}* ]
     [options]
     [scope]
     {action}
-    ':' >> alternatives ';' >>
+    ':' >> exp:alternatives ';' >>
     [exceptions]
     ;
 
@@ -96,25 +96,41 @@ exceptions
 
 alternatives
     =
-    alternative {'|' >> alternative}
+    options+:alternative {'|' >> options+:alternative}
     ;
 
 alternative
     =
-    {element}* [rewrite]
+    elements [rewrite]
+    ;
+
+elements
+    =
+    {element}*
     ;
 
 element
     =
-      id ('+='| '=') >>  atom
-    | gated_predicate
-    | semantic_predicate
-    | semantic_action
+      named
+    | predicate_or_action
     | closure
     | positive_closure
     | optional
     | atom
     ;
+
+named
+    =
+    name:id (force_list:'+='| '=') >>  exp:atom
+    ;
+
+predicate_or_action
+    =
+      gated_predicate
+    | semantic_predicate
+    | semantic_action
+    ;
+
 
 gated_predicate
     =
@@ -139,55 +155,59 @@ semantic_action
 
 syntactic_predicate
     =
-    subexp '=>' >>
+    @subexp '=>' >>
     ;
 
 optional
     =
-    atom '?' >>
+    @atom '?' >>
     ;
 
 closure
     =
-    atom '*' >>
+    @atom '*' >>
     ;
 
 positive_closure
     =
-    atom '+' >>
+    @atom '+' >>
     ;
 
 atom
     =
     ['^'|'!']
-    (
-      negative
+    @(
+      eof
+    | negative
     | syntactic_predicate
     | subexp
     | range
-    | terminal
-    | rule_ref
     | terminal
     | non_terminal
     )
     ;
 
+eof
+    =
+    'EOF'
+    ;
+
 range
     =
-    char '..' >> char
+    first:char '..' >> last:char
     ;
 
 subexp
     =
     '('
         [options ':' >>]
-        alternatives
+        @alternatives
     ')'
     ;
 
 negative
     =
-    '~' >> atom
+    '~' >> @atom
     ;
 
 non_terminal
@@ -200,7 +220,12 @@ terminal
     =
       char
     | string
-    | '.' >>
+    | any
+    ;
+
+any
+    =
+    '.' >>
     ;
 
 

@@ -193,6 +193,9 @@ class ParseContext(object):
     def _error(self, item, etype=FailedParse):
         raise etype(self._buffer, item)
 
+    def _fail(self):
+        self._error('fail')
+
     @contextmanager
     def _try(self):
         p = self._pos

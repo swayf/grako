@@ -52,7 +52,7 @@
  *
  *  I (Terence) tested this by running it on the jython-2.1/Lib
  *  directory of 40k lines of Python.
- *  
+ *
  */
 
 grammar Python;
@@ -284,6 +284,9 @@ suite : simple_stmt
       | NEWLINE INDENT (stmt)+ DEDENT
       ;
 
+INDENT  : ;
+DEDENT  : ;
+
 test: or_test
     ( ('if' or_test 'else') => 'if' or_test 'else' test)?
     | lambdef
@@ -342,7 +345,7 @@ factor : PLUS factor
 power : atom (trailer)* (options {greedy=true;}:DOUBLESTAR factor)?
       ;
 
-atom : LPAREN 
+atom : LPAREN
        ( yield_expr
        | testlist_gexp
        )?
@@ -358,7 +361,7 @@ atom : LPAREN
      | (STRING)+
      ;
 
-listmaker : test 
+listmaker : test
             ( list_for
             | (options {greedy=true;}:COMMA test)*
             ) (COMMA)?
@@ -368,7 +371,7 @@ testlist_gexp
     : test ( (options {k=2;}: COMMA test)* (COMMA)?
            | gen_for
            )
-           
+
     ;
 
 lambdef: 'lambda' (varargslist)? COLON test
@@ -624,7 +627,7 @@ NEWLINE
 
 WS  :    {startPos>0}?=> (' '|'\t'|'\u000C')+ {$channel=HIDDEN;}
     ;
-    
+
 /** Grab everything before a real symbol.  Then if newline, kill it
  *  as this is a blank line.  If whitespace followed by comment, kill it
  *  as it's a comment on a line by itself.
@@ -669,7 +672,7 @@ LEADING_WS
 
     Only match \n here if we didn't start on left edge; let NEWLINE return that.
     Kill if newlines if we live on a line by ourselves
-    
+
     Consume any leading whitespace if it starts on left edge.
  */
 COMMENT

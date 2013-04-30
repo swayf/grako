@@ -3,7 +3,7 @@ start: test
 
 test: parser
 	PYTHONPATH=../.. \
-		python antlr2grako.py grammar/Python.g \
+		python antlr2grako.py grammar/Python.g \ #--trace \
 				2>&1
 
 parser: antlr_parser.py
