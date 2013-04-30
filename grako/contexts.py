@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import, unicode_literals
 import sys
+from functools import wraps
 from contextlib import contextmanager
 from collections import namedtuple
 from .ast import AST
@@ -195,7 +196,7 @@ class ParseContext(object):
         p = self._pos
         self._push_ast()
         try:
-            yield
+            yield None
             ast = self.ast
             cst = self.cst
         except:
@@ -211,7 +212,7 @@ class ParseContext(object):
         self._push_cut()
         try:
             with self._try():
-                yield
+                yield None
         except FailedCut:
             raise
         except FailedParse as e:
@@ -221,23 +222,31 @@ class ParseContext(object):
             self._pop_cut()
 
     @contextmanager
-    def _choice(self):
+    def _choice_context(self):
         try:
-            yield
+            yield None
         except FailedCut as e:
             raise e.nested
 
+    #decorator
+    def _choice(self, f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            with self._choice_context():
+                return f()
+        return wrapper
+
     @contextmanager
     def _optional(self):
-        with self._choice():
+        with self._choice_context():
             with self._option():
-                yield
+                yield None
 
     @contextmanager
     def _group(self):
         self._push_cst()
         try:
-            yield
+            yield None
             cst = self.cst
         finally:
             self._pop_cst()
@@ -248,7 +257,7 @@ class ParseContext(object):
         p = self._pos
         self._push_ast()
         try:
-            yield
+            yield None
         finally:
             self._goto(p)
             self._pop_ast()  # simply discard
@@ -258,7 +267,7 @@ class ParseContext(object):
         p = self._pos
         self._push_ast()
         try:
-            yield
+            yield None
         except FailedParse:
             pass
         else:
@@ -303,3 +312,17 @@ class ParseContext(object):
             self._pop_cst()
         self._add_cst_node(cst)
         return result
+
+    #decorator
+    def _closure(self, f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return self._repeat(f)
+        return wrapper
+
+    #decorator
+    def _closure_plus(self, f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return self._repeat(f, plus=True)
+        return wrapper
