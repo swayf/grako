@@ -487,7 +487,7 @@ Change History
     * Semantic actions can now be implemented by a delegate.
     * Reset synthetic method count and use decorators for more readable parser code.
     * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
-    * The bootstar parser was refactored to use semantic delegates.
+    * The bootstrap parser was refactored to use semantic delegates.
     * Proved that grammar models can be pickled, unpickled, and reused.
 
 - **1.3.0**
