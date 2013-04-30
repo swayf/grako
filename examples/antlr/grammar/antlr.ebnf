@@ -1,32 +1,4 @@
 (*
- [The "BSD licence"]
- Copyright (c) 2005-2007 Terence Parr
- All rights reserved.
-
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions
- are met:
- 1. Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
- 2. Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
- 3. The name of the author may not be used to endorse or promote products
-    derived from this software without specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*)
-
-(*
     ANTLR v3 grammar written in Grako EBNF syntax.
 
     This grammar is inspired in, but different one by the one created
@@ -36,10 +8,10 @@
 
 grammar
     =
-    [('lexer'|'parser')] grammar id ';'
-    [options] 
-    [tokens] 
-    {scope} 
+    [('lexer'|'parser')] 'grammar' id ';'
+    [options]
+    [tokens]
+    {scope}
     {action}
     {rule}+
     $
@@ -57,7 +29,7 @@ option
 
 tokens
     =
-    'tokens' '{' {token}+ '}' 
+    'tokens' '{' {token}+ '}'
     ;
 
 token
@@ -65,10 +37,15 @@ token
     token_name ['=' token_value ] ';'
     ;
 
+token_value
+    =
+    literal
+    ;
+
 scope
     =
-    'scope' 
-    ( 
+    'scope'
+    (
       block ['scope' id {',' id} ';' ]
     | id {',' id} ';'
     | id block
@@ -88,8 +65,8 @@ block
 rule
     =
     ['protected'|'public'|'private'|'fragment']
-    id ['!'] [args] 
-    ['returns' args] 
+    id ['!'] [arg]
+    ['returns' arg]
     ['trhows' id {',' id}* ]
     [options]
     [scope]
@@ -98,15 +75,26 @@ rule
     [exceptions]
     ;
 
+arg
+    =
+    '['
+        {
+            arg
+        |
+            ?/[^\]]*/?
+        }*
+    ']'
+    ;
+
 exceptions
     =
-    {'catch' args block}
+    {'catch' arg block}
     ['finally' block]
     ;
 
 alternatives
     =
-    alternative {'|' alternative} 
+    alternative {'|' alternative}
     ;
 
 alternative
@@ -116,7 +104,7 @@ alternative
 
 element
     =
-      id ('+='|=) atom
+      id ('+='| '=')  atom
     | semantic
     | syntactic
     | optional
@@ -145,7 +133,7 @@ closure
     atom '*'
     ;
 
-positive_closuere
+positive_closure
     =
     atom '+'
     ;
@@ -164,9 +152,14 @@ atom
     )
     ;
 
+range
+    =
+    char '..' char
+    ;
+
 subexp
     =
-    '(' aternatives ')'
+    '(' alternatives ')'
     ;
 
 negative
@@ -208,6 +201,12 @@ token_name
     upper_name
     ;
 
+literal
+    =
+    id | string | int
+    ;
+
+
 id
     =
     lower_name
@@ -230,7 +229,7 @@ NAME_CHARS
 
 char
     =
-    string;
+    string
     ;
 
 string
