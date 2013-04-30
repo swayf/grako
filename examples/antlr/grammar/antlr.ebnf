@@ -8,7 +8,7 @@
 
 grammar
     =
-    [('lexer'|'parser')] 'grammar' id ';'
+    [('lexer'|'parser')] 'grammar' >> name ';'
     [options]
     [tokens]
     {scope}
@@ -19,22 +19,22 @@ grammar
 
 options
     =
-    'options' '{' {option}+ '}'
+    'options' >> '{' {option}+ '}' >>
     ;
 
 option
     =
-    id '='  (id|string|char|int|'*') ';'
+    id '=' >>  (id|string|char|int|'*') ';' >>
     ;
 
 tokens
     =
-    'tokens' '{' {token}+ '}'
+    'tokens' >> '{' {token}+ '}'
     ;
 
 token
     =
-    token_name ['=' token_value ] ';'
+    token_name ['=' >> token_value ] ';' >>
     ;
 
 token_value
@@ -44,22 +44,24 @@ token_value
 
 scope
     =
-    'scope'
+    'scope' >>
     (
-      block ['scope' id {',' id} ';' ]
-    | id {',' id} ';'
+      block ['scope' >> id {',' id} ';' ]
+    | id {',' >> id} ';'
     | id block
     )
     ;
 
 action
     =
-    '@' ('lexer'|'parser'|id) block
+    '@' >> ('lexer'|'parser'|id)
+    ['::' >> id]
+    block
     ;
 
 block
     =
-    '{' {(block|?/./?)} '}'
+    '{' >> {(block|?/[^}]*/?)} '}'
     ;
 
 rule
@@ -71,13 +73,13 @@ rule
     [options]
     [scope]
     {action}
-    ':' alternatives ';'
+    ':' >> alternatives ';' >>
     [exceptions]
     ;
 
 arg
     =
-    '['
+    '[' >>
         {
             arg
         |
@@ -88,13 +90,13 @@ arg
 
 exceptions
     =
-    {'catch' arg block}
-    ['finally' block]
+    {'catch' >> arg block}
+    ['finally' >> block]
     ;
 
 alternatives
     =
-    alternative {'|' alternative}
+    alternative {'|' >> alternative}
     ;
 
 alternative
@@ -104,38 +106,50 @@ alternative
 
 element
     =
-      id ('+='| '=')  atom
-    | semantic
-    | syntactic
+      id ('+='| '=') >>  atom
+    | gated_predicate
+    | semantic_predicate
+    | semantic_action
+    | syntactic_predicate
     | optional
     | closure
     | positive_closure
     | atom
     ;
 
-semantic
+gated_predicate
     =
-    block '?'
+    block '?=>' >>
     ;
 
-syntactic
+semantic_predicate
     =
-    block '=>'
+    block '?' >>
+    ;
+
+semantic_action
+    =
+    block
+    ;
+
+syntactic_predicate
+    =
+    subexp '=>' >>
     ;
 
 optional
     =
-    atom '?'
+    atom '?' >>
     ;
 
 closure
     =
-    atom '*'
+    atom '*' >>
     ;
 
 positive_closure
     =
-    atom '+'
+    atom '+' >>
     ;
 
 atom
@@ -154,17 +168,20 @@ atom
 
 range
     =
-    char '..' char
+    char '..' >> char
     ;
 
 subexp
     =
-    '(' alternatives ')'
+    '(' >>
+        [options ':' >>]
+        alternatives
+    ')'
     ;
 
 negative
     =
-    '~' (non_terminal|subexp)
+    '~' >> (non_terminal|subexp)
     ;
 
 non_terminal
@@ -177,13 +194,13 @@ terminal
     =
       char
     | string
-    | '.'
+    | '.' >>
     ;
 
 
 rewrite
     =
-    '->' ?/[^|;]*/?
+    '->' >> ?/[^|;]*/?
     ;
 
 rule_ref
@@ -209,7 +226,12 @@ literal
 
 id
     =
-    lower_name
+    name
+    ;
+
+name
+    =
+    ?/[a-zA-Z]/? NAME_CHARS
     ;
 
 lower_name
@@ -234,13 +256,40 @@ char
 
 string
     =
-    '"' ?/([^"\n]|"")*/? '"'
-    |
-    "'" ?/([^'\n]|'')*/? "'"
-    |
-    "<<" ?/.*(?!>>)/? ">>"
+    STRING
     ;
 
-int =
+STRING
+    =
+    '"' >> @?/([^"\n]|\\")*?/? '"'
+    |
+    "'" >> @?/([^'\n]|\\')*?/? "'"
+    |
+    '<<' >> {!'>>' ?/./?} '>>'
+    ;
+
+int
+    =
     ?/[0-9]+/?
+    ;
+
+ESC
+    =
+    '\' >>
+    @(
+        '\\'
+    |
+        '"'
+    |
+        "'"
+    |
+        'u' XDIGIT XDIGIT XDIGIT XDIGIT
+    |
+        ?/[nrtbf>]/?
+    )
+    ;
+
+XDIGIT
+    =
+    ?/[a-fA-F0-9]/?
     ;

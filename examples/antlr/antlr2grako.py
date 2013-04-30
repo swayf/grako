@@ -7,8 +7,7 @@ from grako.buffering import Buffer
 from antlr_parser import ANTLRParser as ANTLRParserBase
 
 
-#COMMENTS_RE = r'/\*.*?\*/|//[^\n]*?\n'
-COMMENTS_RE = r'\/\*.*?\*\/'
+COMMENTS_RE = r'/\*(?:.|\n)*?\*/|//[^\n]*?\n'
 
 
 class ANTLRParser(ANTLRParserBase):
