@@ -69,14 +69,14 @@ A **Grako** generated parser consists of the following classes:
 
     def _myrulename_(self):
 
-* An *semantics check parser* class that inherits from the base parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
+* A *semantics check parser* class that inherits from the base parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
 
-* A *semantics delegate class* one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
+* A *semantics delegate class* with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
 
     def myrulename(self, ast):
         return ast
 
-The methods in the base parser class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
+The methods in the delegate class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
 
 
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph
@@ -127,9 +127,6 @@ Using the Generated Parser
 ==========================
 
 To use the generated parser, just subclass the base or the abstract parser, create an instance of it, and invoke its ``parse()`` method passing the grammar to parse and the starting rule's name as parameter::
-
-    class MyParser(MyParserBase):
-        pass
 
     parser = MyParser()
     ast = parser.parse('text to parse', rule_name='start')
