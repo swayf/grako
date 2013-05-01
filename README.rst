@@ -226,6 +226,9 @@ The expressions, in reverse order of operator precedence, can be:
     ``()``
         The empty expression. Succeed without advancing over input.
 
+    ``!()``
+        The *fail* expression. This is actually ``!`` applied to ``()``, which always fails.
+
     ``>>``
         The cut expression. After this point, prevent other options from being considered even if the current option fails to parse.
 
