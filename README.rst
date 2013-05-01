@@ -496,7 +496,7 @@ Change History
 - **1.4.0-rc.1**
     * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
     * Semantic actions can now be implemented by a delegate.
-    * Reset synthetic method count and use decorators for more readable parser code.
+    * Reset synthetic method count and use decorators to increase readibility of generated parsers.
     * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
     * The bootstrap parser was refactored to use semantic delegates.
     * Proved that grammar models can be pickled, unpickled, and reused.
@@ -505,7 +505,7 @@ Change History
 - **1.3.0**
     * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
     * Make sure that *cut* actually applies to the nearest fork.
-    * Finish aligning model parsing with generated code parsing. Performance should now favor model parsing (because less code means more CPU-cache hits), but model parsing doesn't yet provide for semantic actions.
+    * Finish aligning model parsing with generated code parsing.
     * Report all the rules missing in a grammar before aborting.
     * Align the sample *etc/grako.ebnf* grammar to the language parsed by the bootstrap parser.
     * Ensure compatibility with Python_ 2.7.4 and 3.3.1.
