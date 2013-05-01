@@ -105,7 +105,10 @@ class CommentGrammar(_Grammar):
     def __str__(self):
         return self.render()
 
-    template = '(* {text} *)'
+    template = '''
+        (* {text} *)
+
+        '''
 
 
 class EOFGrammar(_Grammar):
@@ -147,13 +150,22 @@ class GroupGrammar(_DecoratorGrammar):
             return self.exp.parse(ctx)
 
     def __str__(self):
-        return '(%s)' % str(self.exp).strip()
+        template = '(%s)'
+        if isinstance(self.exp, ChoiceGrammar):
+            template = trim(self.str_template)
+        return template % str(self.exp)
 
     template = '''\
                 with self._group() as _e:
                 {exp:1::}
                     _e = self.cst
                 '''
+
+    str_template = '''
+            (
+            %s
+            )
+            '''
 
 
 class TokenGrammar(_Grammar):
