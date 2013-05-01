@@ -487,7 +487,7 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-- **tip**
+- **1.4.0-rc.1**
     * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
     * Semantic actions can now be implemented by a delegate.
     * Reset synthetic method count and use decorators for more readable parser code.
