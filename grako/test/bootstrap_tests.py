@@ -97,9 +97,9 @@ def main():
     open('tmp/g10.py', 'w').write(gencode10)
 
     print('-' * 20, 'phase 11 - Pickle the model and try again.')
-    with open('tmp/11.grako', 'w') as f:
+    with open('tmp/11.grako', 'wb') as f:
         pickle.dump(g10, f, protocol=2)
-    with open('tmp/11.grako', 'r') as f:
+    with open('tmp/11.grako', 'rb') as f:
         g11 = pickle.load(f)
     r11 = g11.parse(text,
                     start_rule='grammar',
