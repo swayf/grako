@@ -420,11 +420,12 @@ License
 .. _ResQSoft:  http://www.resqsoft.com/
 .. _`Juancarlo Añez`: mailto:apalala@gmail.com
 
-You may use the tool under the terms of the `BSD-style License` as described in the enclosed **LICENSE.txt** file.
+You may use the tool under the terms of the `BSD_-style License` as described in the enclosed **LICENSE.txt** file.
 
 *If your project requires different licensing* please contact
 `info@resqsoft.com`_.
 
+.. _BSD: http://en.wikipedia.org/wiki/BSD_licenses#2-clause_license_.28.22Simplified_BSD_License.22_or_.22FreeBSD_License.22.29
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
 
 
@@ -501,6 +502,7 @@ Change History
     * The bootstrap parser was refactored to use semantic delegates.
     * Proved that grammar models can be pickled, unpickled, and reused.
     * Added the *antlr* example with an ANTLR_ to **Grako** grammar translator.
+    * Changed the licensing to simplified BSD_-style.
 
 - **1.3.0**
     * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
