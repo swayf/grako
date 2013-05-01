@@ -56,7 +56,8 @@ class Node(Renderer):
     @property
     def text(self):
         if self.parseinfo:
-            return self.line_info.text.strip('\n')
+            text = self.parseinfo.buffer.text
+            return text[self.parseinfo.pos:self.parseinfo.endpos]
 
     def __str__(self):
         return self.render()
