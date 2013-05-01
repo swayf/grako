@@ -11,23 +11,23 @@ class ANTLRSemantics(object):
         return model.Grammar(self.name, ast.rules)
 
     def rule(self, ast):
-        return model.RuleGrammar(ast.name, ast.exp)
+        return model.Rule(ast.name, ast.exp)
 
     def alternatives(self, ast):
         options = [o for o in ast.options if o is not None]
         if len(options) == 1:
             return options[0]
         else:
-            return model.ChoiceGrammar(options)
+            return model.Choice(options)
 
     def elements(self, ast):
         elements = [e for e in ast if e is not None]
         if not elements:
-            return model.VoidGrammar()
+            return model.Void()
         elif len(elements) == 1:
             return elements[0]
         else:
-            return model.SequenceGrammar(elements)
+            return model.Sequence(elements)
 
     def predicate_or_action(self, ast):
         def flatten(s):
@@ -38,39 +38,39 @@ class ANTLRSemantics(object):
             else:
                 return s
         text = flatten(ast)
-        return model.CommentGrammar(text)
+        return model.Comment(text)
 
     def named(self, ast):
-        return model.NamedGrammar(ast.name, ast.exp, ast.force_list)
+        return model.Named(ast.name, ast.exp, ast.force_list)
 
     def syntatic_predicate(self, ast):
-        return model.LookaheadGrammar(ast)
+        return model.Lookahead(ast)
 
     def optional(self, ast):
-        return model.OptionalGrammar(ast)
+        return model.Optional(ast)
 
     def closure(self, ast):
-        return model.RepeatGrammar(ast)
+        return model.Repeat(ast)
 
     def positive_closure(self, ast):
-        return model.RepeatPlusGrammar(ast)
+        return model.RepeatPlus(ast)
 
     def negative(self, ast):
-        neg = model.LookaheadNotGrammar(ast)
-        any = model.PatternGrammar('.')
-        return model.SequenceGrammar([neg, any])
+        neg = model.LookaheadNot(ast)
+        any = model.Pattern('.')
+        return model.Sequence([neg, any])
 
     def range(self, ast):
-        return model.PatternGrammar('[%s-%s]' % (ast.first, ast.last))
+        return model.Pattern('[%s-%s]' % (ast.first, ast.last))
 
     def non_terminal(self, ast):
-        return model.RuleRefGrammar(ast)
+        return model.RuleRef(ast)
 
     def any(self, ast):
-        return model.PatternGrammar('\w+|\S+')
+        return model.Pattern('\w+|\S+')
 
     def string(self, ast):
         text = ast
         if isinstance(text, list):
             text = ''.join(text)
-        return model.TokenGrammar(text)
+        return model.Token(text)

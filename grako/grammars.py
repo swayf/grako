@@ -30,7 +30,7 @@ from .exceptions import (FailedParse,
 
 
 def check(result):
-    assert isinstance(result, _Grammar), str(result)
+    assert isinstance(result, _Model), str(result)
 
 
 def dot(x, y, k):
@@ -62,9 +62,9 @@ class ModelContext(ParseContext):
         return self.rules[name]
 
 
-class _Grammar(Renderer):
+class _Model(Renderer):
     def __init__(self):
-        super(_Grammar, self).__init__()
+        super(_Model, self).__init__()
         self._first_set = None
 
     def parse(self, ctx):
@@ -83,23 +83,23 @@ class _Grammar(Renderer):
         return set()
 
 
-class VoidGrammar(_Grammar):
+class Void(_Model):
     def __str__(self):
         return '()'
 
     template = 'pass'
 
 
-class FailGrammar(_Grammar):
+class Fail(_Model):
     def __str__(self):
         return '!()'
 
     template = 'self._fail()'
 
 
-class CommentGrammar(_Grammar):
+class Comment(_Model):
     def __init__(self, text):
-        super(CommentGrammar, self).__init__()
+        super(Comment, self).__init__()
         self.text = text.strip()
 
     def __str__(self):
@@ -111,7 +111,7 @@ class CommentGrammar(_Grammar):
         '''
 
 
-class EOFGrammar(_Grammar):
+class EOF(_Model):
     def parse(self, ctx):
         ctx._next_token()
         if not ctx.buf.atend():
@@ -123,10 +123,10 @@ class EOFGrammar(_Grammar):
     template = 'self._check_eof()'
 
 
-class _DecoratorGrammar(_Grammar):
+class _Decorator(_Model):
     def __init__(self, exp):
-        assert isinstance(exp, _Grammar), str(exp)
-        super(_DecoratorGrammar, self).__init__()
+        assert isinstance(exp, _Model), str(exp)
+        super(_Decorator, self).__init__()
         self.exp = exp
 
     def parse(self, ctx):
@@ -144,14 +144,14 @@ class _DecoratorGrammar(_Grammar):
     template = '{exp}'
 
 
-class GroupGrammar(_DecoratorGrammar):
+class Group(_Decorator):
     def parse(self, ctx):
         with ctx._group():
             return self.exp.parse(ctx)
 
     def __str__(self):
         template = '(%s)'
-        if isinstance(self.exp, ChoiceGrammar):
+        if isinstance(self.exp, Choice):
             template = trim(self.str_template)
         return template % str(self.exp)
 
@@ -168,9 +168,9 @@ class GroupGrammar(_DecoratorGrammar):
             '''
 
 
-class TokenGrammar(_Grammar):
+class Token(_Model):
     def __init__(self, token):
-        super(TokenGrammar, self).__init__()
+        super(Token, self).__init__()
         self.token = token
         if not self.token:
             raise GrammarError('invalid token %s' % self.token)
@@ -180,6 +180,7 @@ class TokenGrammar(_Grammar):
         token = ctx.buf.match(self.token)
         if token is None:
             raise FailedToken(ctx.buf, self.token)
+
         ctx._trace_match(self.token, None)
         ctx._add_cst_node(token)
         return token
@@ -201,9 +202,9 @@ class TokenGrammar(_Grammar):
     template = "_e = self._token({token})"
 
 
-class PatternGrammar(_Grammar):
+class Pattern(_Model):
     def __init__(self, pattern):
-        super(PatternGrammar, self).__init__()
+        super(Pattern, self).__init__()
         self.pattern = pattern
         self._re = re.compile(pattern)
 
@@ -227,13 +228,13 @@ class PatternGrammar(_Grammar):
     template = '_e = self._pattern({pattern})'
 
 
-class LookaheadGrammar(_DecoratorGrammar):
+class Lookahead(_Decorator):
     def __str__(self):
         return '&' + self.exp
 
     def parse(self, ctx):
         with ctx._if():
-            super(LookaheadGrammar, self).parse(ctx)
+            super(Lookahead, self).parse(ctx)
 
     template = '''\
                 with self._if():
@@ -241,13 +242,13 @@ class LookaheadGrammar(_DecoratorGrammar):
                 '''
 
 
-class LookaheadNotGrammar(_DecoratorGrammar):
+class LookaheadNot(_Decorator):
     def __str__(self):
         return '!' + str(self.exp)
 
     def parse(self, ctx):
         with ctx._ifnot():
-            super(LookaheadNotGrammar, self).parse(ctx)
+            super(LookaheadNot, self).parse(ctx)
 
     template = '''\
                 with self._ifnot():
@@ -255,9 +256,9 @@ class LookaheadNotGrammar(_DecoratorGrammar):
                 '''
 
 
-class SequenceGrammar(_Grammar):
+class Sequence(_Model):
     def __init__(self, sequence):
-        super(SequenceGrammar, self).__init__()
+        super(Sequence, self).__init__()
         assert isinstance(sequence, list), str(sequence)
         self.sequence = sequence
 
@@ -289,9 +290,9 @@ class SequenceGrammar(_Grammar):
                 '''
 
 
-class ChoiceGrammar(_Grammar):
+class Choice(_Model):
     def __init__(self, options):
-        super(ChoiceGrammar, self).__init__()
+        super(Choice, self).__init__()
         assert isinstance(options, list), urepr(options)
         self.options = options
 
@@ -335,7 +336,7 @@ class ChoiceGrammar(_Grammar):
         if len(self.options) == 1:
             return render(self.options[0], **fields)
         else:
-            return super(ChoiceGrammar, self).render(**fields)
+            return super(Choice, self).render(**fields)
 
     option_template = '''\
                     with self._option() as _e:
@@ -352,7 +353,7 @@ class ChoiceGrammar(_Grammar):
                 '''
 
 
-class RepeatGrammar(_DecoratorGrammar):
+class Repeat(_Decorator):
     def parse(self, ctx):
         f = lambda: self.exp.parse(ctx)
         return ctx._repeat(f)
@@ -366,7 +367,7 @@ class RepeatGrammar(_DecoratorGrammar):
 
     def __str__(self):
         template = '{%s}'
-        if isinstance(self.exp, ChoiceGrammar):
+        if isinstance(self.exp, Choice):
             template = trim(self.str_template)
         return template % str(self.exp)
 
@@ -376,7 +377,7 @@ class RepeatGrammar(_DecoratorGrammar):
     def render(self, **fields):
         if {()} in self.exp.firstset:
             raise GrammarError('may repeat empty sequence')
-        return super(RepeatGrammar, self).render(**fields)
+        return super(Repeat, self).render(**fields)
 
     template = '''
                 @self._closure
@@ -393,7 +394,7 @@ class RepeatGrammar(_DecoratorGrammar):
             '''
 
 
-class RepeatPlusGrammar(RepeatGrammar):
+class RepeatPlus(Repeat):
     def parse(self, ctx):
         f = lambda: self.exp.parse(ctx)
         return ctx._repeat(f, plus=True)
@@ -406,7 +407,7 @@ class RepeatPlusGrammar(RepeatGrammar):
         return result
 
     def __str__(self):
-        return super(RepeatPlusGrammar, self).__str__() + '+'
+        return super(RepeatPlus, self).__str__() + '+'
 
     def render_fields(self, fields):
         fields.update(n=self.counter())
@@ -420,7 +421,7 @@ class RepeatPlusGrammar(RepeatGrammar):
                 '''
 
 
-class OptionalGrammar(_DecoratorGrammar):
+class Optional(_Decorator):
 
     def parse(self, ctx):
         with ctx._optional():
@@ -431,7 +432,7 @@ class OptionalGrammar(_DecoratorGrammar):
 
     def __str__(self):
         template = '[%s]'
-        if isinstance(self.exp, ChoiceGrammar):
+        if isinstance(self.exp, Choice):
             template = trim(self.str_template)
         return template % str(self.exp)
 
@@ -447,7 +448,7 @@ class OptionalGrammar(_DecoratorGrammar):
             '''
 
 
-class CutGrammar(_Grammar):
+class Cut(_Model):
     def parse(self, ctx):
         ctx._cut()
         return None
@@ -461,10 +462,10 @@ class CutGrammar(_Grammar):
     template = 'self._cut()'
 
 
-class NamedGrammar(_DecoratorGrammar):
+class Named(_Decorator):
     def __init__(self, name, exp, force_list):
-        super(NamedGrammar, self).__init__(exp)
-        assert isinstance(exp, _Grammar), str(exp)
+        super(Named, self).__init__(exp)
+        assert isinstance(exp, _Model), str(exp)
         self.name = name
         self.force_list = force_list
 
@@ -493,9 +494,9 @@ class NamedGrammar(_DecoratorGrammar):
                 '''
 
 
-class OverrideGrammar(_DecoratorGrammar):
+class Override(_Decorator):
     def parse(self, ctx):
-        result = super(OverrideGrammar, self).parse(ctx)
+        result = super(Override, self).parse(ctx)
         ctx._add_ast_node('@', result)
         return result
 
@@ -508,9 +509,9 @@ class OverrideGrammar(_DecoratorGrammar):
                 '''
 
 
-class SpecialGrammar(_Grammar):
+class Special(_Model):
     def __init__(self, special):
-        super(SpecialGrammar, self).__init__()
+        super(Special, self).__init__()
         self.special = special
 
     def _first(self, k, F):
@@ -520,9 +521,9 @@ class SpecialGrammar(_Grammar):
         return '?/%s/?' % self.pattern
 
 
-class RuleRefGrammar(_Grammar):
+class RuleRef(_Model):
     def __init__(self, name):
-        super(RuleRefGrammar, self).__init__()
+        super(RuleRef, self).__init__()
         self.name = name
 
     def parse(self, ctx):
@@ -560,9 +561,9 @@ class RuleRefGrammar(_Grammar):
     template = "_e = self._call('{name}')"
 
 
-class RuleGrammar(NamedGrammar):
+class Rule(Named):
     def __init__(self, name, exp, ast_name=None):
-        super(RuleGrammar, self).__init__(name, exp, False)
+        super(Rule, self).__init__(name, exp, False)
         self.ast_name = ast_name
 
     def parse(self, ctx):

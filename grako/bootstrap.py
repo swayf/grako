@@ -17,25 +17,7 @@ from collections import OrderedDict
 from .buffering import Buffer
 from .parsing import Parser
 from .util import simplify_list
-from .grammars import (ChoiceGrammar,
-                       CutGrammar,
-                       EOFGrammar,
-                       Grammar,
-                       GroupGrammar,
-                       LookaheadGrammar,
-                       LookaheadNotGrammar,
-                       NamedGrammar,
-                       OptionalGrammar,
-                       OverrideGrammar,
-                       PatternGrammar,
-                       RepeatGrammar,
-                       RepeatPlusGrammar,
-                       RuleGrammar,
-                       RuleRefGrammar,
-                       SequenceGrammar,
-                       SpecialGrammar,
-                       TokenGrammar,
-                       VoidGrammar)
+from . import grammars
 from .exceptions import FailedParse
 
 __all__ = ['GrakoParser', 'GrakoGrammarGenerator']
@@ -307,7 +289,7 @@ class GrakoSemantics(object):
         self.rules = OrderedDict()
 
     def token(self, ast):
-        return TokenGrammar(ast)
+        return grammars.Token(ast)
 
     def word(self, ast):
         return ast
@@ -316,42 +298,42 @@ class GrakoSemantics(object):
         return ast.qualified
 
     def call(self, ast):
-        return RuleRefGrammar(ast)
+        return grammars.RuleRef(ast)
 
     def pattern(self, ast):
-        return PatternGrammar(ast)
+        return grammars.Pattern(ast)
 
     def cut(self, ast):
-        return CutGrammar()
+        return grammars.Cut()
 
     def eof(self, ast):
-        return EOFGrammar()
+        return grammars.EOF()
 
     def void(self, ast):
-        return VoidGrammar()
+        return grammars.Void()
 
     def subexp(self, ast):
-        return GroupGrammar(ast)
+        return grammars.Group(ast)
 
     def optional(self, ast):
-        return OptionalGrammar(ast)
+        return grammars.Optional(ast)
 
     def plus(self, ast):
         return ast
 
     def repeat(self, ast):
         if ast.plus:
-            return RepeatPlusGrammar(ast.repeat)
-        return RepeatGrammar(ast.repeat)
+            return grammars.RepeatPlus(ast.repeat)
+        return grammars.Repeat(ast.repeat)
 
     def special(self, ast):
-        return SpecialGrammar(ast.special)
+        return grammars.Special(ast.special)
 
     def kif(self, ast):
-        return LookaheadGrammar(ast.kif)
+        return grammars.Lookahead(ast.kif)
 
     def knot(self, ast):
-        return LookaheadNotGrammar(ast.knot)
+        return grammars.LookaheadNot(ast.knot)
 
     def atom(self, ast):
         return ast
@@ -360,10 +342,10 @@ class GrakoSemantics(object):
         return ast
 
     def named(self, ast):
-        return NamedGrammar(ast.name, ast.value, 'force_list' in ast)
+        return grammars.Named(ast.name, ast.value, 'force_list' in ast)
 
     def override(self, ast):
-        return OverrideGrammar(ast)
+        return grammars.Override(ast)
 
     def element(self, ast):
         return ast
@@ -373,12 +355,12 @@ class GrakoSemantics(object):
         assert isinstance(seq, list), str(seq)
         if len(seq) == 1:
             return simplify_list(seq)
-        return SequenceGrammar(seq)
+        return grammars.Sequence(seq)
 
     def choice(self, ast):
         if len(ast.options) == 1:
             return ast.options[0]
-        return ChoiceGrammar(ast.options)
+        return grammars.Choice(ast.options)
 
     def expre(self, ast):
         return ast
@@ -388,15 +370,15 @@ class GrakoSemantics(object):
         name = ast.name
         rhs = ast.rhs
         if not name in self.rules:
-            rule = RuleGrammar(name, rhs, ast_name=ast_name)
+            rule = grammars.Rule(name, rhs, ast_name=ast_name)
             self.rules[name] = rule
         else:
             rule = self.rules[name]
-            if isinstance(rule.exp, ChoiceGrammar):
+            if isinstance(rule.exp, grammars.Choice):
                 rule.exp.options.append(rhs)
             else:
-                rule.exp = ChoiceGrammar([rule.exp, rhs])
+                rule.exp = grammars.Choice([rule.exp, rhs])
         return rule
 
     def grammar(self, ast):
-        return Grammar(self.grammar_name, list(self.rules.values()))
+        return grammars.Grammar(self.grammar_name, list(self.rules.values()))
