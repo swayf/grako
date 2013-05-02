@@ -492,14 +492,14 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-- **1.4.0-rc.1**
+- **1.4.0**
     * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
     * Semantic actions can now be implemented by a delegate.
     * Reset synthetic method count and use decorators to increase readibility of generated parsers.
-    * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
+    * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap **Grako**.
     * The bootstrap parser was refactored to use semantic delegates.
     * Proved that grammar models can be pickled, unpickled, and reused.
-    * Added the *antlr* example with an ANTLR_ to **Grako** grammar translator.
+    * Added the *antlr* example with an ANTLR_-to-`**Grako** grammar translator.
     * Changed the licensing to simplified BSD_.
 
 - **1.3.0**
