@@ -110,6 +110,21 @@ def main():
     gencode11 = r11.codegen()
     open('tmp/g11.py', 'w').write(gencode11)
 
+    print('-' * 20, 'phase 12 - Visitor.')
+    from grako.visitor import GrammarVisitor
+
+    class PrintNameVisitor(GrammarVisitor):
+        def __init__(self):
+            self.visited = []
+
+        def visit(self, o):
+            self.visited.append(o.__class__.__name__)
+            super(PrintNameVisitor, self).visit(o)
+
+    v = PrintNameVisitor()
+    g11.accept(v)
+    open('tmp/12.txt', 'w').write('\n'.join(v.visited))
+
 
 if __name__ == '__main__':
     main()

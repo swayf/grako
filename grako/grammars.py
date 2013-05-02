@@ -518,7 +518,7 @@ class Special(_Model):
         return set([(self.special,)])
 
     def __str__(self):
-        return '?/%s/?' % self.pattern
+        return '?%s?' % self.special
 
 
 class RuleRef(_Model):
