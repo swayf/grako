@@ -26,11 +26,11 @@ class GraphvizVisitor(GrammarVisitor):
         # self.graph.layout(prog='neato')
         self.graph.draw(filename)
 
-    def push_graph(self, name=None):
+    def push_graph(self, name=None, **attr):
         if name is None:
             self.node_count += 1
             name = 'g%d' % self.node_count
-        self.stack.append(self.graph.add_subgraph(name))
+        self.stack.append(self.graph.add_subgraph(name, **attr))
         return self.graph
 
     def pop_graph(self):
@@ -171,8 +171,7 @@ class GraphvizVisitor(GrammarVisitor):
         return (ni, ne)
 
     def visit_repeat(self, r):
-        g = self.push_graph()
-        g.graph_attr['rankdir'] = 'TB'
+        self.push_graph(rankdir='TB')
         try:
             i, e = self._visit_decorator(r)
             ni = self.dot()
