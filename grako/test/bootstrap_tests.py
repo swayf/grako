@@ -111,7 +111,7 @@ def main():
     gencode11 = r11.codegen()
     open('tmp/g11.py', 'w').write(gencode11)
 
-    print('-' * 20, 'phase 12 - Visitor.')
+    print('-' * 20, 'phase 12 - Visitor')
 
     class PrintNameVisitor(NodeVisitor):
         def __init__(self):
@@ -124,6 +124,14 @@ def main():
     v = PrintNameVisitor()
     g11.accept(v)
     open('tmp/12.txt', 'w').write('\n'.join(v.visited))
+
+    print('-' * 20, 'phase 13 - Graphics')
+    try:
+        from grako.diagrams import draw
+    except:
+        print('PyGraphViz not found!')
+    else:
+        draw('tmp/13.png', g11)
 
 
 if __name__ == '__main__':

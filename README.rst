@@ -492,6 +492,11 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
+- **tip**
+    * Create a basic diagram of the grammar if pygraphviz_ is installed.
+
+.. _pygraphviz: https://pypi.python.org/pypi/pygraphviz/
+
 - **1.4.0**
     * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
     * Semantic actions can now be implemented by a delegate.
