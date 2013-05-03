@@ -8,6 +8,7 @@ sys.path.append('tmp')
 import os
 import json
 import pickle
+from grako.rendering import NodeVisitor
 from grako.bootstrap import (GrakoParser,
                              GrakoGrammarGenerator,
                              GrakoSemantics,
@@ -111,9 +112,8 @@ def main():
     open('tmp/g11.py', 'w').write(gencode11)
 
     print('-' * 20, 'phase 12 - Visitor')
-    from grako.visitors import GrammarVisitor
 
-    class PrintNameVisitor(GrammarVisitor):
+    class PrintNameVisitor(NodeVisitor):
         def __init__(self):
             self.visited = []
 
