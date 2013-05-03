@@ -93,10 +93,8 @@ class Renderer(object):
 
 class NodeVisitor(object):
     def visit(self, obj, *args, **kwargs):
-        visit_name = 'visit_' + obj.__class__.__name__.lower()
-        return self._dispatch(visit_name, obj, *args, **kwargs)
-
-    def _dispatch(self, name, *args, **kwargs):
+        name = obj.__class__.__name__
+        name = 'visit_' + name.lower()
         method = getattr(self, name, None)
         if method:
-            return method(*args, **kwargs)
+            return method(obj, *args, **kwargs)

@@ -88,29 +88,27 @@ class GraphvizVisitor(GrammarVisitor):
     def concat(*args):
         return list(itertools.chain(*args))
 
-    def visit_Rule(self, r):
+    def _visit_decorator(self, d):
+        return d.exp.accept(self)
+
+    def visit_grammar(self, g):
+        vrules = [r.accept(self) for r in g.rules]
+        s, e = vrules[0][0], vrules[-1][1]
+        return (s, e)
+
+    def visit_rule(self, r):
         self.push_graph(r.name)
         try:
-            return super(GraphvizVisitor, self).visit_Rule(r)
+            i, e = self._visit_decorator(r)
+            s = self.rule_node(r.name)
+            self.edge(s, i)
+            t = self.end_node()
+            self.edge(e, t)
+            return (s, t)
         finally:
             self.pop_graph()
 
-    def visit_grammar(self, g, vrules):
-        # s = self.node(g.name)
-        # e = self.dot()
-        # self.path([s] + [n for n, _ in vrules] + [e])
-        s, e = vrules[0], vrules[-1]
-        return (s, e)
-
-    def visit_rule(self, r, vexp):
-        i, e = vexp
-        s = self.rule_node(r.name)
-        self.edge(s, i)
-        t = self.end_node()
-        self.edge(e, t)
-        return (s, t)
-
-    def visit_rule_ref(self, rr):
+    def visit_ruleref(self, rr):
         n = self.ref_node(rr.name)
         return (n, n)
 
@@ -118,20 +116,18 @@ class GraphvizVisitor(GrammarVisitor):
         n = self.node(s.special)
         return (n, n)
 
-    def visit_override(self, o, vexp):
-        i, e = vexp
-        return (i, e)
+    def visit_override(self, o):
+        return self._visit_decorator(o)
 
-    def visit_named(self, n, vexp):
-        i, e = vexp
-        return (i, e)
+    def visit_named(self, n):
+        return self._visit_decorator(n)
 
     def visit_cut(self, c):
         c = self.node('>>')
         return (c, c)
 
-    def visit_optional(self, o, vexp):
-        i, e = vexp
+    def visit_optional(self, o):
+        i, e = self._visit_decorator(o)
         ni = self.dot()
         ne = self.dot()
         self.zedge(ni, i)
@@ -139,23 +135,26 @@ class GraphvizVisitor(GrammarVisitor):
         self.zedge(e, ne)
         return (ni, ne)
 
-    def visit_repeat(self, r, vexp):
-        i, e = vexp
+    def visit_repeat(self, r):
+        i, e = self._visit_decorator(r)
         ni = self.dot()
         self.edge(ni, i)
         self.edge(e, ni)
         return (ni, ni)
 
-    def visit_repeat_plus(self, r, vexp):
-        i, e = vexp
-        self.edge(e, i)
+    def visit_repeatplus(self, r):
+        i, e = self._visit_decorator(r)
+        if i == e:
+            self.redge(e, i)
+        else:
+            self.edge(e, i)
         return (i, e)
 
-    def visit_group(self, g, vexp):
-        i, e = vexp
-        return (i, e)
+    def visit_group(self, g):
+        return self._visit_decorator(g)
 
-    def visit_choice(self, c, vopt):
+    def visit_choice(self, c):
+        vopt = [o.accept(self) for o in c.options]
         ni = self.dot()
         ne = self.dot()
         for i, e in vopt:
@@ -163,7 +162,8 @@ class GraphvizVisitor(GrammarVisitor):
             self.edge(e, ne)
         return (ni, ne)
 
-    def visit_sequence(self, s, vseq):
+    def visit_sequence(self, s):
+        vseq = [x.accept(self) for x in s.sequence]
         i, _ = vseq[0]
         _, e = vseq[-1]
         if i != e:
@@ -173,14 +173,14 @@ class GraphvizVisitor(GrammarVisitor):
                 self.edge(n, n1)
         return (i, e)
 
-    def visit_lookahead(self, l, vexp):
-        i, e = vexp
+    def visit_lookahead(self, l):
+        i, e = self._visit_decorator(l)
         n = self.node('&')
         self.edge(n, e)
         return (n, e)
 
-    def visit_lookahead_not(self, l, vexp):
-        i, e = vexp
+    def visit_lookahead_not(self, l):
+        i, e = self._visit_decorator(l)
         n = self.node('!')
         self.edge(n, e)
         return (n, e)
