@@ -8,7 +8,11 @@ from .visitors import GrammarVisitor
 class GraphvizVisitor(GrammarVisitor):
     def __init__(self):
         super(GraphvizVisitor, self).__init__()
-        self.top_graph = pgv.AGraph(pagedir='LB', directed=True)
+        self.top_graph = pgv.AGraph(directed=True,
+                                    rankdir='LR',
+                                    packMode='clust',
+                                    splines='true'
+                                    )
         self.stack = [self.top_graph]
         self.node_count = 0
 
@@ -18,6 +22,8 @@ class GraphvizVisitor(GrammarVisitor):
 
     def draw(self, filename):
         self.graph.layout(prog='dot')
+        # WARNING: neato generated graphics hang my GPU
+        # self.graph.layout(prog='neato')
         self.graph.draw(filename)
 
     def push_graph(self, name):
@@ -28,13 +34,19 @@ class GraphvizVisitor(GrammarVisitor):
         self.stack.pop()
         pass
 
-    def node(self, name):
-        self.node_count += 1
-        id = 'n%d' % self.node_count
+    def node(self, name, id=None):
+        if id is None:
+            self.node_count += 1
+            id = 'n%d' % self.node_count
+        else:
+            try:
+                return self.graph.get_node(id)
+            except KeyError:
+                pass
         self.graph.add_node(id)
         n = self.graph.get_node(id)
         n.attr['label'] = name
-        n.attr['shape'] = 'circle'
+#        n.attr['shape'] = 'circle'
         return n
 
     def dot(self):
@@ -52,8 +64,8 @@ class GraphvizVisitor(GrammarVisitor):
         n.attr['shape'] = 'box'
         return n
 
-    def rule_node(self, name):
-        n = self.node(name)
+    def rule_node(self, name, **attr):
+        n = self.node(name, **attr)
         n.attr['shape'] = 'parallelogram'
         return n
 
@@ -63,8 +75,8 @@ class GraphvizVisitor(GrammarVisitor):
         n.attr['width'] = 0.2
         return n
 
-    def edge(self, s, e):
-        self.graph.add_edge(s, e)
+    def edge(self, s, e, **attr):
+        self.graph.add_edge(s, e, **attr)
         edge = self.graph.get_edge(s, e)
         edge.attr['arrowhead'] = 'normal'
         return edge
@@ -75,9 +87,11 @@ class GraphvizVisitor(GrammarVisitor):
         return edge
 
     def zedge(self, s, e):
-        edge = self.edge(s, e)
-        edge.attr['len'] = 0.000001
+        edge = self.edge(s, e, len=0.000001)
         return edge
+
+    def nedge(self, s, e):
+        return self.edge(s, e, style='invisible', dir='none')
 
     def path(self, p):
         self.graph.add_path(p)
@@ -92,15 +106,28 @@ class GraphvizVisitor(GrammarVisitor):
         return d.exp.accept(self)
 
     def visit_grammar(self, g):
-        vrules = [r.accept(self) for r in g.rules]
-        s, e = vrules[0][0], vrules[-1][1]
-        return (s, e)
+        self.push_graph(g.name + '0')
+        try:
+            vrules = [r.accept(self) for r in reversed(g.rules)]
+        finally:
+            self.pop_graph()
+        self.push_graph(g.name + '1')
+        try:
+            # link all rule starting nodes with invisible edges
+            starts = [self.node(r.name, id=r.name) for r in g.rules]
+            for n1, n2 in zip(starts, starts[1:]):
+                # self.nedge(n1, n2)
+                pass
+        finally:
+            self.pop_graph()
+        s, t = vrules[0][0], vrules[-1][1]
+        return (s, t)
 
     def visit_rule(self, r):
         self.push_graph(r.name)
         try:
             i, e = self._visit_decorator(r)
-            s = self.rule_node(r.name)
+            s = self.rule_node(r.name, id=r.name)
             self.edge(s, i)
             t = self.end_node()
             self.edge(e, t)
@@ -123,8 +150,9 @@ class GraphvizVisitor(GrammarVisitor):
         return self._visit_decorator(n)
 
     def visit_cut(self, c):
-        c = self.node('>>')
-        return (c, c)
+        # c = self.node('>>')
+        # return (c, c)
+        return None
 
     def visit_optional(self, o):
         i, e = self._visit_decorator(o)
@@ -164,6 +192,7 @@ class GraphvizVisitor(GrammarVisitor):
 
     def visit_sequence(self, s):
         vseq = [x.accept(self) for x in s.sequence]
+        vseq = [x for x in vseq if x is not None]
         i, _ = vseq[0]
         _, e = vseq[-1]
         if i != e:
@@ -198,8 +227,9 @@ class GraphvizVisitor(GrammarVisitor):
         return (n, n)
 
     def visit_eof(self, v):
-        n = self.node('$')
-        return (n, n)
+        # n = self.node('$')
+        # return (n, n)
+        return None
 
 
 def draw(filename, grammar):
