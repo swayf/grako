@@ -78,7 +78,7 @@ class GraphvizVisitor(GrammarVisitor):
     def end_node(self):
         n = self.node('')
         n.attr['shape'] = 'point'
-        n.attr['width'] = 0.2
+        n.attr['width'] = 0.1
         return n
 
     def edge(self, s, e, **attr):
