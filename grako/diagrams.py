@@ -26,15 +26,18 @@ class GraphvizVisitor(GrammarVisitor):
         # self.graph.layout(prog='neato')
         self.graph.draw(filename)
 
-    def push_graph(self, name):
+    def push_graph(self, name=None):
+        if name is None:
+            self.node_count += 1
+            name = 'g%d' % self.node_count
         self.stack.append(self.graph.add_subgraph(name))
-        pass
+        return self.graph
 
     def pop_graph(self):
         self.stack.pop()
         pass
 
-    def node(self, name, id=None):
+    def node(self, name, id=None, **attr):
         if id is None:
             self.node_count += 1
             id = 'n%d' % self.node_count
@@ -43,16 +46,19 @@ class GraphvizVisitor(GrammarVisitor):
                 return self.graph.get_node(id)
             except KeyError:
                 pass
-        self.graph.add_node(id)
+        self.graph.add_node(id, **attr)
         n = self.graph.get_node(id)
         n.attr['label'] = name
 #        n.attr['shape'] = 'circle'
         return n
 
+    def tnode(self, name, **attr):
+        return self.node(name, **attr)
+
     def dot(self):
         n = self.node('')
         n.attr['shape'] = 'point'
-        n.attr['size'] = 0.0000001
+        n.attr['size'] = 0.0000000001
         n.attr['label'] = ''
         return n
 
@@ -78,7 +84,8 @@ class GraphvizVisitor(GrammarVisitor):
     def edge(self, s, e, **attr):
         self.graph.add_edge(s, e, **attr)
         edge = self.graph.get_edge(s, e)
-        edge.attr['arrowhead'] = 'normal'
+        # edge.attr['arrowhead'] = 'normal'
+        edge.attr['arrowhead'] = 'none'
         return edge
 
     def redge(self, s, e):
@@ -164,11 +171,16 @@ class GraphvizVisitor(GrammarVisitor):
         return (ni, ne)
 
     def visit_repeat(self, r):
-        i, e = self._visit_decorator(r)
-        ni = self.dot()
-        self.edge(ni, i)
-        self.edge(e, ni)
-        return (ni, ni)
+        g = self.push_graph()
+        g.graph_attr['rankdir'] = 'TB'
+        try:
+            i, e = self._visit_decorator(r)
+            ni = self.dot()
+            self.edge(ni, i)
+            self.edge(e, ni)
+            return (ni, ni)
+        finally:
+            self.pop_graph()
 
     def visit_repeatplus(self, r):
         i, e = self._visit_decorator(r)
@@ -215,11 +227,11 @@ class GraphvizVisitor(GrammarVisitor):
         return (n, e)
 
     def visit_pattern(self, p):
-        n = self.node(p.pattern)
+        n = self.tnode(p.pattern)
         return (n, n)
 
     def visit_token(self, t):
-        n = self.node(t.token)
+        n = self.tnode(t.token)
         return (n, n)
 
     def visit_void(self, v):

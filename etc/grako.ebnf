@@ -44,7 +44,7 @@ element
 
 named
     =
-    name:word [force_list:'+'] ':' value:element
+    name:word (force_list:'+:'|':') value:element
     ;
 
 override
