@@ -69,8 +69,8 @@ class Renderer(object):
     def reset_counter(cls):
         Renderer._counter = itertools.count()
 
-    def accept(self, visitor):
-        return visitor.visit(self)
+    def accept(self, visitor, *args, **kwargs):
+        return visitor.visit(self, *args, **kwargs)
 
     def render_fields(self, fields):
         pass
@@ -92,9 +92,9 @@ class Renderer(object):
 
 
 class NodeVisitor(object):
-    def visit(self, obj):
-        visit_name = 'visit_' + obj.__class__.__name__
-        return self._dispatch(visit_name, obj)
+    def visit(self, obj, *args, **kwargs):
+        visit_name = 'visit_' + obj.__class__.__name__.lower()
+        return self._dispatch(visit_name, obj, *args, **kwargs)
 
     def _dispatch(self, name, *args, **kwargs):
         method = getattr(self, name, None)
