@@ -32,7 +32,7 @@ choice
 
 sequence
     =
-    sequence+:element {[',' >>] sequence+:element}
+    sequence+:element {sequence+:element}
     ;
 
 element
