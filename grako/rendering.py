@@ -70,7 +70,7 @@ class Renderer(object):
         Renderer._counter = itertools.count()
 
     def accept(self, visitor):
-        visitor.visit(self)
+        return visitor.visit(self)
 
     def render_fields(self, fields):
         pass
@@ -94,10 +94,9 @@ class Renderer(object):
 class NodeVisitor(object):
     def visit(self, obj):
         visit_name = 'visit_' + obj.__class__.__name__
-        self._dispatch(visit_name, obj)
+        return self._dispatch(visit_name, obj)
 
     def _dispatch(self, name, *args, **kwargs):
         method = getattr(self, name, None)
         if method:
-            method(*args, **kwargs)
-
+            return method(*args, **kwargs)
