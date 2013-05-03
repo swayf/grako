@@ -131,7 +131,7 @@ def main():
     except:
         print('PyGraphViz not found!')
     else:
-        draw('tmp/13.png', g11)
+        draw('tmp/13.jpg', g11)
 
 
 if __name__ == '__main__':
