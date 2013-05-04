@@ -83,12 +83,6 @@ class Buffer(object):
             return None
         return self.text[self._pos]
 
-    def lookahead(self):
-        if self.atend():
-            return ''
-        txt = (self.text[self.pos:self.pos + 80].split('\n')[0]).encode('unicode-escape')
-        return '<%d:%d>%s' % (self.line + 1, self.col + 1, txt)
-
     def next(self):
         if self._pos >= self._len:
             return None
@@ -204,6 +198,14 @@ class Buffer(object):
         end = max(start, self._linecache[n].pos)
         text = self.text[start:end]
         return LineInfo(self.filename, line, col, start, text)
+
+    def lookahead(self):
+        if self.atend():
+            return ''
+        info = self.line_info()
+        text = info.text[info.col:info.col + 80]
+        text = text.split('\n')[0].encode('unicode-escape')
+        return '<%d:%d>%s' % (info.line + 1, info.col + 1, text)
 
     def get_line(self, n=None):
         if n is None:
