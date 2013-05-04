@@ -184,7 +184,12 @@ class ParseContext(object):
 
     def _trace_event(self, event):
         if self.trace:
-            self._trace('%s   %s \n\t%s', event, self._rulestack(), self._buffer.lookahead())
+            self._trace('%s \n%s   \n%s \n\t%s \n',
+                        event,
+                        self._buffer.line_info().filename,
+                        self._rulestack(),
+                        self._buffer.lookahead()
+                        )
 
     def _trace_match(self, token, name=None):
         if self.trace:
