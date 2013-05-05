@@ -118,6 +118,7 @@ The *-h* and *--help* parameters provide full usage information::
                                 specify where the output should go (default is stdout)
           -t, --trace           produce verbose parsing output
           -b, --binary          generate a pickled grammar model instead of a parser
+          -d, --draw            generate a diagram of the grammar
 
         $
 
