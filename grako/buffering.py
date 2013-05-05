@@ -203,7 +203,7 @@ class Buffer(object):
         if self.atend():
             return ''
         info = self.line_info()
-        text = info.text[info.col:info.col + 80]
+        text = info.text[info.col + 1:info.col + 1 + 80]
         text = text.split('\n')[0].encode('unicode-escape')
         return '<%d:%d>%s' % (info.line + 1, info.col + 1, text)
 
