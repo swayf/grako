@@ -5,6 +5,9 @@ import pygraphviz as pgv
 from .visitors import GrammarVisitor
 
 
+__all__ = ['draw']
+
+
 class GraphvizVisitor(GrammarVisitor):
     def __init__(self):
         super(GraphvizVisitor, self).__init__()
