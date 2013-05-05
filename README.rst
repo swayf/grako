@@ -12,7 +12,7 @@ Grako
 
 **Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decision making or backtracking. *Positive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level, and delegation to Python_'s re_ module for *lexemes* allows for (Perl_-like) powerful and efficient lexical analysis. The use of Python_'s `context managers`_ considerably reduces the size of the generated parsers for enhanced CPU-cache hits.
 
-**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 2500 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependencies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
+**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 3000 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependencies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity
 
