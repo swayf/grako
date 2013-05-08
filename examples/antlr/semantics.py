@@ -44,7 +44,6 @@ class ANTLRSemantics(object):
         return model.Named(ast.name, ast.exp, ast.force_list)
 
     def syntactic_predicate(self, ast):
-        print('LOOKAHEAD', ast)
         return model.Lookahead(ast)
 
     def optional(self, ast):
