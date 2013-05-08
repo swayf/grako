@@ -230,7 +230,7 @@ class Pattern(_Model):
 
 class Lookahead(_Decorator):
     def __str__(self):
-        return '&' + self.exp
+        return '&' + str(self.exp)
 
     def parse(self, ctx):
         with ctx._if():
