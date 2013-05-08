@@ -74,3 +74,6 @@ class ANTLRSemantics(object):
         if isinstance(text, list):
             text = ''.join(text)
         return model.Token(text)
+
+    def eof(self, ast):
+        return model.EOF()
