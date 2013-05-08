@@ -8,8 +8,9 @@
 
 grammar
     =
-    [('lexer'|'parser')] 'grammar' >> name ';'
+    [('lexer'|'parser')] 'grammar' >> name:name ';'
     [options]
+    [imports]
     [tokens]
     {scope}
     {action}
@@ -25,6 +26,11 @@ options
 option
     =
     id '=' >>  (id|string|char|int|'*') ';' >>
+    ;
+
+imports
+    =
+    'import' >> name {',' name} ';'
     ;
 
 tokens
@@ -101,7 +107,7 @@ alternatives
 
 alternative
     =
-    elements [rewrite]
+    @elements ['->' >> rewrite]
     ;
 
 elements
@@ -175,7 +181,6 @@ positive_closure
 
 atom
     =
-    ['^'|'!']
     @(
       eof
     | negative
@@ -185,6 +190,7 @@ atom
     | terminal
     | non_terminal
     )
+    ['^'|'!']
     ;
 
 eof
@@ -212,8 +218,11 @@ negative
 
 non_terminal
     =
+    @(
       rule_ref
     | token_ref
+    )
+    [arg]
     ;
 
 terminal
@@ -231,7 +240,8 @@ any
 
 rewrite
     =
-    '->' >> ?/[^|;]*/?
+      '^(' {rewrite}+ ')'
+    | ?/[^|;^)]+/?
     ;
 
 rule_ref
