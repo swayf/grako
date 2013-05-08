@@ -261,6 +261,8 @@ class Sequence(_Model):
         super(Sequence, self).__init__()
         assert isinstance(sequence, list), str(sequence)
         self.sequence = sequence
+        for s in self.sequence:
+            assert isinstance(s, _Model), str(s)
 
     def parse(self, ctx):
         result = []
@@ -295,6 +297,8 @@ class Choice(_Model):
         super(Choice, self).__init__()
         assert isinstance(options, list), urepr(options)
         self.options = options
+        for o in self.options:
+            assert isinstance(o, _Model), str(o)
 
     def parse(self, ctx):
         with ctx._choice_context():
