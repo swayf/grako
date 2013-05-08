@@ -240,8 +240,13 @@ any
 
 rewrite
     =
-      '^(' {rewrite}+ ')'
-    | ?/[^|;^)]+/?
+    {rewrite_term}*
+    ;
+
+rewrite_term
+    =
+      '^(' {rewrite_term}+ ')'
+    | ?/[^|;^)]*/?
     ;
 
 rule_ref
@@ -311,7 +316,7 @@ int
 
 ESC
     =
-    ?/\\['"\\nrtbf]/?
+    ?/\\['"\\nrtbfv]/?
     |
     ?/\\u[a-fA-F0-9]{4}/?
     ;
