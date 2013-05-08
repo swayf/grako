@@ -60,6 +60,9 @@ class ANTLRSemantics(object):
         any = model.Pattern('.')
         return model.Sequence([neg, any])
 
+    def subexp(self, ast):
+        return model.Group(ast)
+
     def range(self, ast):
         return model.Pattern('[%s-%s]' % (ast.first, ast.last))
 
