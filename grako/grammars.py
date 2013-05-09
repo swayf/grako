@@ -152,7 +152,7 @@ class Group(_Decorator):
     def __str__(self):
         template = '(%s)'
         if isinstance(self.exp, Choice):
-            template = trim(self.str_template)
+            template = '\n' + trim(self.str_template)
         return template % str(self.exp)
 
     template = '''\
