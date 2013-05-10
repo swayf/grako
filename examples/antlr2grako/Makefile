@@ -3,7 +3,10 @@ start: test
 
 test: clean parser
 	PYTHONPATH=../.. \
-		python antlr2grako.py grammar/Python.g  --trace \
+		python antlr2grako.py grammar/Python.g  \
+				> python.ebnf
+	PYTHONPATH=../.. \
+		python -m grako python.ebnf  \
 				2>&1
 
 parser: antlr_parser.py
