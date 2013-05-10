@@ -159,9 +159,9 @@ class Group(_Decorator):
         return template % exp
 
     template = '''\
-                with self._group() as _e:
+                with self._group():
                 {exp:1::}
-                    _e = self.cst
+                    self.cst
                 '''
 
     str_template = '''
@@ -202,7 +202,7 @@ class Token(_Model):
     def render_fields(self, fields):
         fields.update(token=urepr(self.token))
 
-    template = "_e = self._token({token})"
+    template = "self._token({token})"
 
 
 class Pattern(_Model):
@@ -228,7 +228,7 @@ class Pattern(_Model):
     def render_fields(self, fields):
         fields.update(pattern=urepr(self.pattern))
 
-    template = '_e = self._pattern({pattern})'
+    template = 'self._pattern({pattern})'
 
 
 class Lookahead(_Decorator):
@@ -346,7 +346,7 @@ class Choice(_Model):
             return super(Choice, self).render(**fields)
 
     option_template = '''\
-                    with self._option() as _e:
+                    with self._option():
                     {option}
                         return\
                     '''
@@ -356,7 +356,7 @@ class Choice(_Model):
                 def choice{n}():
                 {options}
                     self._error({error})
-                _e = choice{n}() \
+                choice{n}() \
                 '''
 
 
@@ -393,7 +393,7 @@ class Repeat(_Decorator):
                 def closure{n}():
                 {exp:1::}
                     return
-                _e = closure{n}()\
+                closure{n}()\
                 '''
 
     str_template = '''
@@ -428,7 +428,7 @@ class RepeatPlus(Repeat):
                 def closure{n}():
                 {exp:1::}
                     return
-                _e = closure{n}()\
+                closure{n}()\
                 '''
 
 
@@ -451,7 +451,7 @@ class Optional(_Decorator):
         return template % exp
 
     template = '''\
-                with self._optional() as _e:
+                with self._optional():
                 {exp:1::}\
                 '''
 
@@ -583,7 +583,7 @@ class RuleRef(_Model):
             name += '_'
         fields.update(name=name)
 
-    template = "_e = self.{name}()"
+    template = "self.{name}()"
 
 
 class Rule(Named):
@@ -663,7 +663,6 @@ class Rule(Named):
     template = '''
                 @rule_def
                 def {name}(self):
-                    _e = None
                 {exp:1::}{ast_name_clause}
 
                 '''
