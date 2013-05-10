@@ -435,10 +435,13 @@ class Optional(_Decorator):
         return {()} | self.exp._first(k, F)
 
     def __str__(self):
+        exp = str(self.exp)
         template = '[%s]'
         if isinstance(self.exp, Choice):
             template = trim(self.str_template)
-        return template % str(self.exp)
+        elif isinstance(self.exp, Group):
+            exp = self.exp.exp
+        return template % exp
 
     template = '''\
                 with self._optional() as _e:
