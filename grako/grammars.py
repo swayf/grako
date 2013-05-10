@@ -579,7 +579,7 @@ class RuleRef(_Model):
             name += '_'
         fields.update(name=name)
 
-    template = "_e = self._call('{name}')"
+    template = "_e = self._{name}_()"
 
 
 class Rule(Named):
@@ -657,6 +657,7 @@ class Rule(Named):
                       )
 
     template = '''
+                @rule_def
                 def _{name}_(self):
                     _e = None
                 {exp:1::}{ast_name_clause}

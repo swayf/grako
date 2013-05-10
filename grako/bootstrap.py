@@ -15,7 +15,7 @@ in the .grammars module.
 from __future__ import print_function, division, absolute_import, unicode_literals
 from collections import OrderedDict
 from .buffering import Buffer
-from .parsing import Parser
+from .parsing import Parser, rule_def
 from .util import simplify_list
 from . import grammars
 from .exceptions import FailedParse
@@ -35,12 +35,15 @@ class GrakoParserBase(Parser):
                                                   filename=filename,
                                                   **kwargs)
 
+    @rule_def
     def _void_(self):
         self._token('()', 'void')
 
+    @rule_def
     def _token_(self):
-        self._call('TOKEN')
+        self._TOKEN_()
 
+    @rule_def
     def _TOKEN_(self):
         with self._option():
             self._token("'")
@@ -58,206 +61,229 @@ class GrakoParserBase(Parser):
 
         raise FailedParse(self._buffer, '<"> or' + "<'>")
 
+    @rule_def
     def _word_(self):
         self._pattern(r'[A-Za-z0-9_]+')
 
+    @rule_def
     def _qualified_(self):
         self._pattern(r'[A-Za-z0-9_]+(?:\.[-_A-Za-z0-9]+)*', 'qualified')
 
+    @rule_def
     def _call_(self):
-        self._call('word')
+        self._word_()
 
+    @rule_def
     def _pattern_(self):
-        self._call('PATTERN')
+        self._PATTERN_()
 
+    @rule_def
     def _PATTERN_(self):
         self._token('?/')
         self._cut()
         self._pattern(r'(.*?)(?=/\?)', '@')
         self._token('/?')
 
+    @rule_def
     def _cut_(self):
         self._token('>>', 'cut')
         self._cut()
 
+    @rule_def
     def _eof_(self):
         self._token('$')
         self._cut()
 
+    @rule_def
     def _subexp_(self):
         self._token('(')
         self._cut()
-        e = self._call('expre')
+        e = self._expre_()
         self.ast['@'] = e
         self._token(')')
 
+    @rule_def
     def _optional_(self):
         self._token('[')
         self._cut()
-        e = self._call('expre')
+        e = self._expre_()
         self.ast['@'] = e
         self._cut()
         self._token(']')
 
+    @rule_def
     def _plus_(self):
         if not self._try_token('-', 'symbol'):
             self._token('+', 'symbol')
 
+    @rule_def
     def _repeat_(self):
         self._token('{')
         self._cut()
-        e = self._call('expre')
+        e = self._expre_()
         self.ast['repeat'] = e
         self._token('}')
         if not self._try_token('*'):
             try:
-                e = self._call('plus')
+                e = self._plus_()
                 self.ast['plus'] = e
             except FailedParse:
                 pass
 
+    @rule_def
     def _special_(self):
         self._token('?(')
         self._cut()
         self._pattern(r'(.*)\)?', 'special')
 
+    @rule_def
     def _kif_(self):
         self._token('&')
         self._cut()
-        e = self._call('term')
+        e = self._term_()
         self.ast['@'] = e
 
+    @rule_def
     def _knot_(self):
         self._token('!')
         self._cut()
-        e = self._call('term')
+        e = self._term_()
         self.ast['@'] = e
 
+    @rule_def
     def _atom_(self):
         with self._option():
-            self._call('void')
+            self._void_()
             self._cut()
             return
         with self._option():
-            self._call('cut')
+            self._cut_()
             self._cut()
             return
         with self._option():
-            self._call('token')
+            self._token_()
             self._cut()
             return
         with self._option():
-            self._call('call')
+            self._call_()
             self._cut()
             return
         with self._option():
-            self._call('pattern')
+            self._pattern_()
             self._cut()
             return
         with self._option():
-            self._call('eof')
+            self._eof_()
             self._cut()
             return
         self._error('expecting atom')
 
+    @rule_def
     def _term_(self):
         with self._option():
-            self._call('atom')
+            self._atom_()
             self._cut()
             return
         with self._option():
-            self._call('subexp')
+            self._subexp_()
             self._cut()
             return
         with self._option():
-            self._call('repeat')
+            self._repeat_()
             self._cut()
             return
         with self._option():
-            self._call('optional')
+            self._optional_()
             self._cut()
             return
         with self._option():
-            self._call('special')
+            self._special_()
             self._cut()
             return
         with self._option():
-            self._call('kif')
+            self._kif_()
             self._cut()
             return
         with self._option():
-            self._call('knot')
+            self._knot_()
             self._cut()
             return
         self._error('expecting term')
 
+    @rule_def
     def _named_(self):
-        name = self._call('qualified')
+        name = self._qualified_()
         if not self._try_token('+:', 'force_list'):
             self._token(':')
         self._cut()
         self.ast.add('name', name)
-        e = self._call('element')
+        e = self._element_()
         self.ast['value'] = e
 
+    @rule_def
     def _override_(self):
         self._token('@')
         self._cut()
-        e = self._call('element')
+        e = self._element_()
         self.ast['@'] = e
 
+    @rule_def
     def _element_(self):
         with self._option():
-            self._call('named')
+            self._named_()
             self._cut()
             return
         with self._option():
-            self._call('override')
+            self._override_()
             self._cut()
             return
         with self._option():
-            self._call('term')
+            self._term_()
             self._cut()
             return
         self._error('element')
 
+    @rule_def
     def _sequence_(self):
         @self._closure_plus
         def callelm():
-            e = self._call('element')
+            e = self._element_()
             self.ast.add_list('sequence', e)
         callelm()
 
+    @rule_def
     def _choice_(self):
         @self._closure
         def options():
             self._token('|')
             self._cut()
-            e = self._call('sequence')
+            e = self._sequence_()
             self.ast.add_list('options', e)
 
-        e = self._call('sequence')
+        e = self._sequence_()
         self.ast.add_list('options', e)
         options()
 
+    @rule_def
     def _expre_(self):
-        self._call('choice')
+        self._choice_()
 
+    @rule_def
     def _rule_(self):
         # FIXME: This doesn't work, and it's usefullness is doubtfull.
         # p = self._pos
         # try:
-        #     ast_name = self._call('word')
+        #     ast_name = self._word_()
         #     self._token(':')
         #     self.ast.add('ast_name', str(ast_name))
         # except FailedParse:
         #     self._goto(p)
-        e = self._call('word')
+        e = self._word_()
         self.ast['name'] = e
         self._cut()
         self._token('=')
         self._cut()
-        e = self._call('expre')
+        e = self._expre_()
         self.ast['rhs'] = e
         if not self._try_token(';'):
             try:
@@ -265,10 +291,11 @@ class GrakoParserBase(Parser):
             except FailedParse:
                 self._error('expecting one of: ; .')
 
+    @rule_def
     def _grammar_(self):
         @self._closure_plus
         def rules():
-            e = self._call('rule')
+            e = self._rule_()
             self.ast['rules'] = e
         rules()
         self._next_token()

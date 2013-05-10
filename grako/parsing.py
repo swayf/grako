@@ -14,6 +14,7 @@ Parser.parse() will take the text to parse directly, or an instance of the
 .buffeing.Buffer class.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
+import functools
 from . import buffering
 from .contexts import ParseContext, ParseInfo
 from .exceptions import (FailedParse,
@@ -55,7 +56,8 @@ class Parser(ParseContext):
             self.trace = kwargs.pop('trace', self.trace)
             self._reset_context(buffer, semantics=semantics)
             self._push_ast()
-            result = self._call(rule_name)
+            rule = self._find_rule(rule_name)
+            result = rule()
             self.ast[rule_name] = result
             return result
         finally:
@@ -78,12 +80,13 @@ class Parser(ParseContext):
     def result(self):
         return self.ast
 
-    def _call(self, name):
+    def _call(self, rule):
+        name = rule.__name__.strip('_')
         self._rule_stack.append(name)
         pos = self._pos
         try:
             self._trace_event('ENTER ')
-            node, newpos = self._invoke_rule(name, pos)
+            node, newpos = self._invoke_rule(pos, rule, name)
             self._goto(newpos)
             self._trace_event('SUCCESS')
             self._add_cst_node(node)
@@ -95,8 +98,8 @@ class Parser(ParseContext):
         finally:
             self._rule_stack.pop()
 
-    def _invoke_rule(self, name, pos):
-        key = (pos, name)
+    def _invoke_rule(self, pos, rule, name):
+        key = (pos, rule)
         cache = self._memoization_cache
 
         if key in cache:
@@ -105,12 +108,11 @@ class Parser(ParseContext):
                 raise result
             return result
 
-        rule = self._find_rule(name)
         self._push_ast()
         try:
             if name[0].islower():
                 self._next_token()
-            rule()
+            rule(self)
             node = self.ast
             if not node:
                 node = self.cst
@@ -188,3 +190,11 @@ class Parser(ParseContext):
         self._next_token()
         if not self._buffer.atend():
             raise FailedParse(self._buffer, 'Expecting end of text.')
+
+
+# decorator
+def rule_def(rule):
+    @functools.wraps(rule)
+    def wrapper(self):
+        return self._call(rule)
+    return wrapper
