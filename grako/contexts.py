@@ -339,6 +339,6 @@ class ParseContext(object):
             finally:
                 self._pop_cst()
             self._add_cst_node(cst)
-            self._last_node = result
+            self._last_node = cst
             return result
         return wrapper

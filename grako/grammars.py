@@ -427,7 +427,7 @@ class RepeatPlus(Repeat):
                 @self._closure_plus
                 def closure{n}():
                 {exp:1::}
-                    return self.last_node
+                    return
                 _e = closure{n}()\
                 '''
 
