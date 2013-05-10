@@ -175,7 +175,7 @@ class Parser(ParseContext):
         return token
 
     def _find_rule(self, name):
-        rule = getattr(self, '_%s_' % name, None)
+        rule = getattr(self, name, None)
         if rule is None or not isinstance(rule, type(self._find_rule)):
             raise FailedRef(self._buffer, name)
         return rule
