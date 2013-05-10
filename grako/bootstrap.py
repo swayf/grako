@@ -48,14 +48,14 @@ class GrakoParserBase(Parser):
         with self._option():
             self._token("'")
             self._cut()
-            self._pattern(r"(?:[^'\\\n]|\\'|\\\\)*", '@')
+            self._pattern(r"(?:[^'\n]|\\'|\\\\)*", '@')
             self._token("'")
             return
 
         with self._option():
             self._token('"')
             self._cut()
-            self._pattern(r'(?:[^"\\\n]|\\"|\\\\)*', '@')
+            self._pattern(r'(?:[^"\n]|\\"|\\\\)*', '@')
             self._token('"')
             return
 
