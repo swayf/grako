@@ -245,7 +245,8 @@ class ParseContext(object):
         @wraps(f)
         def wrapper(*args, **kwargs):
             with self._choice_context():
-                return f()
+                f()
+                return self.last_node
         return wrapper
 
     @contextmanager
@@ -263,6 +264,7 @@ class ParseContext(object):
         finally:
             self._pop_cst()
         self._add_cst_node(cst)
+        self._last_node = cst
 
     @contextmanager
     def _if(self):
@@ -320,7 +322,7 @@ class ParseContext(object):
             finally:
                 self._pop_cst()
             self._add_cst_node(cst)
-            self._last_node = result
+            self._last_node = cst
             return result
         return wrapper
 

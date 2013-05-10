@@ -149,6 +149,7 @@ class Parser(ParseContext):
     def _try_token(self, token, node_name=None, force_list=False):
         p = self._pos
         self._next_token()
+        self._last_node = None
         if self._buffer.match(token) is None:
             self._goto(p)
             return None
@@ -171,6 +172,7 @@ class Parser(ParseContext):
     def _try_pattern(self, pattern, node_name=None, force_list=False):
         p = self._pos
         token = self._buffer.matchre(pattern)
+        self._last_node = None
         if token is None:
             self._goto(p)
             return None

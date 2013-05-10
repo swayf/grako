@@ -348,7 +348,7 @@ class Choice(_Model):
     option_template = '''\
                     with self._option() as _e:
                     {option}
-                        return _e\
+                        return\
                     '''
 
     template = '''\
@@ -392,7 +392,7 @@ class Repeat(_Decorator):
                 @self._closure
                 def closure{n}():
                 {exp:1::}
-                    return _e
+                    return
                 _e = closure{n}()\
                 '''
 
@@ -427,7 +427,7 @@ class RepeatPlus(Repeat):
                 @self._closure_plus
                 def closure{n}():
                 {exp:1::}
-                    return _e
+                    return self.last_node
                 _e = closure{n}()\
                 '''
 
@@ -500,7 +500,7 @@ class Named(_Decorator):
 
     template = '''
                 {exp}
-                self.ast['{name}'] = _e\
+                self.ast['{name}'] = self.last_node\
                 '''
 
 
@@ -515,7 +515,7 @@ class NamedList(Named):
 
     template = '''
                 {exp}
-                self.ast.add_list('{name}', _e)\
+                self.ast.add_list('{name}', self.last_node)\
                 '''
 
 
@@ -530,7 +530,7 @@ class Override(_Decorator):
 
     template = '''
                 {exp}
-                self.ast['@'] = _e\
+                self.ast['@'] = self.last_node\
                 '''
 
 
