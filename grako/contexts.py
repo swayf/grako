@@ -57,6 +57,10 @@ class ParseContext(object):
     def last_node(self):
         return self._last_node
 
+    @last_node.setter
+    def last_node(self, value):
+        self._last_node = value
+
     @property
     def _pos(self):
         return self._buffer.pos
@@ -104,8 +108,8 @@ class ParseContext(object):
         return self._concrete_stack[-1]
 
     @cst.setter
-    def cst(self, cst):
-        self._concrete_stack[-1] = cst
+    def cst(self, value):
+        self._concrete_stack[-1] = value
 
     def _push_cst(self):
         self._concrete_stack.append(None)
@@ -118,6 +122,8 @@ class ParseContext(object):
             return
         previous = self._concrete_stack[-1]
         if previous is None:
+            if isinstance(node, list):
+                node = node[:]  # copy it
             self._concrete_stack[-1] = node
         elif previous == node:  # FIXME: Don't know how this happens, but it does
             return
@@ -211,6 +217,7 @@ class ParseContext(object):
             yield None
             ast = self.ast
             cst = self.cst
+            self.last_node = cst
         except:
             self._goto(p)
             raise
@@ -245,6 +252,7 @@ class ParseContext(object):
         @wraps(f)
         def wrapper(*args, **kwargs):
             with self._choice_context():
+                self.last_node = None
                 f()
                 return self.last_node
         return wrapper
@@ -264,7 +272,7 @@ class ParseContext(object):
         finally:
             self._pop_cst()
         self._add_cst_node(cst)
-        self._last_node = cst
+        self.last_node = cst
 
     @contextmanager
     def _if(self):
@@ -275,13 +283,13 @@ class ParseContext(object):
         finally:
             self._goto(p)
             self._pop_ast()  # simply discard
-            self._last_node = None
+            self.last_node = None
 
     @contextmanager
     def _ifnot(self):
         p = self._pos
         self._push_ast()
-        self._last_node = None
+        self.last_node = None
         try:
             yield None
         except FailedParse:
@@ -291,7 +299,7 @@ class ParseContext(object):
         finally:
             self._goto(p)
             self._pop_ast()  # simply discard
-            self._last_node = None
+            self.last_node = None
 
     def _repeater(self, f):
         result = []
@@ -325,7 +333,7 @@ class ParseContext(object):
             finally:
                 self._pop_cst()
             self._add_cst_node(cst)
-            self._last_node = cst
+            self.last_node = cst
             return cst
         return wrapper
 
@@ -342,6 +350,6 @@ class ParseContext(object):
             finally:
                 self._pop_cst()
             self._add_cst_node(cst)
-            self._last_node = cst
+            self.last_node = cst
             return cst
         return wrapper
