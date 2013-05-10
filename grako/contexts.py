@@ -305,7 +305,6 @@ class ParseContext(object):
             except FailedParse as e:
                 if self._is_cut_set():
                     raise FailedCut(e)
-                self._last_node = result
                 return result
             finally:
                 self._pop_cut()
@@ -320,7 +319,6 @@ class ParseContext(object):
         finally:
             self._pop_cst()
         self._add_cst_node(cst)
-        self._last_node = result
         return result
 
     #decorator
