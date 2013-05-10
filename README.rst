@@ -494,6 +494,7 @@ Change History
 ==============
 
 - **tip**
+    * *Incompatible change!* No longer asume that parsers implement semantics, so underscores were dropped from the names of methods implementing rules.
     * Create a basic diagram of a grammar if pygraphviz_ is installed.
     * Added the ``--draw`` option to the command-line tool.
     * Fixes to the *antlr2grako* example to let it convert over 6000 lines of an ANTLR_ gramar to **Grako**.
