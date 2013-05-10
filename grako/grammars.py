@@ -362,8 +362,10 @@ class Choice(_Model):
 
 class Repeat(_Decorator):
     def parse(self, ctx):
-        f = lambda: self.exp.parse(ctx)
-        return ctx._repeat(f)
+        @ctx._closure
+        def closure():
+            return self.exp.parse(ctx)
+        return closure()
 
     def _first(self, k, F):
         efirst = self.exp._first(k, F)
@@ -403,8 +405,10 @@ class Repeat(_Decorator):
 
 class RepeatPlus(Repeat):
     def parse(self, ctx):
-        f = lambda: self.exp.parse(ctx)
-        return ctx._repeat(f, plus=True)
+        @ctx._closure_plus
+        def closure():
+            return self.exp.parse(ctx)
+        return closure()
 
     def _first(self, k, F):
         efirst = self.exp._first(k, F)

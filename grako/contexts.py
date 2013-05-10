@@ -309,28 +309,34 @@ class ParseContext(object):
             finally:
                 self._pop_cut()
 
-    def _repeat(self, f, plus=False):
-        self._push_cst()
-        try:
-            with self._try():
-                one = [f()] if plus else []
-            result = one + self._repeater(f)
-            cst = to_list(self.cst)
-        finally:
-            self._pop_cst()
-        self._add_cst_node(cst)
-        return result
-
     #decorator
     def _closure(self, f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            return self._repeat(f)
+            self._push_cst()
+            try:
+                result = self._repeater(f)
+                cst = to_list(self.cst)
+            finally:
+                self._pop_cst()
+            self._add_cst_node(cst)
+            self._last_node = result
+            return result
         return wrapper
 
     #decorator
     def _closure_plus(self, f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            return self._repeat(f, plus=True)
+            self._push_cst()
+            try:
+                with self._try():
+                    one = [f()]
+                result = one + self._repeater(f)
+                cst = to_list(self.cst)
+            finally:
+                self._pop_cst()
+            self._add_cst_node(cst)
+            self._last_node = result
+            return result
         return wrapper
