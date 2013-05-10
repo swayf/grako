@@ -10,4 +10,4 @@ regexp_test:
 	cd examples/regex; make -s clean; make -s test > /dev/null
 
 antlr_test:
-	cd examples/antlr; make -s clean; make -s test > /dev/null
+	cd examples/antlr2grako; make -s clean; make -s test > /dev/null

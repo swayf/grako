@@ -404,10 +404,10 @@ Regex
 
 The project ``examples/regexp`` contains a regexp-to-EBNF translator and parser generator. The project has no practical use, but it's a complete, end-to-end example of how to implement a translator using **Grako**.
 
-ANTLR
------
+antlr2grako
+-----------
 
-The project ``examples/antlr`` contains a ANTLR_ to **Grako** grammar tanslator. It is work in progress, but it's already capable of producing a translation for the enclosed ``Python.g`` grammar. The project is a good example of the use of models and templates in translation. The sample program, ``antlr2grako.py`` generates the **Grako** gramar on standard ouput, but because the model used is **Grako**'s own, the same code can be used to directly generate a parser from an ANTLR_ grammar. Please take a look at the *README* to know about limitations.
+The project ``examples/antlr2grako`` contains a ANTLR_ to **Grako** grammar tanslator.  The project is a good example of the use of models and templates in translation. The program, ``antlr2grako.py`` generates the **Grako** gramar on standard ouput, but because the model used is **Grako**'s own, the same code can be used to directly generate a parser from an ANTLR_ grammar. Please take a look at the examples *README* to know about limitations.
 
 
 License
@@ -494,7 +494,10 @@ Change History
 ==============
 
 - **tip**
-    * Create a basic diagram of the grammar if pygraphviz_ is installed.
+    * Create a basic diagram of a grammar if pygraphviz_ is installed.
+    * Added the ``--draw`` option to the command-line tool.
+    * Fixes to the *antlr2grako* example to let it convert over 6000 lines of an ANTLR_ gramar to **Grako**.
+    * Improved rendering of grammars by grammar models.
 
 .. _pygraphviz: https://pypi.python.org/pypi/pygraphviz/
 
