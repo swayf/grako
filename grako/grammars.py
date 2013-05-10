@@ -150,10 +150,13 @@ class Group(_Decorator):
             return self.exp.parse(ctx)
 
     def __str__(self):
+        exp = str(self.exp)
         template = '(%s)'
         if isinstance(self.exp, Choice):
             template = '\n' + trim(self.str_template)
-        return template % str(self.exp)
+        elif isinstance(self.exp, Group):
+            exp = str(self.exp.exp)
+        return template % exp
 
     template = '''\
                 with self._group() as _e:
