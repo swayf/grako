@@ -87,13 +87,15 @@ class GrakoParserBase(Parser):
     def _subexp_(self):
         self._token('(')
         self._cut()
-        self._call('expre', '@')
+        e = self._call('expre')
+        self.ast['@'] = e
         self._token(')')
 
     def _optional_(self):
         self._token('[')
         self._cut()
-        self._call('expre', '@')
+        e = self._call('expre')
+        self.ast['@'] = e
         self._cut()
         self._token(']')
 
@@ -104,11 +106,13 @@ class GrakoParserBase(Parser):
     def _repeat_(self):
         self._token('{')
         self._cut()
-        self._call('expre', 'repeat')
+        e = self._call('expre')
+        self.ast['repeat'] = e
         self._token('}')
         if not self._try_token('*'):
             try:
-                self._call('plus', 'plus')
+                e = self._call('plus')
+                self.ast['plus'] = e
             except FailedParse:
                 pass
 
@@ -120,12 +124,14 @@ class GrakoParserBase(Parser):
     def _kif_(self):
         self._token('&')
         self._cut()
-        self._call('term', 'kif')
+        e = self._call('term')
+        self.ast['@'] = e
 
     def _knot_(self):
         self._token('!')
         self._cut()
-        self._call('term', 'knot')
+        e = self._call('term')
+        self.ast['@'] = e
 
     def _atom_(self):
         with self._option():
@@ -191,12 +197,14 @@ class GrakoParserBase(Parser):
             self._token(':')
         self._cut()
         self.ast.add('name', name)
-        self._call('element', 'value')
+        e = self._call('element')
+        self.ast['value'] = e
 
     def _override_(self):
         self._token('@')
         self._cut()
-        self._call('element', '@')
+        e = self._call('element')
+        self.ast['@'] = e
 
     def _element_(self):
         with self._option():
@@ -214,18 +222,23 @@ class GrakoParserBase(Parser):
         self._error('element')
 
     def _sequence_(self):
-        self._call('element', 'sequence', True)
-        f = lambda: self._call('element', 'sequence', True)
-        self._repeater(f)
+        @self._closure_plus
+        def callelm():
+            e = self._call('element')
+            self.ast.add_list('sequence', e)
+        callelm()
 
     def _choice_(self):
+        @self._closure
         def options():
             self._token('|')
             self._cut()
-            self._call('sequence', 'options')
+            e = self._call('sequence')
+            self.ast.add_list('options', e)
 
-        self._call('sequence', 'options', True)
-        self._repeat(options, False)
+        e = self._call('sequence')
+        self.ast.add_list('options', e)
+        options()
 
     def _expre_(self):
         self._call('choice')
@@ -239,11 +252,13 @@ class GrakoParserBase(Parser):
         #     self.ast.add('ast_name', str(ast_name))
         # except FailedParse:
         #     self._goto(p)
-        self._call('word', 'name')
+        e = self._call('word')
+        self.ast['name'] = e
         self._cut()
         self._token('=')
         self._cut()
-        self._call('expre', 'rhs')
+        e = self._call('expre')
+        self.ast['rhs'] = e
         if not self._try_token(';'):
             try:
                 self._token('.')
@@ -251,9 +266,11 @@ class GrakoParserBase(Parser):
                 self._error('expecting one of: ; .')
 
     def _grammar_(self):
-        self._call('rule', 'rules')
-        f = lambda: self._call('rule', 'rules')
-        self._repeat(f, True)
+        @self._closure_plus
+        def rules():
+            e = self._call('rule')
+            self.ast['rules'] = e
+        rules()
         self._next_token()
         self._check_eof()
 
@@ -330,10 +347,10 @@ class GrakoSemantics(object):
         return grammars.Special(ast.special)
 
     def kif(self, ast):
-        return grammars.Lookahead(ast.kif)
+        return grammars.Lookahead(ast)
 
     def knot(self, ast):
-        return grammars.LookaheadNot(ast.knot)
+        return grammars.LookaheadNot(ast)
 
     def atom(self, ast):
         return ast

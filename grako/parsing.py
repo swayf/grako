@@ -55,7 +55,9 @@ class Parser(ParseContext):
             self.trace = kwargs.pop('trace', self.trace)
             self._reset_context(buffer, semantics=semantics)
             self._push_ast()
-            return self._call(rule_name, rule_name)
+            result = self._call(rule_name)
+            self.ast[rule_name] = result
+            return result
         finally:
             self._memoization_cache = dict()
 
@@ -76,7 +78,7 @@ class Parser(ParseContext):
     def result(self):
         return self.ast
 
-    def _call(self, name, node_name=None, force_list=False):
+    def _call(self, name):
         self._rule_stack.append(name)
         pos = self._pos
         try:
@@ -84,7 +86,6 @@ class Parser(ParseContext):
             node, newpos = self._invoke_rule(name, pos)
             self._goto(newpos)
             self._trace_event('SUCCESS')
-            self._add_ast_node(node_name, node, force_list)
             self._add_cst_node(node)
             return node
         except FailedParse:
