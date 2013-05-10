@@ -159,9 +159,9 @@ class Group(_Decorator):
         return template % exp
 
     template = '''\
-                with self._group() as _e:
+                with self._group():
                 {exp:1::}
-                    _e = self.cst
+                    self.cst
                 '''
 
     str_template = '''
@@ -202,7 +202,7 @@ class Token(_Model):
     def render_fields(self, fields):
         fields.update(token=urepr(self.token))
 
-    template = "_e = self._token({token})"
+    template = "self._token({token})"
 
 
 class Pattern(_Model):
@@ -228,7 +228,7 @@ class Pattern(_Model):
     def render_fields(self, fields):
         fields.update(pattern=urepr(self.pattern))
 
-    template = '_e = self._pattern({pattern})'
+    template = 'self._pattern({pattern})'
 
 
 class Lookahead(_Decorator):
@@ -346,9 +346,9 @@ class Choice(_Model):
             return super(Choice, self).render(**fields)
 
     option_template = '''\
-                    with self._option() as _e:
+                    with self._option():
                     {option}
-                        return _e\
+                        return self.last_node\
                     '''
 
     template = '''\
@@ -356,7 +356,7 @@ class Choice(_Model):
                 def choice{n}():
                 {options}
                     self._error({error})
-                _e = choice{n}() \
+                choice{n}() \
                 '''
 
 
@@ -390,8 +390,8 @@ class Repeat(_Decorator):
                 @self._closure
                 def closure{n}():
                 {exp:1::}
-                    return _e
-                _e = closure{n}()\
+                    return self.last_node
+                closure{n}()\
                 '''
 
     str_template = '''
@@ -423,8 +423,8 @@ class RepeatPlus(Repeat):
                 @self._closure_plus
                 def closure{n}():
                 {exp:1::}
-                    return _e
-                _e = closure{n}()\
+                    return self.last_node
+                closure{n}()\
                 '''
 
 
@@ -447,7 +447,7 @@ class Optional(_Decorator):
         return template % exp
 
     template = '''\
-                with self._optional() as _e:
+                with self._optional():
                 {exp:1::}\
                 '''
 
@@ -496,7 +496,7 @@ class Named(_Decorator):
 
     template = '''
                 {exp}
-                self.ast['{name}'] = _e\
+                self.ast['{name}'] = self.last_node\
                 '''
 
 
@@ -511,7 +511,7 @@ class NamedList(Named):
 
     template = '''
                 {exp}
-                self.ast.add_list('{name}', _e)\
+                self.ast.add_list('{name}', self.last_node)\
                 '''
 
 
@@ -526,7 +526,7 @@ class Override(_Decorator):
 
     template = '''
                 {exp}
-                self.ast['@'] = _e\
+                self.ast['@'] = self.last_node\
                 '''
 
 
@@ -579,7 +579,7 @@ class RuleRef(_Model):
             name += '_'
         fields.update(name=name)
 
-    template = "_e = self.{name}()"
+    template = "self.{name}()"
 
 
 class Rule(Named):
@@ -659,7 +659,6 @@ class Rule(Named):
     template = '''
                 @rule_def
                 def {name}(self):
-                    _e = None
                 {exp:1::}{ast_name_clause}
 
                 '''
