@@ -27,17 +27,18 @@ class ParseContext(object):
         super(ParseContext, self).__init__()
 
         self._buffer = buffer
-        self.semantics = semantics if semantics is not None else self
+        self.semantics = semantics
         self.encoding = encoding
         self.comments_re = comments_re
         self.parseinfo = parseinfo
+        self.trace = trace
 
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
-        self.trace = trace
+        self._last_node = None
 
     def _reset_context(self, buffer=None, semantics=None):
         self._buffer = buffer
@@ -48,13 +49,13 @@ class ParseContext(object):
         self._memoization_cache = dict()
         if semantics is not None:
             self.semantics = semantics
-        if self.semantics is not None:
-            set_buffer = getattr(self.semantics, 'set_buffer', None)
-            if set_buffer is not None:
-                set_buffer(buffer)
 
     def goto(self, pos):
         self._buffer.goto(pos)
+
+    @property
+    def last_node(self):
+        return self._last_node
 
     @property
     def _pos(self):
