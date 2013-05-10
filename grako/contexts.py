@@ -31,13 +31,14 @@ class ParseContext(object):
         self.encoding = encoding
         self.comments_re = comments_re
         self.parseinfo = parseinfo
+        self.trace = trace
 
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
-        self.trace = trace
+        self._last_node = None
 
     def _reset_context(self, buffer=None, semantics=None):
         self._buffer = buffer
@@ -51,6 +52,10 @@ class ParseContext(object):
 
     def goto(self, pos):
         self._buffer.goto(pos)
+
+    @property
+    def last_node(self):
+        return self._last_node
 
     @property
     def _pos(self):

@@ -86,10 +86,12 @@ class Parser(ParseContext):
         pos = self._pos
         try:
             self._trace_event('ENTER ')
+            self._last_node = None
             node, newpos = self._invoke_rule(pos, rule, name)
             self._goto(newpos)
             self._trace_event('SUCCESS')
             self._add_cst_node(node)
+            self._last_node = node
             return node
         except FailedParse:
             self._trace_event('FAILED')
@@ -141,6 +143,7 @@ class Parser(ParseContext):
         self._trace_match(token, node_name)
         self._add_ast_node(node_name, token, force_list)
         self._add_cst_node(token)
+        self._last_node = token
         return token
 
     def _try_token(self, token, node_name=None, force_list=False):
@@ -152,6 +155,7 @@ class Parser(ParseContext):
         self._trace_match(token, node_name)
         self._add_ast_node(node_name, token, force_list)
         self._add_cst_node(token)
+        self._last_node = token
         return token
 
     def _pattern(self, pattern, node_name=None, force_list=False):
@@ -161,6 +165,7 @@ class Parser(ParseContext):
         self._trace_match(token, pattern)
         self._add_ast_node(node_name, token, force_list)
         self._add_cst_node(token)
+        self._last_node = token
         return token
 
     def _try_pattern(self, pattern, node_name=None, force_list=False):
@@ -172,6 +177,7 @@ class Parser(ParseContext):
         self._trace_match(token)
         self._add_ast_node(node_name, token, force_list)
         self._add_cst_node(token)
+        self._last_node = token
         return token
 
     def _find_rule(self, name):
