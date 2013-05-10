@@ -473,20 +473,17 @@ class Cut(_Model):
 
 
 class Named(_Decorator):
-    def __init__(self, name, exp, force_list):
+    def __init__(self, name, exp):
         super(Named, self).__init__(exp)
         assert isinstance(exp, _Model), str(exp)
         self.name = name
-        self.force_list = force_list
 
     def parse(self, ctx):
         value = self.exp.parse(ctx)
-        ctx._add_ast_node(self.name, value, self.force_list)
+        ctx._add_ast_node(self.name, value)
         return value
 
     def __str__(self):
-        if self.force_list:
-            return '%s+:%s' % (self.name, str(self.exp))
         return '%s:%s' % (self.name, str(self.exp))
 
     def render_fields(self, fields):
@@ -494,13 +491,27 @@ class Named(_Decorator):
         if iskeyword(name):
             name += '_'
         fields.update(n=self.counter(),
-                      name=name,
-                      force_list=', force_list=True' if self.force_list else ''
+                      name=name
                       )
 
     template = '''
                 {exp}
-                self.ast.add('{name}', _e{force_list})\
+                self.ast['{name}'] = _e\
+                '''
+
+
+class NamedList(Named):
+    def parse(self, ctx):
+        value = self.exp.parse(ctx)
+        ctx._add_ast_node(self.name, value, True)
+        return value
+
+    def __str__(self):
+        return '%s+:%s' % (self.name, str(self.exp))
+
+    template = '''
+                {exp}
+                self.ast.add_list('{name}', _e)\
                 '''
 
 
@@ -515,7 +526,7 @@ class Override(_Decorator):
 
     template = '''
                 {exp}
-                self._add_ast_node('@', _e)\
+                self.ast['@'] = _e\
                 '''
 
 
@@ -573,7 +584,7 @@ class RuleRef(_Model):
 
 class Rule(Named):
     def __init__(self, name, exp, ast_name=None):
-        super(Rule, self).__init__(name, exp, False)
+        super(Rule, self).__init__(name, exp)
         self.ast_name = ast_name
 
     def parse(self, ctx):

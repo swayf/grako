@@ -159,6 +159,9 @@ class GraphvizVisitor(GrammarVisitor):
     def visit_named(self, n):
         return self._visit_decorator(n)
 
+    def visit_namedlist(self, n):
+        return self._visit_decorator(n)
+
     def visit_cut(self, c):
         # c = self.node('>>')
         # return (c, c)

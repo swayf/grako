@@ -123,9 +123,7 @@ class Parser(ParseContext):
                     node = semantic_rule(node)
                 except FailedSemantics as e:
                     self._error(str(e), FailedParse)
-            result = (node, self._pos)
-
-            cache[key] = result
+            cache[key] = result = (node, self._pos)
             return result
         except Exception as e:
             cache[key] = e

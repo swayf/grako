@@ -41,7 +41,10 @@ class ANTLRSemantics(object):
         return model.Comment(text)
 
     def named(self, ast):
-        return model.Named(ast.name, ast.exp, ast.force_list)
+        if ast.force_list:
+            return model.NamedList(ast.name, ast.exp)
+        else:
+            return model.Named(ast.name, ast.exp)
 
     def syntactic_predicate(self, ast):
         return model.Lookahead(ast)

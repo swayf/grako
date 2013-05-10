@@ -342,7 +342,10 @@ class GrakoSemantics(object):
         return ast
 
     def named(self, ast):
-        return grammars.Named(ast.name, ast.value, 'force_list' in ast)
+        if ast.force_list:
+            return grammars.NamedList(ast.name, ast.value)
+        else:
+            return grammars.Named(ast.name, ast.value)
 
     def override(self, ast):
         return grammars.Override(ast)

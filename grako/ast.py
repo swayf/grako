@@ -63,3 +63,6 @@ class AST(dict):
         else:
             super(AST, self).__setitem__(key, [previous, value])
         return self
+
+    def add_list(self, key, value):
+        return self.add(key, value, force_list=True)
