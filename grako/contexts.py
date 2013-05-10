@@ -275,11 +275,13 @@ class ParseContext(object):
         finally:
             self._goto(p)
             self._pop_ast()  # simply discard
+            self._last_node = None
 
     @contextmanager
     def _ifnot(self):
         p = self._pos
         self._push_ast()
+        self._last_node = None
         try:
             yield None
         except FailedParse:
@@ -289,6 +291,7 @@ class ParseContext(object):
         finally:
             self._goto(p)
             self._pop_ast()  # simply discard
+            self._last_node = None
 
     def _repeater(self, f):
         result = []
