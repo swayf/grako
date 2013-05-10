@@ -33,7 +33,9 @@ class Buffer(object):
         self.original_text = text
         self.text = text
         self.filename = filename if filename is not None else ''
-        self.whitespace = set(whitespace if whitespace is not None else string.whitespace)
+        self.whitespace = set(whitespace
+                              if whitespace is not None
+                              else string.whitespace)
         self.comments_re = comments_re
         self.ignorecase = ignorecase
         self.trace = trace
@@ -80,12 +82,6 @@ class Buffer(object):
         if self._pos >= self._len:
             return None
         return self.text[self._pos]
-
-    def lookahead(self):
-        if self.atend():
-            return ''
-        txt = (self.text[self.pos:self.pos + 80].split('\n')[0]).encode('unicode-escape')
-        return '<%d:%d>%s' % (self.line + 1, self.col + 1, txt)
 
     def next(self):
         if self._pos >= self._len:
@@ -198,8 +194,18 @@ class Buffer(object):
         n = bisect(self._linecache, PosLine(pos, 0))
         start, line = self._linecache[n - 1]
         col = pos - start - 1
-        text = self.text[start:self._linecache[n].pos]
+        start = max(0, start)
+        end = max(start, self._linecache[n].pos)
+        text = self.text[start:end]
         return LineInfo(self.filename, line, col, start, text)
+
+    def lookahead(self):
+        if self.atend():
+            return ''
+        info = self.line_info()
+        text = info.text[info.col + 1:info.col + 1 + 80]
+        text = text.split('\n')[0].encode('unicode-escape')
+        return '<%d:%d>%s' % (info.line + 1, info.col + 1, text)
 
     def get_line(self, n=None):
         if n is None:

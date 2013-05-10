@@ -15,27 +15,9 @@ in the .grammars module.
 from __future__ import print_function, division, absolute_import, unicode_literals
 from collections import OrderedDict
 from .buffering import Buffer
-from .parsing import Parser
-from .util import simplify
-from .grammars import (ChoiceGrammar,
-                       CutGrammar,
-                       EOFGrammar,
-                       Grammar,
-                       GroupGrammar,
-                       LookaheadGrammar,
-                       LookaheadNotGrammar,
-                       NamedGrammar,
-                       OptionalGrammar,
-                       OverrideGrammar,
-                       PatternGrammar,
-                       RepeatGrammar,
-                       RepeatOneGrammar,
-                       RuleGrammar,
-                       RuleRefGrammar,
-                       SequenceGrammar,
-                       SpecialGrammar,
-                       TokenGrammar,
-                       VoidGrammar)
+from .parsing import Parser, rule_def
+from .util import simplify_list
+from . import grammars
 from .exceptions import FailedParse
 
 __all__ = ['GrakoParser', 'GrakoGrammarGenerator']
@@ -53,241 +35,298 @@ class GrakoParserBase(Parser):
                                                   filename=filename,
                                                   **kwargs)
 
-    def _void_(self):
+    @rule_def
+    def void(self):
         self._token('()', 'void')
 
-    def _token_(self):
+    @rule_def
+    def token(self):
+        self.TOKEN()
+
+    @rule_def
+    def TOKEN(self):
         with self._option():
             self._token("'")
             self._cut()
-            self._pattern(r"(?:[^'\\]|\\')*", '@')
+            self._pattern(r"(?:[^'\n]|\\'|\\\\)*", '@')
             self._token("'")
             return
 
         with self._option():
             self._token('"')
             self._cut()
-            self._pattern(r'(?:[^"\\]|\\")*', '@')
+            self._pattern(r'(?:[^"\n]|\\"|\\\\)*', '@')
             self._token('"')
             return
 
         raise FailedParse(self._buffer, '<"> or' + "<'>")
 
-    def _word_(self):
+    @rule_def
+    def word(self):
         self._pattern(r'[A-Za-z0-9_]+')
 
-    def _qualified_(self):
+    @rule_def
+    def qualified(self):
         self._pattern(r'[A-Za-z0-9_]+(?:\.[-_A-Za-z0-9]+)*', 'qualified')
 
-    def _call_(self):
-        self._call('word')
+    @rule_def
+    def call(self):
+        self.word()
 
-    def _pattern_(self):
+    @rule_def
+    def pattern(self):
+        self.PATTERN()
+
+    @rule_def
+    def PATTERN(self):
         self._token('?/')
         self._cut()
         self._pattern(r'(.*?)(?=/\?)', '@')
         self._token('/?')
 
-    def _cut_(self):
+    @rule_def
+    def cut(self):
         self._token('>>', 'cut')
         self._cut()
 
-    def _eof_(self):
+    @rule_def
+    def eof(self):
         self._token('$')
         self._cut()
 
-    def _subexp_(self):
+    @rule_def
+    def subexp(self):
         self._token('(')
         self._cut()
-        self._call('expre', '@')
+        e = self.expre()
+        self.ast['@'] = e
         self._token(')')
 
-    def _optional_(self):
+    @rule_def
+    def optional(self):
         self._token('[')
         self._cut()
-        self._call('expre', '@')
+        e = self.expre()
+        self.ast['@'] = e
         self._cut()
         self._token(']')
 
-    def _plus_(self):
+    @rule_def
+    def plus(self):
         if not self._try_token('-', 'symbol'):
             self._token('+', 'symbol')
 
-    def _repeat_(self):
+    @rule_def
+    def repeat(self):
         self._token('{')
         self._cut()
-        self._call('expre', 'repeat')
+        e = self.expre()
+        self.ast['repeat'] = e
         self._token('}')
         if not self._try_token('*'):
             try:
-                self._call('plus', 'plus')
+                e = self.plus()
+                self.ast['plus'] = e
             except FailedParse:
                 pass
 
-    def _special_(self):
+    @rule_def
+    def special(self):
         self._token('?(')
         self._cut()
         self._pattern(r'(.*)\)?', 'special')
 
-    def _kif_(self):
+    @rule_def
+    def kif(self):
         self._token('&')
         self._cut()
-        self._call('term', 'kif')
+        e = self.term()
+        self.ast['@'] = e
 
-    def _knot_(self):
+    @rule_def
+    def knot(self):
         self._token('!')
         self._cut()
-        self._call('term', 'knot')
+        e = self.term()
+        self.ast['@'] = e
 
-    def _atom_(self):
+    @rule_def
+    def atom(self):
         with self._option():
-            self._call('void')
+            self.void()
             self._cut()
             return
         with self._option():
-            self._call('cut')
+            self.cut()
             self._cut()
             return
         with self._option():
-            self._call('token')
+            self.token()
             self._cut()
             return
         with self._option():
-            self._call('call')
+            self.call()
             self._cut()
             return
         with self._option():
-            self._call('pattern')
+            self.pattern()
             self._cut()
             return
         with self._option():
-            self._call('eof')
+            self.eof()
             self._cut()
             return
         self._error('expecting atom')
 
-    def _term_(self):
+    @rule_def
+    def term(self):
         with self._option():
-            self._call('atom')
+            self.atom()
             self._cut()
             return
         with self._option():
-            self._call('subexp')
+            self.subexp()
             self._cut()
             return
         with self._option():
-            self._call('repeat')
+            self.repeat()
             self._cut()
             return
         with self._option():
-            self._call('optional')
+            self.optional()
             self._cut()
             return
         with self._option():
-            self._call('special')
+            self.special()
             self._cut()
             return
         with self._option():
-            self._call('kif')
+            self.kif()
             self._cut()
             return
         with self._option():
-            self._call('knot')
+            self.knot()
             self._cut()
             return
         self._error('expecting term')
 
-    def _named_(self):
-        name = self._call('qualified')
+    @rule_def
+    def named(self):
+        name = self.qualified()
         if not self._try_token('+:', 'force_list'):
             self._token(':')
         self._cut()
         self.ast.add('name', name)
-        self._call('element', 'value')
+        e = self.element()
+        self.ast['value'] = e
 
-    def _override_(self):
+    @rule_def
+    def override(self):
         self._token('@')
         self._cut()
-        self._call('element', '@')
+        e = self.element()
+        self.ast['@'] = e
 
-    def _element_(self):
+    @rule_def
+    def element(self):
         with self._option():
-            self._call('named')
+            self.named()
             self._cut()
             return
         with self._option():
-            self._call('override')
+            self.override()
             self._cut()
             return
         with self._option():
-            self._call('term')
+            self.term()
             self._cut()
             return
         self._error('element')
 
-    def _sequence_(self):
-        self._call('element', 'sequence', True)
-        f = lambda: self._call('element', 'sequence', True)
-        self._repeater(f)
+    @rule_def
+    def sequence(self):
+        @self._closure_plus
+        def callelm():
+            e = self.element()
+            self.ast.add_list('sequence', e)
+        callelm()
 
-    def _choice_(self):
+    @rule_def
+    def choice(self):
+        @self._closure
         def options():
             self._token('|')
             self._cut()
-            self._call('sequence', 'options')
+            e = self.sequence()
+            self.ast.add_list('options', e)
 
-        self._call('sequence', 'options', True)
-        self._repeat(options, False)
+        e = self.sequence()
+        self.ast.add_list('options', e)
+        options()
 
-    def _expre_(self):
-        self._call('choice')
+    @rule_def
+    def expre(self):
+        self.choice()
 
-    def _rule_(self):
+    @rule_def
+    def rule(self):
         # FIXME: This doesn't work, and it's usefullness is doubtfull.
         # p = self._pos
         # try:
-        #     ast_name = self._call('word')
+        #     ast_name = self.word()
         #     self._token(':')
         #     self.ast.add('ast_name', str(ast_name))
         # except FailedParse:
         #     self._goto(p)
-        self._call('word', 'name')
+        e = self.word()
+        self.ast['name'] = e
         self._cut()
         self._token('=')
         self._cut()
-        self._call('expre', 'rhs')
+        e = self.expre()
+        self.ast['rhs'] = e
         if not self._try_token(';'):
             try:
                 self._token('.')
             except FailedParse:
                 self._error('expecting one of: ; .')
 
-    def _grammar_(self):
-        self._call('rule', 'rules')
-        f = lambda: self._call('rule', 'rules')
-        self._repeat(f, True)
+    @rule_def
+    def grammar(self):
+        @self._closure_plus
+        def rules():
+            e = self.rule()
+            self.ast['rules'] = e
+        rules()
         self._next_token()
         self._check_eof()
 
 
-class GrakoParser(GrakoParserBase):
+class GrakoASTSemantics(object):
 
     def subexp(self, ast):
-        return simplify(ast.exp)
+        return simplify_list(ast.exp)
 
     def element(self, ast):
-        return simplify(ast)
+        return simplify_list(ast)
 
     def sequence(self, ast):
-        return simplify(ast.sequence)
+        return simplify_list(ast.sequence)
 
     def choice(self, ast):
         if len(ast.options) == 1:
-            return simplify(ast.options)
+            return simplify_list(ast.options)
         return ast
 
 
-class GrakoGrammarGenerator(GrakoParser):
+class GrakoParser(GrakoParserBase):
+    def __init__(self, grammar_name, semantics=None, **kwargs):
+        if semantics is None:
+            semantics = GrakoASTSemantics()
+        super(GrakoParser, self).__init__(semantics=semantics, **kwargs)
+
+
+class GrakoGrammarGenerator(GrakoParserBase):
     def __init__(self, grammar_name, semantics=None, **kwargs):
         if semantics is None:
             semantics = GrakoSemantics(grammar_name)
@@ -301,7 +340,7 @@ class GrakoSemantics(object):
         self.rules = OrderedDict()
 
     def token(self, ast):
-        return TokenGrammar(ast)
+        return grammars.Token(ast)
 
     def word(self, ast):
         return ast
@@ -310,42 +349,42 @@ class GrakoSemantics(object):
         return ast.qualified
 
     def call(self, ast):
-        return RuleRefGrammar(ast)
+        return grammars.RuleRef(ast)
 
     def pattern(self, ast):
-        return PatternGrammar(ast)
+        return grammars.Pattern(ast)
 
     def cut(self, ast):
-        return CutGrammar()
+        return grammars.Cut()
 
     def eof(self, ast):
-        return EOFGrammar()
+        return grammars.EOF()
 
     def void(self, ast):
-        return VoidGrammar()
+        return grammars.Void()
 
     def subexp(self, ast):
-        return GroupGrammar(ast)
+        return grammars.Group(ast)
 
     def optional(self, ast):
-        return OptionalGrammar(ast)
+        return grammars.Optional(ast)
 
     def plus(self, ast):
         return ast
 
     def repeat(self, ast):
         if ast.plus:
-            return RepeatOneGrammar(ast.repeat)
-        return RepeatGrammar(ast.repeat)
+            return grammars.RepeatPlus(ast.repeat)
+        return grammars.Repeat(ast.repeat)
 
     def special(self, ast):
-        return SpecialGrammar(ast.special)
+        return grammars.Special(ast.special)
 
     def kif(self, ast):
-        return LookaheadGrammar(ast.kif)
+        return grammars.Lookahead(ast)
 
     def knot(self, ast):
-        return LookaheadNotGrammar(ast.knot)
+        return grammars.LookaheadNot(ast)
 
     def atom(self, ast):
         return ast
@@ -354,10 +393,13 @@ class GrakoSemantics(object):
         return ast
 
     def named(self, ast):
-        return NamedGrammar(ast.name, ast.value, 'force_list' in ast)
+        if ast.force_list:
+            return grammars.NamedList(ast.name, ast.value)
+        else:
+            return grammars.Named(ast.name, ast.value)
 
     def override(self, ast):
-        return OverrideGrammar(ast)
+        return grammars.Override(ast)
 
     def element(self, ast):
         return ast
@@ -366,13 +408,13 @@ class GrakoSemantics(object):
         seq = ast.sequence
         assert isinstance(seq, list), str(seq)
         if len(seq) == 1:
-            return simplify(seq)
-        return SequenceGrammar(seq)
+            return simplify_list(seq)
+        return grammars.Sequence(seq)
 
     def choice(self, ast):
         if len(ast.options) == 1:
             return ast.options[0]
-        return ChoiceGrammar(ast.options)
+        return grammars.Choice(ast.options)
 
     def expre(self, ast):
         return ast
@@ -382,15 +424,15 @@ class GrakoSemantics(object):
         name = ast.name
         rhs = ast.rhs
         if not name in self.rules:
-            rule = RuleGrammar(name, rhs, ast_name=ast_name)
+            rule = grammars.Rule(name, rhs, ast_name=ast_name)
             self.rules[name] = rule
         else:
             rule = self.rules[name]
-            if isinstance(rule.exp, ChoiceGrammar):
+            if isinstance(rule.exp, grammars.Choice):
                 rule.exp.options.append(rhs)
             else:
-                rule.exp = ChoiceGrammar([rule.exp, rhs])
+                rule.exp = grammars.Choice([rule.exp, rhs])
         return rule
 
     def grammar(self, ast):
-        return Grammar(self.grammar_name, list(self.rules.values()))
+        return grammars.Grammar(self.grammar_name, list(self.rules.values()))

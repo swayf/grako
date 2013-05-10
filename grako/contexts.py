@@ -4,6 +4,7 @@ import sys
 from functools import wraps
 from contextlib import contextmanager
 from collections import namedtuple
+from .util import to_list
 from .ast import AST
 from .exceptions import FailedParse, FailedCut, FailedLookahead
 
@@ -21,20 +22,23 @@ class ParseContext(object):
                  parseinfo=False,
                  trace=False,
                  encoding='utf-8',
+                 comments_re=None,
                  **kwargs):
         super(ParseContext, self).__init__()
 
         self._buffer = buffer
-        self.semantics = semantics if semantics is not None else self
+        self.semantics = semantics
         self.encoding = encoding
+        self.comments_re = comments_re
         self.parseinfo = parseinfo
+        self.trace = trace
 
         self._ast_stack = []
         self._concrete_stack = [None]
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
-        self.trace = trace
+        self._last_node = None
 
     def _reset_context(self, buffer=None, semantics=None):
         self._buffer = buffer
@@ -45,13 +49,17 @@ class ParseContext(object):
         self._memoization_cache = dict()
         if semantics is not None:
             self.semantics = semantics
-        if self.semantics is not None:
-            set_buffer = getattr(self.semantics, 'set_buffer', None)
-            if set_buffer is not None:
-                set_buffer(buffer)
 
     def goto(self, pos):
         self._buffer.goto(pos)
+
+    @property
+    def last_node(self):
+        return self._last_node
+
+    @last_node.setter
+    def last_node(self, value):
+        self._last_node = value
 
     @property
     def _pos(self):
@@ -100,8 +108,8 @@ class ParseContext(object):
         return self._concrete_stack[-1]
 
     @cst.setter
-    def cst(self, cst):
-        self._concrete_stack[-1] = cst
+    def cst(self, value):
+        self._concrete_stack[-1] = value
 
     def _push_cst(self):
         self._concrete_stack.append(None)
@@ -114,6 +122,8 @@ class ParseContext(object):
             return
         previous = self._concrete_stack[-1]
         if previous is None:
+            if isinstance(node, list):
+                node = node[:]  # copy it
             self._concrete_stack[-1] = node
         elif previous == node:  # FIXME: Don't know how this happens, but it does
             return
@@ -181,7 +191,12 @@ class ParseContext(object):
 
     def _trace_event(self, event):
         if self.trace:
-            self._trace('%s   %s \n\t%s', event, self._rulestack(), self._buffer.lookahead())
+            self._trace('%s \n%s   \n%s \n\t%s \n',
+                        event,
+                        self._buffer.line_info().filename,
+                        self._rulestack(),
+                        self._buffer.lookahead()
+                        )
 
     def _trace_match(self, token, name=None):
         if self.trace:
@@ -191,6 +206,9 @@ class ParseContext(object):
     def _error(self, item, etype=FailedParse):
         raise etype(self._buffer, item)
 
+    def _fail(self):
+        self._error('fail')
+
     @contextmanager
     def _try(self):
         p = self._pos
@@ -199,6 +217,7 @@ class ParseContext(object):
             yield None
             ast = self.ast
             cst = self.cst
+            self.last_node = cst
         except:
             self._goto(p)
             raise
@@ -233,7 +252,9 @@ class ParseContext(object):
         @wraps(f)
         def wrapper(*args, **kwargs):
             with self._choice_context():
-                return f()
+                self.last_node = None
+                f()
+                return self.last_node
         return wrapper
 
     @contextmanager
@@ -251,6 +272,7 @@ class ParseContext(object):
         finally:
             self._pop_cst()
         self._add_cst_node(cst)
+        self.last_node = cst
 
     @contextmanager
     def _if(self):
@@ -261,11 +283,13 @@ class ParseContext(object):
         finally:
             self._goto(p)
             self._pop_ast()  # simply discard
+            self.last_node = None
 
     @contextmanager
     def _ifnot(self):
         p = self._pos
         self._push_ast()
+        self.last_node = None
         try:
             yield None
         except FailedParse:
@@ -275,6 +299,7 @@ class ParseContext(object):
         finally:
             self._goto(p)
             self._pop_ast()  # simply discard
+            self.last_node = None
 
     def _repeater(self, f):
         result = []
@@ -297,32 +322,34 @@ class ParseContext(object):
             finally:
                 self._pop_cut()
 
-    def _repeat(self, f, plus=False):
-        self._push_cst()
-        try:
-            with self._try():
-                one = [f()] if plus else []
-            result = one + self._repeater(f)
-            cst = self.cst
-            if cst is None:
-                cst = []
-            elif not isinstance(cst, list):
-                cst = [cst]
-        finally:
-            self._pop_cst()
-        self._add_cst_node(cst)
-        return result
-
     #decorator
     def _closure(self, f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            return self._repeat(f)
+            self._push_cst()
+            try:
+                self._repeater(f)
+                cst = to_list(self.cst)
+            finally:
+                self._pop_cst()
+            self._add_cst_node(cst)
+            self.last_node = cst
+            return cst
         return wrapper
 
     #decorator
     def _closure_plus(self, f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            return self._repeat(f, plus=True)
+            self._push_cst()
+            try:
+                with self._try():
+                    f()
+                self._repeater(f)
+                cst = to_list(self.cst)
+            finally:
+                self._pop_cst()
+            self._add_cst_node(cst)
+            self.last_node = cst
+            return cst
         return wrapper

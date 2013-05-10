@@ -40,6 +40,10 @@ argparser.add_argument('-b', '--binary',
                        help='generate a pickled grammar model instead of a parser',
                        action='store_true'
                        )
+argparser.add_argument('-d', '--draw',
+                       help='generate a diagram of the grammar',
+                       action='store_true'
+                       )
 
 
 def genmodel(name, grammar, trace=False, filename=None):
@@ -65,27 +69,45 @@ def main():
     outfile = args.outfile
     name = args.name
     binary = args.binary
+    draw = args.draw
 
     if binary and not outfile:
         log.error('--binary requires --outfile')
+        sys.exit(1)
+    if draw and not outfile:
+        log.error('--draw requires --outfile')
+        sys.exit(1)
+    if binary and draw:
+        log.error('either --binary or --draw, not both')
+        sys.exit(1)
 
     if name is None:
         name = os.path.splitext(os.path.basename(filename))[0]
 
     if outfile and os.path.isfile(outfile):
         os.unlink(outfile)
+
     grammar = open(filename, 'r').read()
+
+    if outfile:
+        dirname = os.path.dirname(outfile)
+        if dirname and not os.path.isdir(dirname):
+            os.makedirs(dirname)
+
     try:
-        if not binary:
-            parser = gencode(name, grammar, trace=args.trace, filename=filename)
-        else:
-            model = genmodel(name, grammar, trace=args.trace, filename=filename)
+        model = genmodel(name, grammar, trace=args.trace, filename=filename)
+
+        if binary:
             parser = pickle.dumps(model, protocol=2)
-        if outfile:
-            dirname = os.path.dirname(outfile)
-            if dirname and not os.path.isdir(dirname):
-                os.makedirs(dirname)
-            open(outfile, 'w').write(parser)
+        else:
+            parser = model.render()
+
+        if draw:
+            from . import diagrams
+            diagrams.draw(outfile, model)
+        elif outfile:
+            with open(outfile, 'w') as f:
+                f.write(parser)
         else:
             print(parser)
     except GrakoException as e:

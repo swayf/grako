@@ -8,6 +8,7 @@ sys.path.append('tmp')
 import os
 import json
 import pickle
+from grako.rendering import NodeVisitor
 from grako.bootstrap import (GrakoParser,
                              GrakoGrammarGenerator,
                              GrakoSemantics,
@@ -97,9 +98,9 @@ def main():
     open('tmp/g10.py', 'w').write(gencode10)
 
     print('-' * 20, 'phase 11 - Pickle the model and try again.')
-    with open('tmp/11.grako', 'w') as f:
+    with open('tmp/11.grako', 'wb') as f:
         pickle.dump(g10, f, protocol=2)
-    with open('tmp/11.grako', 'r') as f:
+    with open('tmp/11.grako', 'rb') as f:
         g11 = pickle.load(f)
     r11 = g11.parse(text,
                     start_rule='grammar',
@@ -109,6 +110,28 @@ def main():
     open('tmp/11.ebnf', 'w').write(str(110))
     gencode11 = r11.codegen()
     open('tmp/g11.py', 'w').write(gencode11)
+
+    print('-' * 20, 'phase 12 - Visitor')
+
+    class PrintNameVisitor(NodeVisitor):
+        def __init__(self):
+            self.visited = []
+
+        def visit(self, o):
+            self.visited.append(o.__class__.__name__)
+            super(PrintNameVisitor, self).visit(o)
+
+    v = PrintNameVisitor()
+    g11.accept(v)
+    open('tmp/12.txt', 'w').write('\n'.join(v.visited))
+
+    print('-' * 20, 'phase 13 - Graphics')
+    try:
+        from grako.diagrams import draw
+    except:
+        print('PyGraphViz not found!')
+    else:
+        draw('tmp/13.jpg', g11)
 
 
 if __name__ == '__main__':

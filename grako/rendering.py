@@ -69,6 +69,9 @@ class Renderer(object):
     def reset_counter(cls):
         Renderer._counter = itertools.count()
 
+    def accept(self, visitor, *args, **kwargs):
+        return visitor.visit(self, *args, **kwargs)
+
     def render_fields(self, fields):
         pass
 
@@ -86,3 +89,12 @@ class Renderer(object):
             return self.formatter.format(trim(template), **fields)
         except KeyError as e:
             raise KeyError(str(e), type(self))
+
+
+class NodeVisitor(object):
+    def visit(self, obj, *args, **kwargs):
+        name = obj.__class__.__name__
+        name = 'visit_' + name.lower()
+        method = getattr(self, name, None)
+        if method:
+            return method(obj, *args, **kwargs)

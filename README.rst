@@ -1,7 +1,4 @@
-    *At least for the people who send me mail about a new language that they're
-designing, the general advice is: do it to learn about how to write a
-compiler. Don't have any expectations that anyone will use it, unless you hook up with some sort of organization in a position to push it hard. It's a
-lottery, and some can buy a lot of the tickets. There are plenty of beautiful languages (more beautiful than C) that didn't catch on. But someone does win the lottery, and doing a language at least teaches you something.*
+    *At least for the people who send me mail about a new language that they're designing, the general advice is: do it to learn about how to write a compiler. Don't have any expectations that anyone will use it, unless you hook up with some sort of organization in a position to push it hard. It's a lottery, and some can buy a lot of the tickets. There are plenty of beautiful languages (more beautiful than C) that didn't catch on. But someone does win the lottery, and doing a language at least teaches you something.*
 
     **Dennis Ritchie** (1941-2011)
     Creator of the C programming language and of UNIX
@@ -15,7 +12,7 @@ Grako
 
 **Grako** is *different* from other PEG_ parser generators in that the generated parsers use Python_'s very efficient exception-handling system to backtrack. **Grako** generated parsers simply assert what must be parsed; there are no complicated *if-then-else* sequences for decision making or backtracking. *Positive and negative lookaheads*, and the *cut* element allow for additional, hand-crafted optimizations at the grammar level, and delegation to Python_'s re_ module for *lexemes* allows for (Perl_-like) powerful and efficient lexical analysis. The use of Python_'s `context managers`_ considerably reduces the size of the generated parsers for enhanced CPU-cache hits.
 
-**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 2500 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependencies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
+**Grako**, the runtime support, and the generated parsers have measurably low `Cyclomatic complexity`_.  At around 3000 lines of Python_, it is possible to study all its source code in a single session. **Grako**'s only dependencies are on the Python_ 2.7, 3.x, or PyPy_ standard libraries.
 
 .. _`Cyclomatic complexity`: http://en.wikipedia.org/wiki/Cyclomatic_complexity
 
@@ -72,14 +69,14 @@ A **Grako** generated parser consists of the following classes:
 
     def _myrulename_(self):
 
-* An *semantics check parser* class that inherits from the base parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
+* A *semantics check parser* class that inherits from the base parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
 
-* A *semantics delegate class* one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
+* A *semantics delegate class* with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
 
     def myrulename(self, ast):
         return ast
 
-The methods in the base parser class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
+The methods in the delegate class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
 
 
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph
@@ -120,6 +117,8 @@ The *-h* and *--help* parameters provide full usage information::
           -o outfile, --outfile outfile
                                 specify where the output should go (default is stdout)
           -t, --trace           produce verbose parsing output
+          -b, --binary          generate a pickled grammar model instead of a parser
+          -d, --draw            generate a diagram of the grammar
 
         $
 
@@ -129,9 +128,6 @@ Using the Generated Parser
 ==========================
 
 To use the generated parser, just subclass the base or the abstract parser, create an instance of it, and invoke its ``parse()`` method passing the grammar to parse and the starting rule's name as parameter::
-
-    class MyParser(MyParserBase):
-        pass
 
     parser = MyParser()
     ast = parser.parse('text to parse', rule_name='start')
@@ -225,6 +221,9 @@ The expressions, in reverse order of operator precedence, can be:
 
     ``()``
         The empty expression. Succeed without advancing over input.
+
+    ``!()``
+        The *fail* expression. This is actually ``!`` applied to ``()``, which always fails.
 
     ``>>``
         The cut expression. After this point, prevent other options from being considered even if the current option fails to parse.
@@ -395,9 +394,20 @@ Still, comments are provided for *non-obvious intentions* in the code, and each 
 Examples
 ========
 
+Grako
+-----
+
 The file ``etc/grako.ebnf`` contains a grammar for the **Grako** EBNF_ language written in the same language. It is used in the *bootstrap* test suite to prove that **Grako** can generate a parser to parse its own language.
 
+Regex
+-----
+
 The project ``examples/regexp`` contains a regexp-to-EBNF translator and parser generator. The project has no practical use, but it's a complete, end-to-end example of how to implement a translator using **Grako**.
+
+antlr2grako
+-----------
+
+The project ``examples/antlr2grako`` contains a ANTLR_ to **Grako** grammar tanslator.  The project is a good example of the use of models and templates in translation. The program, ``antlr2grako.py`` generates the **Grako** gramar on standard ouput, but because the model used is **Grako**'s own, the same code can be used to directly generate a parser from an ANTLR_ grammar. Please take a look at the examples *README* to know about limitations.
 
 
 License
@@ -409,11 +419,12 @@ License
 .. _ResQSoft:  http://www.resqsoft.com/
 .. _`Juancarlo Añez`: mailto:apalala@gmail.com
 
-You may use the tool under the terms of the `BSD-style License` as described in the enclosed **LICENSE.txt** file.
+You may use the tool under the terms of the BSD_-style license described in the enclosed **LICENSE.txt** file.
 
 *If your project requires different licensing* please contact
 `info@resqsoft.com`_.
 
+.. _BSD: http://en.wikipedia.org/wiki/BSD_licenses#2-clause_license_.28.22Simplified_BSD_License.22_or_.22FreeBSD_License.22.29
 .. _`info@resqsoft.com`: mailto:info@resqsoft.com
 
 
@@ -483,17 +494,29 @@ Change History
 ==============
 
 - **tip**
+    * *Incompatible change!* No longer asume that parsers implement semantics, so underscores were dropped from the names of methods implementing rules.
+    * A ``last_node`` protocol allowed the removal of variable ``_e`` from generated parsers.
+    * Create a basic diagram of a grammar if pygraphviz_ is installed.
+    * Added the ``--draw`` option to the command-line tool.
+    * Fixes to the *antlr2grako* example to let it convert over 6000 lines of an ANTLR_ gramar to **Grako**.
+    * Improved rendering of grammars by grammar models.
+
+.. _pygraphviz: https://pypi.python.org/pypi/pygraphviz/
+
+- **1.4.0**
     * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
     * Semantic actions can now be implemented by a delegate.
-    * Reset synthetic method count and use decorators for more readable parser code.
-    * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap the tool.
+    * Reset synthetic method count and use decorators to increase readability of generated parsers.
+    * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap **Grako**.
     * The bootstrap parser was refactored to use semantic delegates.
     * Proved that grammar models can be pickled, unpickled, and reused.
+    * Added the *antlr* example with an ANTLR_-to-**Grako** grammar translator.
+    * Changed the licensing to simplified BSD_.
 
 - **1.3.0**
     * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
     * Make sure that *cut* actually applies to the nearest fork.
-    * Finish aligning model parsing with generated code parsing. Performance should now favor model parsing (because less code means more CPU-cache hits), but model parsing doesn't yet provide for semantic actions.
+    * Finish aligning model parsing with generated code parsing.
     * Report all the rules missing in a grammar before aborting.
     * Align the sample *etc/grako.ebnf* grammar to the language parsed by the bootstrap parser.
     * Ensure compatibility with Python_ 2.7.4 and 3.3.1.

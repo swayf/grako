@@ -32,7 +32,7 @@ choice
 
 sequence
     =
-    sequence+:element {[',' >>] sequence+:element}
+    sequence+:element {sequence+:element}
     ;
 
 element
@@ -44,7 +44,7 @@ element
 
 named
     =
-    name:word [force_list:'+'] ':' value:element
+    name:word (force_list:'+:'|':') value:element
     ;
 
 override
@@ -120,17 +120,8 @@ cut
 
 token
     =
-    dqstring | sqstring
-    ;
-
-dqstring
-    =
-    '"' >> @?/([^"]|\\")*/? '"'
-    ;
-
-sqstring
-    =
-    "'" >> @?/([^']|\\')*/? "'"
+      '"' >> @?/([^"\\\n]|\\"|\\\\)*/? '"'
+    | "'" >> @?/([^'\\\n]|\\'|\\\\)*/? "'"
     ;
 
 word
@@ -139,6 +130,11 @@ word
     ;
 
 pattern
+    =
+    PATTERN
+    ;
+
+PATTERN
     =
     '?/' >> @?/(.*?)(?=/\?)/? '/?'
     ;

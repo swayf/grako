@@ -1,0 +1,322 @@
+(*
+    ANTLR v3 grammar written in Grako EBNF syntax.
+
+    This grammar is inspired in, but different one by the one created
+    by Terence Parr using ANTLR syntax. It is licensed under the BSD
+    License to keep in the spirit of ANTLR.
+*)
+
+grammar
+    =
+    [('lexer'|'parser')] 'grammar' >> name:name ';'
+    [options]
+    [imports]
+    [tokens]
+    {scope}
+    {action}
+    rules:{rule}+
+    $
+    ;
+
+options
+    =
+    'options' >> '{' {option}+ '}' >>
+    ;
+
+option
+    =
+    id '=' >>  (id|string|char|int|'*') ';' >>
+    ;
+
+imports
+    =
+    'import' >> name {',' name} ';'
+    ;
+
+tokens
+    =
+    'tokens' >> '{' {token}+ '}'
+    ;
+
+token
+    =
+    token_name ['=' >> token_value ] ';' >>
+    ;
+
+token_value
+    =
+    literal
+    ;
+
+scope
+    =
+    'scope' >>
+    (
+      block ['scope' >> id {',' id} ';' ]
+    | id {',' >> id} ';'
+    | id block
+    )
+    ;
+
+action
+    =
+    '@' >> ('lexer'|'parser'|id)
+    ['::' >> id]
+    block
+    ;
+
+block
+    =
+    '{' {(block|?/[^}]*/?)} '}'
+    ;
+
+rule
+    =
+    ['protected'|'public'|'private'|'fragment']
+    name:id ['!'] [arg]
+    ['returns' arg]
+    ['trhows' id {',' id}* ]
+    [options]
+    [scope]
+    {action}
+    ':' >> exp:alternatives ';' >>
+    [exceptions]
+    ;
+
+arg
+    =
+    '[' >>
+        {
+            arg
+        |
+            ?/[^\]]*/?
+        }*
+    ']'
+    ;
+
+exceptions
+    =
+    {'catch' >> arg block}
+    ['finally' >> block]
+    ;
+
+alternatives
+    =
+    options+:alternative {'|' >> options+:alternative}
+    ;
+
+alternative
+    =
+    @elements ['->' >> rewrite]
+    ;
+
+elements
+    =
+    {element}*
+    ;
+
+element
+    =
+      named
+    | predicate_or_action
+    | closure
+    | positive_closure
+    | optional
+    | atom
+    ;
+
+named
+    =
+    name:id (force_list:'+='| '=') >>  exp:atom
+    ;
+
+predicate_or_action
+    =
+      gated_predicate
+    | semantic_predicate
+    | semantic_action
+    ;
+
+
+gated_predicate
+    =
+    block '?=>' >>
+    ;
+
+semantic_predicate
+    =
+    block '?' >>
+    ;
+
+semantic_action
+    =
+    '{'
+        {
+            semantic_action
+        |
+            ?/[^}]/?
+        }
+    '}'
+    ;
+
+syntactic_predicate
+    =
+    @subexp '=>' >>
+    ;
+
+optional
+    =
+    @atom '?' >>
+    ;
+
+closure
+    =
+    @atom '*' >>
+    ;
+
+positive_closure
+    =
+    @atom '+' >>
+    ;
+
+atom
+    =
+    @(
+      eof
+    | negative
+    | syntactic_predicate
+    | subexp
+    | range
+    | terminal
+    | non_terminal
+    )
+    ['^'|'!']
+    ;
+
+eof
+    =
+    'EOF'
+    ;
+
+range
+    =
+    first:char '..' >> last:char
+    ;
+
+subexp
+    =
+    '('
+        [options ':' >>]
+        @alternatives
+    ')'
+    ;
+
+negative
+    =
+    '~' >> @atom
+    ;
+
+non_terminal
+    =
+    @(
+      rule_ref
+    | token_ref
+    )
+    [arg]
+    ;
+
+terminal
+    =
+      char
+    | string
+    | any
+    ;
+
+any
+    =
+    '.' >>
+    ;
+
+
+rewrite
+    =
+    {rewrite_term}*
+    ;
+
+rewrite_term
+    =
+      '^(' {rewrite_term}+ ')'
+    | ?/[^|;^)]*/?
+    ;
+
+rule_ref
+    =
+    lower_name
+    ;
+
+token_ref
+    =
+    upper_name
+    ;
+
+token_name
+    =
+    upper_name
+    ;
+
+literal
+    =
+    id | string | int
+    ;
+
+
+id
+    =
+    name
+    ;
+
+name
+    =
+    ?/[a-zA-Z][A-Za-z0-9_]*/?
+    ;
+
+lower_name
+    =
+    ?/[a-z][A-Za-z0-9_]*/?
+    ;
+
+upper_name
+    =
+    ?/[A-Z][A-Za-z0-9_]*/?
+    ;
+
+char
+    =
+    string
+    ;
+
+string
+    =
+    STRING
+    ;
+
+STRING
+    =
+    '"' >> @{?/[^"\n\\]/?|ESC} '"'
+    |
+    "'" >> @{?/[^'\n\\]/?|ESC} "'"
+    |
+    '<<' >> ?/(?:(?!'>>').)*/? '>>'
+    ;
+
+int
+    =
+    ?/[0-9]+/?
+    ;
+
+ESC
+    =
+    ?/\\['"\\nrtbfv]/?
+    |
+    ?/\\u[a-fA-F0-9]{4}/?
+    ;

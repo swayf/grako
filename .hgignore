@@ -6,6 +6,8 @@
 ^dist$
 ^build$
 ^examples/.*/grako$
+^examples/.*/antlr_parser
+^examples/.*/python.ebnf$
 genparser.py$
 parser_base.py$
 docs/_build/
