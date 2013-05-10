@@ -27,7 +27,7 @@ class ParseContext(object):
         super(ParseContext, self).__init__()
 
         self._buffer = buffer
-        self.semantics = semantics if semantics is not None else self
+        self.semantics = semantics
         self.encoding = encoding
         self.comments_re = comments_re
         self.parseinfo = parseinfo
@@ -48,10 +48,6 @@ class ParseContext(object):
         self._memoization_cache = dict()
         if semantics is not None:
             self.semantics = semantics
-        if self.semantics is not None:
-            set_buffer = getattr(self.semantics, 'set_buffer', None)
-            if set_buffer is not None:
-                set_buffer(buffer)
 
     def goto(self, pos):
         self._buffer.goto(pos)
