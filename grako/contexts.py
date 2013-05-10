@@ -320,13 +320,13 @@ class ParseContext(object):
         def wrapper(*args, **kwargs):
             self._push_cst()
             try:
-                result = self._repeater(f)
+                self._repeater(f)
                 cst = to_list(self.cst)
             finally:
                 self._pop_cst()
             self._add_cst_node(cst)
             self._last_node = cst
-            return result
+            return cst
         return wrapper
 
     #decorator
@@ -336,12 +336,12 @@ class ParseContext(object):
             self._push_cst()
             try:
                 with self._try():
-                    one = [f()]
-                result = one + self._repeater(f)
+                    f()
+                self._repeater(f)
                 cst = to_list(self.cst)
             finally:
                 self._pop_cst()
             self._add_cst_node(cst)
             self._last_node = cst
-            return result
+            return cst
         return wrapper
