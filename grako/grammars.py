@@ -348,7 +348,7 @@ class Choice(_Model):
     option_template = '''\
                     with self._option():
                     {option}
-                        return\
+                        return self.last_node\
                     '''
 
     template = '''\
