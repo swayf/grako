@@ -229,6 +229,7 @@ class ParseContext(object):
 
     @contextmanager
     def _option(self):
+        self.last_node = None
         self._push_cut()
         try:
             with self._try():
@@ -260,6 +261,7 @@ class ParseContext(object):
 
     @contextmanager
     def _optional(self):
+        self.last_node = None
         with self._choice_context():
             with self._option():
                 yield None
