@@ -152,10 +152,10 @@ class Group(_Decorator):
     def __str__(self):
         exp = str(self.exp)
         template = '(%s)'
-        if isinstance(self.exp, Choice):
+        if isinstance(self.exp, Group):
+            exp = str(exp.exp)
+        if isinstance(exp, Choice):
             template = '\n' + trim(self.str_template)
-        elif isinstance(self.exp, Group):
-            exp = str(self.exp.exp)
         return template % exp
 
     template = '''\
@@ -375,10 +375,13 @@ class Repeat(_Decorator):
         return {()} | result
 
     def __str__(self):
-        template = '{%s}'
-        if isinstance(self.exp, Choice):
+        exp = self.exp
+        template = '{{{exp}}}'
+        if isinstance(exp, Group):
+            exp = exp.exp
+        if isinstance(exp, Choice):
             template = trim(self.str_template)
-        return template % str(self.exp)
+        return template.format(exp=str(exp))
 
     def render_fields(self, fields):
         fields.update(n=self.counter())
@@ -397,9 +400,9 @@ class Repeat(_Decorator):
                 '''
 
     str_template = '''
-            {
-            %s
-            }
+            {{
+            {exp}
+            }}
             '''
 
 
@@ -627,17 +630,21 @@ class Rule(Named):
                 node.add('parseinfo', ParseInfo(ctx._buffer, name, pos, ctx._pos))
 #            if self.ast_name:
 #                node = AST([(self.ast_name, node)])
-            semantic_rule = ctx._find_semantic_rule(name)
-            if semantic_rule:
-                try:
-                    node = semantic_rule(node)
-                except FailedSemantics as e:
-                    ctx._error(str(e), FailedParse)
         finally:
             ctx._pop_ast()
+        node = self._call_semantics(ctx, name, node)
         result = (node, ctx.pos)
         cache[key] = result
         return result
+
+    def _call_semantics(self, ctx, name, node):
+        semantic_rule = ctx._find_semantic_rule(name)
+        if semantic_rule:
+            try:
+                node = semantic_rule(node)
+            except FailedSemantics as e:
+                ctx._error(str(e), FailedParse)
+        return node
 
     def _first(self, k, F):
         if self._first_set:
