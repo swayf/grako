@@ -96,16 +96,16 @@ class GrakoParserBase(Parser):
     def subexp(self):
         self._token('(')
         self._cut()
-        e = self.expre()
-        self.ast['@'] = e
+        self.expre()
+        self.ast['@'] = self.last_node
         self._token(')')
 
     @rule_def
     def optional(self):
         self._token('[')
         self._cut()
-        e = self.expre()
-        self.ast['@'] = e
+        self.expre()
+        self.ast['@'] = self.last_node
         self._cut()
         self._token(']')
 
@@ -118,13 +118,13 @@ class GrakoParserBase(Parser):
     def repeat(self):
         self._token('{')
         self._cut()
-        e = self.expre()
-        self.ast['repeat'] = e
+        self.expre()
+        self.ast['repeat'] = self.last_node
         self._token('}')
         if not self._try_token('*'):
             try:
-                e = self.plus()
-                self.ast['plus'] = e
+                self.plus()
+                self.ast['plus'] = self.last_node
             except FailedParse:
                 pass
 
@@ -138,15 +138,15 @@ class GrakoParserBase(Parser):
     def kif(self):
         self._token('&')
         self._cut()
-        e = self.term()
-        self.ast['@'] = e
+        self.term()
+        self.ast['@'] = self.last_node
 
     @rule_def
     def knot(self):
         self._token('!')
         self._cut()
-        e = self.term()
-        self.ast['@'] = e
+        self.term()
+        self.ast['@'] = self.last_node
 
     @rule_def
     def atom(self):
@@ -204,15 +204,15 @@ class GrakoParserBase(Parser):
             self._token(':')
         self._cut()
         self.ast.add('name', name)
-        e = self.element()
-        self.ast['value'] = e
+        self.element()
+        self.ast['value'] = self.last_node
 
     @rule_def
     def override(self):
         self._token('@')
         self._cut()
-        e = self.element()
-        self.ast['@'] = e
+        self.element()
+        self.ast['@'] = self.last_node
 
     @rule_def
     def element(self):
@@ -232,8 +232,8 @@ class GrakoParserBase(Parser):
     def sequence(self):
         @self._closure_plus
         def callelm():
-            e = self.element()
-            self.ast.add_list('sequence', e)
+            self.element()
+            self.ast.add_list('sequence', self.last_node)
         callelm()
 
     @rule_def
@@ -242,11 +242,11 @@ class GrakoParserBase(Parser):
         def options():
             self._token('|')
             self._cut()
-            e = self.sequence()
-            self.ast.add_list('options', e)
+            self.sequence()
+            self.ast.add_list('options', self.last_node)
 
-        e = self.sequence()
-        self.ast.add_list('options', e)
+        self.sequence()
+        self.ast.add_list('options', self.last_node)
         options()
 
     @rule_def
@@ -263,13 +263,13 @@ class GrakoParserBase(Parser):
         #     self.ast.add('ast_name', str(ast_name))
         # except FailedParse:
         #     self._goto(p)
-        e = self.word()
-        self.ast['name'] = e
+        self.word()
+        self.ast['name'] = self.last_node
         self._cut()
         self._token('=')
         self._cut()
-        e = self.expre()
-        self.ast['rhs'] = e
+        self.expre()
+        self.ast['rhs'] = self.last_node
         if not self._try_token(';'):
             try:
                 self._token('.')
@@ -280,8 +280,8 @@ class GrakoParserBase(Parser):
     def grammar(self):
         @self._closure_plus
         def rules():
-            e = self.rule()
-            self.ast['rules'] = e
+            self.rule()
+            self.ast['rules'] = self.last_node
         rules()
         self._next_token()
         self._check_eof()
