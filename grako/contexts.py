@@ -213,6 +213,7 @@ class ParseContext(object):
     def _try(self):
         p = self._pos
         self._push_ast()
+        self.last_node = None
         try:
             yield None
             ast = self.ast
@@ -228,6 +229,7 @@ class ParseContext(object):
 
     @contextmanager
     def _option(self):
+        self.last_node = None
         self._push_cut()
         try:
             with self._try():
@@ -259,6 +261,7 @@ class ParseContext(object):
 
     @contextmanager
     def _optional(self):
+        self.last_node = None
         with self._choice_context():
             with self._option():
                 yield None
