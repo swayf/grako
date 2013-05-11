@@ -259,6 +259,7 @@ class ParseContext(object):
 
     @contextmanager
     def _optional(self):
+        self.last_node = None
         with self._choice_context():
             with self._option():
                 yield None
