@@ -45,21 +45,19 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def TOKEN(self):
-        with self._option():
-            self._token("'")
-            self._cut()
-            self._pattern(r"(?:[^'\n]|\\'|\\\\)*", '@')
-            self._token("'")
-            return
+        with self._choice():
+            with self._option():
+                self._token("'")
+                self._cut()
+                self._pattern(r"(?:[^'\n]|\\'|\\\\)*", '@')
+                self._token("'")
 
-        with self._option():
-            self._token('"')
-            self._cut()
-            self._pattern(r'(?:[^"\n]|\\"|\\\\)*', '@')
-            self._token('"')
-            return
-
-        raise FailedParse(self._buffer, '<"> or' + "<'>")
+            with self._option():
+                self._token('"')
+                self._cut()
+                self._pattern(r'(?:[^"\n]|\\"|\\\\)*', '@')
+                self._token('"')
+            raise FailedParse(self._buffer, '<"> or' + "<'>")
 
     @rule_def
     def word(self):
@@ -152,63 +150,52 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def atom(self):
-        with self._option():
-            self.void()
-            self._cut()
-            return
-        with self._option():
-            self.cut()
-            self._cut()
-            return
-        with self._option():
-            self.token()
-            self._cut()
-            return
-        with self._option():
-            self.call()
-            self._cut()
-            return
-        with self._option():
-            self.pattern()
-            self._cut()
-            return
-        with self._option():
-            self.eof()
-            self._cut()
-            return
-        self._error('expecting atom')
+        with self._choice():
+            with self._option():
+                self.void()
+                self._cut()
+            with self._option():
+                self.cut()
+                self._cut()
+            with self._option():
+                self.token()
+                self._cut()
+            with self._option():
+                self.call()
+                self._cut()
+            with self._option():
+                self.pattern()
+                self._cut()
+            with self._option():
+                self.eof()
+                self._cut()
+            self._error('expecting atom')
 
     @rule_def
     def term(self):
-        with self._option():
-            self.atom()
-            self._cut()
-            return
-        with self._option():
-            self.subexp()
-            self._cut()
-            return
-        with self._option():
-            self.repeat()
-            self._cut()
-            return
-        with self._option():
-            self.optional()
-            self._cut()
-            return
-        with self._option():
-            self.special()
-            self._cut()
-            return
-        with self._option():
-            self.kif()
-            self._cut()
-            return
-        with self._option():
-            self.knot()
-            self._cut()
-            return
-        self._error('expecting term')
+        with self._choice():
+            with self._option():
+                self.atom()
+                self._cut()
+            with self._option():
+                self.subexp()
+                self._cut()
+            with self._option():
+                self.repeat()
+                self._cut()
+            with self._option():
+                self.optional()
+                self._cut()
+            with self._option():
+                self.special()
+                self._cut()
+            with self._option():
+                self.kif()
+                self._cut()
+            with self._option():
+                self.knot()
+                self._cut()
+            self._error('expecting term')
 
     @rule_def
     def named(self):
@@ -229,19 +216,17 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def element(self):
-        with self._option():
-            self.named()
-            self._cut()
-            return
-        with self._option():
-            self.override()
-            self._cut()
-            return
-        with self._option():
-            self.term()
-            self._cut()
-            return
-        self._error('element')
+        with self._choice():
+            with self._option():
+                self.named()
+                self._cut()
+            with self._option():
+                self.override()
+                self._cut()
+            with self._option():
+                self.term()
+                self._cut()
+            self._error('element')
 
     @rule_def
     def sequence(self):

@@ -6,7 +6,11 @@ from contextlib import contextmanager
 from collections import namedtuple
 from .util import to_list
 from .ast import AST
-from .exceptions import FailedParse, FailedCut, FailedLookahead
+from .exceptions import (FailedParse,
+                         FailedCut,
+                         FailedLookahead,
+                         OptionSucceeded
+                         )
 
 
 __all__ = ['ParseInfo', 'ParseContext']
@@ -234,6 +238,7 @@ class ParseContext(object):
         try:
             with self._try():
                 yield None
+            raise OptionSucceeded()
         except FailedCut:
             raise
         except FailedParse as e:
@@ -243,26 +248,18 @@ class ParseContext(object):
             self._pop_cut()
 
     @contextmanager
-    def _choice_context(self):
+    def _choice(self):
         try:
             yield None
+        except OptionSucceeded:
+            pass
         except FailedCut as e:
             raise e.nested
-
-    #decorator
-    def _choice(self, f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            with self._choice_context():
-                self.last_node = None
-                f()
-                return self.last_node
-        return wrapper
 
     @contextmanager
     def _optional(self):
         self.last_node = None
-        with self._choice_context():
+        with self._choice():
             with self._option():
                 yield None
 

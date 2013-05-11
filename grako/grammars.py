@@ -304,10 +304,10 @@ class Choice(_Model):
             assert isinstance(o, _Model), str(o)
 
     def parse(self, ctx):
-        with ctx._choice_context():
+        with ctx._choice():
             for o in self.options:
                 with ctx._option():
-                    return o.parse(ctx)
+                    o.parse(ctx)
             firstset = ' '.join(str(urepr(f[0])) for f in self.firstset if f)
             if firstset:
                 raise FailedParse(ctx.buf, 'one of {%s}' % firstset)
@@ -352,11 +352,9 @@ class Choice(_Model):
                     '''
 
     template = '''\
-                @self._choice
-                def choice{n}():
+                with self._choice():
                 {options}
-                    self._error({error})
-                choice{n}() \
+                    self._error({error})\
                 '''
 
 
@@ -723,7 +721,7 @@ class Grammar(Renderer):
                            semantics=semantics,
                            trace=trace, **kwargs)
         start_rule = ctx._find_rule(start) if start else self.rules[0]
-        with ctx._choice_context():
+        with ctx._choice():
             return start_rule.parse(ctx)
 
     def codegen(self):
