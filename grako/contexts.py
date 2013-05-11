@@ -305,15 +305,12 @@ class ParseContext(object):
             self.last_node = None
 
     def _repeater(self, f):
-        result = []
         while True:
             self._push_cut()
             try:
                 p = self._pos
                 with self._try():
-                    value = f()
-                if value is not None:
-                    result.append(value)
+                    f()
                 if self._pos == p:
                     self._error('empty closure')
             except FailedCut:
@@ -321,7 +318,7 @@ class ParseContext(object):
             except FailedParse as e:
                 if self._is_cut_set():
                     raise FailedCut(e)
-                return result
+                break
             finally:
                 self._pop_cut()
 
