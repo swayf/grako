@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='grako',
-    version='1.4.0',
+    version='2.0.0-rc.1',
     author='Juancarlo Añez',
     author_email='apalala@gmail.com',
     packages=['grako', 'grako.model', 'grako.test'],

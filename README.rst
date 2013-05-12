@@ -493,10 +493,10 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 Change History
 ==============
 
-- **tip**
-    * *Incompatible change!* No longer assume that parsers implement the semantics, so underscores were dropped from the names of methods implementing grammar rules.
+- **2.0.0-rc.1**
+    * *Incompatible change!* No longer assume that parsers implement the semantics (so underscores were dropped from the names of methods implementing grammar rules).
     * A ``last_node`` protocol allowed the removal of all mentions of variable ``_e`` from generated parsers.
-    * Seriously refactored *closures*. There are no anonymous blocks in Python!
+    * Refactored *closures* to be more pythonic. There are **no** anonymous blocks in Python_!
     * Create a basic diagram of a grammar if pygraphviz_ is available.  Added the ``--draw`` option to the command-line tool.
     * Fixes to the *antlr2grako* example to let it convert over 6000 lines of an ANTLR_ gramar to **Grako**.
     * Improved rendering of grammars by grammar models.

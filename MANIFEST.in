@@ -1,3 +1,6 @@
+global exclude **/*.pyc
+global exclude **/*.pyo
+global exclude **/*.orig
 include *.txt
 include *.rst
 includee Makefile
@@ -8,7 +11,6 @@ recursive-exclude examples *.pyc
 recursive-exclude examples *.pyo
 recursive-exclude examples genparser.py
 recursive-exclude examples parser_base.py
-recursive-exclude examples/antlr antlr_parser.py
-global exclude *.pyc
-global exclude *.pyo
-global exclude *.orig
+recursive-exclude examples/antlr2grako antlr_parser.py
+recursive-exclude examples/antlr2grako python.ebnf
+recursive-exclude examples/antlr2grako *.orig
