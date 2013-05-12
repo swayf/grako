@@ -31,25 +31,6 @@ Table of Contents
 .. contents:: \
 
 
-Rationale
-=========
-
-**Grako** was created to address recurring problems encountered over decades of working with parser generation tools:
-
-* To deal with programming languages in which important statement words (can't call them keywords) may be used as identifiers in programs, the parser must be able to lead the lexer. The parser must also lead the lexer to parse languages in which the meaning of input symbols may change with context, like Ruby_.
-
-* When ambiguity is the norm in the parsed language (as is the case in several legacy_ ones), an LL or LR grammar becomes contaminated with myriads of lookaheads. PEG_ parsers address ambiguity from the onset. Memoization, and relying on the exception-handling system makes backtracking very efficient.
-
-* Semantic actions, like `Abstract Syntax Tree`_ (AST_)  transformation, *do not*  belong in the grammar. Semantic actions in the grammar create yet another programming language to deal with when doing parsing and translation: the source language, the grammar language, the semantics language, the generated parser's language, and translation's target language. Most grammar parsers do not check that the embedded semantic actions have correct syntax, so errors get reported at awkward moments, and against the generated code, not against the source.
-
-* Pre-processing (like dealing with includes, fixed column formats, or Python_'s structure through indentation) belong in well-designed program code, and not in the grammar.
-
-* It is easy to recruit help with knowledge about a mainstream programming language (Python_ in this case); it is not so for grammar description languages. As a grammar language becomes more complex, it becomes increasingly difficult to find who can maintain a parser. **Grako** grammars are in the spirit of a *Translators and Interpreters 101* course (if something is hard to explain to an university student, it's probably too complicated).
-
-* Generated parsers should be humanly-readable and debuggable. Looking at the generated source code is sometimes the only way to find problems in a grammar, the semantic actions, or in the parser generator itself. It's inconvenient to trust generated code that you cannot understand.
-
-* Python_ is a great language for working in language parsing and translation.
-
 .. _`Abstract Syntax Tree`: http://en.wikipedia.org/wiki/Abstract_syntax_tree
 .. _AST: http://en.wikipedia.org/wiki/Abstract_syntax_tree
 .. _ASTs: http://en.wikipedia.org/wiki/Abstract_syntax_tree
