@@ -357,7 +357,7 @@ class Choice(_Model):
                 '''
 
 
-class Repeat(_Decorator):
+class Closure(_Decorator):
     def parse(self, ctx):
         @ctx._closure
         def closure():
@@ -386,7 +386,7 @@ class Repeat(_Decorator):
     def render(self, **fields):
         if {()} in self.exp.firstset:
             raise GrammarError('may repeat empty sequence')
-        return super(Repeat, self).render(**fields)
+        return super(Closure, self).render(**fields)
 
     template = '''
                 @self._closure
@@ -403,9 +403,9 @@ class Repeat(_Decorator):
             '''
 
 
-class RepeatPlus(Repeat):
+class PositiveClosure(Closure):
     def parse(self, ctx):
-        @ctx._closure_plus
+        @ctx._positive_closure
         def closure():
             return self.exp.parse(ctx)
         return closure()
@@ -418,13 +418,13 @@ class RepeatPlus(Repeat):
         return result
 
     def __str__(self):
-        return super(RepeatPlus, self).__str__() + '+'
+        return super(PositiveClosure, self).__str__() + '+'
 
     def render_fields(self, fields):
         fields.update(n=self.counter())
 
     template = '''
-                @self._closure_plus
+                @self._positive_closure
                 def closure{n}():
                 {exp:1::}
                     return

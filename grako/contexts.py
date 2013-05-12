@@ -335,7 +335,7 @@ class ParseContext(object):
         return wrapper
 
     #decorator
-    def _closure_plus(self, f):
+    def _positive_closure(self, f):
         @wraps(f)
         def wrapper(*args, **kwargs):
             self._push_cst()
@@ -371,4 +371,3 @@ class ParseContext(object):
             self.last_node = cst
         finally:
             self._pop_cst()
-            raise StopIteration()

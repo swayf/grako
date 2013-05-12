@@ -230,11 +230,11 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def sequence(self):
-        @self._closure_plus
-        def callelm():
-            self.element()
-            self.ast.add_list('sequence', self.last_node)
-        callelm()
+        with self._closureng():
+            while True:
+                with self._try():
+                    self.element()
+                    self.ast.add_list('sequence', self.last_node)
 
     @rule_def
     def choice(self):
@@ -278,7 +278,7 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def grammar(self):
-        @self._closure_plus
+        @self._positive_closure
         def rules():
             self.rule()
             self.ast['rules'] = self.last_node
@@ -359,8 +359,8 @@ class GrakoSemantics(object):
 
     def repeat(self, ast):
         if ast.plus:
-            return grammars.RepeatPlus(ast.repeat)
-        return grammars.Repeat(ast.repeat)
+            return grammars.PositiveClosure(ast.repeat)
+        return grammars.Closure(ast.repeat)
 
     def special(self, ast):
         return grammars.Special(ast.special)

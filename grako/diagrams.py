@@ -176,7 +176,7 @@ class GraphvizVisitor(GrammarVisitor):
         self.zedge(e, ne)
         return (ni, ne)
 
-    def visit_repeat(self, r):
+    def visit_closure(self, r):
         self.push_graph(rankdir='TB')
         try:
             i, e = self._visit_decorator(r)
@@ -187,7 +187,7 @@ class GraphvizVisitor(GrammarVisitor):
         finally:
             self.pop_graph()
 
-    def visit_repeatplus(self, r):
+    def visit_positiveclosure(self, r):
         i, e = self._visit_decorator(r)
         if i == e:
             self.redge(e, i)
@@ -213,8 +213,8 @@ class GraphvizVisitor(GrammarVisitor):
         i, _ = vseq[0]
         _, e = vseq[-1]
         if i != e:
-            bunch = zip([a for _, a in vseq[:-1]],
-                        [b for b, _ in vseq[1:]])
+            bunch = zip([a for _x, a in vseq[:-1]],
+                        [b for b, _y in vseq[1:]])
             for n, n1 in bunch:
                 self.edge(n, n1)
         return (i, e)
