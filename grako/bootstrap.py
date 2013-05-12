@@ -115,11 +115,11 @@ class GrakoParserBase(Parser):
             self._token('+', 'symbol')
 
     @rule_def
-    def repeat(self):
+    def closure(self):
         self._token('{')
         self._cut()
         self.expre()
-        self.ast['repeat'] = self.last_node
+        self.ast['exp'] = self.last_node
         self._token('}')
         if not self._try_token('*'):
             try:
@@ -181,7 +181,7 @@ class GrakoParserBase(Parser):
                 self.subexp()
                 self._cut()
             with self._option():
-                self.repeat()
+                self.closure()
                 self._cut()
             with self._option():
                 self.optional()
@@ -230,11 +230,11 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def sequence(self):
-        with self._closureng():
-            while True:
-                with self._try():
-                    self.element()
-                    self.ast.add_list('sequence', self.last_node)
+        @self._positive_closure
+        def seq():
+            self.element()
+            self.ast.add_list('sequence', self.last_node)
+        seq()
 
     @rule_def
     def choice(self):
@@ -357,10 +357,10 @@ class GrakoSemantics(object):
     def plus(self, ast):
         return ast
 
-    def repeat(self, ast):
+    def closure(self, ast):
         if ast.plus:
-            return grammars.PositiveClosure(ast.repeat)
-        return grammars.Closure(ast.repeat)
+            return grammars.PositiveClosure(ast.exp)
+        return grammars.Closure(ast.exp)
 
     def special(self, ast):
         return grammars.Special(ast.special)
