@@ -319,55 +319,26 @@ class ParseContext(object):
             finally:
                 self._pop_cut()
 
-    #decorator
-    def _closure(self, f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            self._push_cst()
-            try:
-                self._repeater(f)
-                cst = to_list(self.cst)
-            finally:
-                self._pop_cst()
-            self._add_cst_node(cst)
-            self.last_node = cst
-            return cst
-        return wrapper
-
-    #decorator
-    def _positive_closure(self, f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            self._push_cst()
-            try:
-                with self._try():
-                    f()
-                self._repeater(f)
-                cst = to_list(self.cst)
-            finally:
-                self._pop_cst()
-            self._add_cst_node(cst)
-            self.last_node = cst
-            return cst
-        return wrapper
-
-    @contextmanager
-    def _closureng(self):
+    def _closure(self, block):
         self._push_cst()
         try:
-            p = self._pos
-            try:
-                yield
-            except OptionSucceeded:
-                pass
-            except FailedCut:
-                raise
-            except FailedParse:
-                pass
-            if self._pos == p:
-                self._error('empty closure')
+            self._repeater(block)
             cst = to_list(self.cst)
-            self._add_cst_node(cst)
-            self.last_node = cst
         finally:
             self._pop_cst()
+        self._add_cst_node(cst)
+        self.last_node = cst
+        return cst
+
+    def _positive_closure(self, block):
+        self._push_cst()
+        try:
+            with self._try():
+                block()
+            self._repeater(block)
+            cst = to_list(self.cst)
+        finally:
+            self._pop_cst()
+        self._add_cst_node(cst)
+        self.last_node = cst
+        return cst

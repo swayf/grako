@@ -228,24 +228,23 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def sequence(self):
-        @self._positive_closure
-        def seq():
+        def block():
             self.element()
             self.ast.add_list('sequence', self.last_node)
-        seq()
+
+        self._positive_closure(block)
 
     @rule_def
     def choice(self):
-        @self._closure
-        def options():
+        self.sequence()
+        self.ast.add_list('options', self.last_node)
+
+        def block():
             self._token('|')
             self._cut()
             self.sequence()
             self.ast.add_list('options', self.last_node)
-
-        self.sequence()
-        self.ast.add_list('options', self.last_node)
-        options()
+        self._closure(block)
 
     @rule_def
     def expre(self):
@@ -253,14 +252,6 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def rule(self):
-        # FIXME: This doesn't work, and it's usefullness is doubtfull.
-        # p = self._pos
-        # try:
-        #     ast_name = self.word()
-        #     self._token(':')
-        #     self.ast.add('ast_name', str(ast_name))
-        # except FailedParse:
-        #     self._goto(p)
         self.word()
         self.ast['name'] = self.last_node
         self._cut()
@@ -277,11 +268,11 @@ class GrakoParserBase(Parser):
 
     @rule_def
     def grammar(self):
-        @self._positive_closure
-        def rules():
+        def block():
             self.rule()
             self.ast['rules'] = self.last_node
-        rules()
+        self._positive_closure(block)
+
         self._next_token()
         self._check_eof()
 

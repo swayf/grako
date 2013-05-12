@@ -359,10 +359,7 @@ class Choice(_Model):
 
 class Closure(_Decorator):
     def parse(self, ctx):
-        @ctx._closure
-        def closure():
-            return self.exp.parse(ctx)
-        return closure()
+        return ctx._closure(lambda: self.exp.parse(ctx))
 
     def _first(self, k, F):
         efirst = self.exp._first(k, F)
@@ -389,11 +386,10 @@ class Closure(_Decorator):
         return super(Closure, self).render(**fields)
 
     template = '''
-                @self._closure
-                def closure{n}():
+
+                def block{n}():
                 {exp:1::}
-                    return
-                closure{n}()\
+                self._closure(block{n})\
                 '''
 
     str_template = '''
@@ -405,10 +401,7 @@ class Closure(_Decorator):
 
 class PositiveClosure(Closure):
     def parse(self, ctx):
-        @ctx._positive_closure
-        def closure():
-            return self.exp.parse(ctx)
-        return closure()
+        return ctx._positive_closure(lambda: self.exp.parse(ctx))
 
     def _first(self, k, F):
         efirst = self.exp._first(k, F)
@@ -424,11 +417,9 @@ class PositiveClosure(Closure):
         fields.update(n=self.counter())
 
     template = '''
-                @self._positive_closure
-                def closure{n}():
+                def block{n}():
                 {exp:1::}
-                    return
-                closure{n}()\
+                self._positive_closure(block{n})
                 '''
 
 
