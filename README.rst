@@ -65,18 +65,16 @@ The Generated Parsers
 
 A **Grako** generated parser consists of the following classes:
 
-* A *parser* class derived from ``Parser`` which implements the parser using one method for each grammar rule. The per-rule methods are named enclosing the rule's name with underscores to emphasize that they should not be tampered with (called, overridden, etc.).::
+* A *parser* class derived from ``Parser`` which implements the parser using one method for each grammar rule::
 
-    def _myrulename_(self):
-
-* A *semantics check parser* class that inherits from the base parser and verifies at runtime that there's a semantic method (see below) for every rule invoked. This class is useful as a parent class when changes are being made to the grammar, as it will throw an exception if there are missing semantic methods.
+    def myrulename(self):
 
 * A *semantics delegate class* with one semantic method per grammar rule. Each method receives as its single parameter the `Abstract Syntax Tree`_ (AST_) built from the rule invocation::
 
     def myrulename(self, ast):
         return ast
 
-The methods in the delegate class return the same AST_ received as parameter, but derived classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
+The methods in the delegate class return the same AST_ received as parameter, but custom semantic classes can override the methods to have them return anything (for example, a `Semantic Graph`_). The base class can be used as a template for the final parser.
 
 
 .. _`Semantic Graph`: http://en.wikipedia.org/wiki/Abstract_semantic_graph
