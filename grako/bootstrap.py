@@ -275,6 +275,7 @@ class GrakoParserBase(Parser):
                 self._token('.')
             except FailedParse:
                 self._error('expecting one of: ; .')
+        self._cut()
 
     @rule_def
     def grammar(self):
