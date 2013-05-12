@@ -53,10 +53,10 @@ class ANTLRSemantics(object):
         return model.Optional(ast)
 
     def closure(self, ast):
-        return model.Repeat(ast)
+        return model.Closure(ast)
 
     def positive_closure(self, ast):
-        return model.RepeatPlus(ast)
+        return model.PositiveClosure(ast)
 
     def negative(self, ast):
         neg = model.LookaheadNot(ast)

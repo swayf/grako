@@ -15,6 +15,10 @@ class GrakoException(Exception):
     pass
 
 
+class OptionSucceeded(GrakoException):
+    pass
+
+
 class GrammarError(GrakoException):
     pass
 

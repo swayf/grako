@@ -304,10 +304,10 @@ class Choice(_Model):
             assert isinstance(o, _Model), str(o)
 
     def parse(self, ctx):
-        with ctx._choice_context():
+        with ctx._choice():
             for o in self.options:
                 with ctx._option():
-                    return o.parse(ctx)
+                    o.parse(ctx)
             firstset = ' '.join(str(urepr(f[0])) for f in self.firstset if f)
             if firstset:
                 raise FailedParse(ctx.buf, 'one of {%s}' % firstset)
@@ -347,25 +347,19 @@ class Choice(_Model):
 
     option_template = '''\
                     with self._option():
-                    {option}
-                        return\
+                    {option}\
                     '''
 
     template = '''\
-                @self._choice
-                def choice{n}():
+                with self._choice():
                 {options}
-                    self._error({error})
-                choice{n}() \
+                    self._error({error})\
                 '''
 
 
-class Repeat(_Decorator):
+class Closure(_Decorator):
     def parse(self, ctx):
-        @ctx._closure
-        def closure():
-            return self.exp.parse(ctx)
-        return closure()
+        return ctx._closure(lambda: self.exp.parse(ctx))
 
     def _first(self, k, F):
         efirst = self.exp._first(k, F)
@@ -389,14 +383,13 @@ class Repeat(_Decorator):
     def render(self, **fields):
         if {()} in self.exp.firstset:
             raise GrammarError('may repeat empty sequence')
-        return super(Repeat, self).render(**fields)
+        return super(Closure, self).render(**fields)
 
     template = '''
-                @self._closure
-                def closure{n}():
+
+                def block{n}():
                 {exp:1::}
-                    return
-                closure{n}()\
+                self._closure(block{n})\
                 '''
 
     str_template = '''
@@ -406,12 +399,9 @@ class Repeat(_Decorator):
             '''
 
 
-class RepeatPlus(Repeat):
+class PositiveClosure(Closure):
     def parse(self, ctx):
-        @ctx._closure_plus
-        def closure():
-            return self.exp.parse(ctx)
-        return closure()
+        return ctx._positive_closure(lambda: self.exp.parse(ctx))
 
     def _first(self, k, F):
         efirst = self.exp._first(k, F)
@@ -421,17 +411,15 @@ class RepeatPlus(Repeat):
         return result
 
     def __str__(self):
-        return super(RepeatPlus, self).__str__() + '+'
+        return super(PositiveClosure, self).__str__() + '+'
 
     def render_fields(self, fields):
         fields.update(n=self.counter())
 
     template = '''
-                @self._closure_plus
-                def closure{n}():
+                def block{n}():
                 {exp:1::}
-                    return
-                closure{n}()\
+                self._positive_closure(block{n})
                 '''
 
 
@@ -723,7 +711,7 @@ class Grammar(Renderer):
                            semantics=semantics,
                            trace=trace, **kwargs)
         start_rule = ctx._find_rule(start) if start else self.rules[0]
-        with ctx._choice_context():
+        with ctx._choice():
             return start_rule.parse(ctx)
 
     def codegen(self):

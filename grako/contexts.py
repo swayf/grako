@@ -6,7 +6,11 @@ from contextlib import contextmanager
 from collections import namedtuple
 from .util import to_list
 from .ast import AST
-from .exceptions import FailedParse, FailedCut, FailedLookahead
+from .exceptions import (FailedParse,
+                         FailedCut,
+                         FailedLookahead,
+                         OptionSucceeded
+                         )
 
 
 __all__ = ['ParseInfo', 'ParseContext']
@@ -234,6 +238,7 @@ class ParseContext(object):
         try:
             with self._try():
                 yield None
+            raise OptionSucceeded()
         except FailedCut:
             raise
         except FailedParse as e:
@@ -243,26 +248,18 @@ class ParseContext(object):
             self._pop_cut()
 
     @contextmanager
-    def _choice_context(self):
+    def _choice(self):
         try:
             yield None
+        except OptionSucceeded:
+            pass
         except FailedCut as e:
             raise e.nested
-
-    #decorator
-    def _choice(self, f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            with self._choice_context():
-                self.last_node = None
-                f()
-                return self.last_node
-        return wrapper
 
     @contextmanager
     def _optional(self):
         self.last_node = None
-        with self._choice_context():
+        with self._choice():
             with self._option():
                 yield None
 
@@ -322,34 +319,26 @@ class ParseContext(object):
             finally:
                 self._pop_cut()
 
-    #decorator
-    def _closure(self, f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            self._push_cst()
-            try:
-                self._repeater(f)
-                cst = to_list(self.cst)
-            finally:
-                self._pop_cst()
-            self._add_cst_node(cst)
-            self.last_node = cst
-            return cst
-        return wrapper
+    def _closure(self, block):
+        self._push_cst()
+        try:
+            self._repeater(block)
+            cst = to_list(self.cst)
+        finally:
+            self._pop_cst()
+        self._add_cst_node(cst)
+        self.last_node = cst
+        return cst
 
-    #decorator
-    def _closure_plus(self, f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            self._push_cst()
-            try:
-                with self._try():
-                    f()
-                self._repeater(f)
-                cst = to_list(self.cst)
-            finally:
-                self._pop_cst()
-            self._add_cst_node(cst)
-            self.last_node = cst
-            return cst
-        return wrapper
+    def _positive_closure(self, block):
+        self._push_cst()
+        try:
+            with self._try():
+                block()
+            self._repeater(block)
+            cst = to_list(self.cst)
+        finally:
+            self._pop_cst()
+        self._add_cst_node(cst)
+        self.last_node = cst
+        return cst

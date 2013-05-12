@@ -9,9 +9,9 @@ import os
 import json
 import pickle
 from grako.rendering import NodeVisitor
+from grako.semantics import GrakoSemantics
 from grako.bootstrap import (GrakoParser,
                              GrakoGrammarGenerator,
-                             GrakoSemantics,
                              COMMENTS_RE
                              )
 
