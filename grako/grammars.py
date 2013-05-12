@@ -347,7 +347,7 @@ class Choice(_Model):
 
     option_template = '''\
                     with self._option():
-                    {option}
+                    {option}\
                     '''
 
     template = '''\
