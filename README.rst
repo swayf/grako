@@ -466,8 +466,8 @@ The following must be mentioned as contributors of thoughts, ideas, code, *and f
 .. _`CSAIL at MIT`:  http://www.csail.mit.edu/
 .. _`PEG and Packrat parsing mailing list`: https://lists.csail.mit.edu/mailman/listinfo/peg
 
-Change History
-==============
+Changes
+=======
 
 - **2.0.0-rc.1**
     * *Incompatible change!* No longer assume that parsers implement the semantics (so underscores were dropped from the names of methods implementing grammar rules).
@@ -477,54 +477,9 @@ Change History
     * Fixes to the *antlr2grako* example to let it convert over 6000 lines of an ANTLR_ gramar to **Grako**.
     * Improved rendering of grammars by grammar models.
 
+For previous changes, consult Bitbucket, or the PyPi_
+
 .. _pygraphviz: https://pypi.python.org/pypi/pygraphviz/
-
-- **1.4.0**
-    * *BUG!* Sometimes the AST_ for a closure ({}) was not a list.
-    * Semantic actions can now be implemented by a delegate.
-    * Reset synthetic method count and use decorators to increase readability of generated parsers.
-    * The **Grako** EBNF_ grammar and the bootstrap parser now align, so the grammar can be used to bootstrap **Grako**.
-    * The bootstrap parser was refactored to use semantic delegates.
-    * Proved that grammar models can be pickled, unpickled, and reused.
-    * Added the *antlr* example with an ANTLR_-to-**Grako** grammar translator.
-    * Changed the licensing to simplified BSD_.
-
-- **1.3.0**
-    * *Important memory optimization!* Remove the memoization information that a *cut* makes obsolete (thanks to Kota Mizushima).
-    * Make sure that *cut* actually applies to the nearest fork.
-    * Finish aligning model parsing with generated code parsing.
-    * Report all the rules missing in a grammar before aborting.
-    * Align the sample *etc/grako.ebnf* grammar to the language parsed by the bootstrap parser.
-    * Ensure compatibility with Python_ 2.7.4 and 3.3.1.
-    * Update credits.
-
-- **1.2.1**
-    * Align bootstrap parser with generated parser framework.
-    * Add *cuts* to bootstrap parser so errors are reported closer to their origin.
-    * *(minor) BUG!* ``FailedCut`` exceptions must translate to their nested exeption so the reported line and column make sense.
-    * Prettify the sample **Grako** grammar.
-    * Remove or comment-out code for tagged/named rule names (they don't work, and their usefulness is doubtful).
-    * Spell-check this document with `Vim spell`_.
-    * Lint using flake8_.
-
-- **1.2.0**
-    * Lazy rendering of template fields.
-    * Optimization of *rendering engine*'s ``indent()`` and ``trim()``.
-    * Rendering of iterables using a specified separator, indent, and format.
-    * Basic documentation of the *rendering engine*.
-    * Added a cache of compiled regexps to ``Buffer``.
-
-- **1.1.0**
-    * *BUG!* Need to preserve state when closure iterations match partially.
-    * Improved performance by also memoizing exception results and advancement over whitespace and comments.
-    * Work with Unicode while rendering.
-    * Improved consistency between the way generated parsers and models parse.
-    * Added a table of contents to this *README*.
-    * Document ``parseinfo`` and default it to *False*.
-    * Mention the use of *context managers*.
-
-- **1.0.0**
-    First feature-complete release.
-
 .. _`Vim spell`:  http://vimdoc.sourceforge.net/htmldoc/spell.html
 .. _flake8: https://pypi.python.org/pypi/flake8
+.. _PyPi: https://pypi.python.org/pypi/grako
