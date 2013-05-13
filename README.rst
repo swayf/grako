@@ -355,17 +355,6 @@ The default multiplier for ``ind`` is ``4``, but that can be overridden using ``
 **Note**
     Using a newline (`\\n`) as separator will interfere with left trimming and indentation of templates. To use newline as separator, specify it as `\\\\n`, and the renderer will understand the intention.
 
-The (lack of) Documentation
-===========================
-**Grako** is lacking in comments and doc-comments for these reasons:
-
-    1. Inline documentation easily goes out of phase with what the code actually does. It is an equivalent and more productive effort to provide out-of-line documentation.
-
-    2. Minimal and understandable code with meaningful identifiers makes comments redundant or unnecessary.
-
-Still, comments are provided for *non-obvious intentions* in the code, and each **Grako** module carries a doc-comment describing its purpose.
-
-
 Examples
 ========
 
