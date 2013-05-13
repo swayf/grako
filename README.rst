@@ -303,7 +303,7 @@ Semantic Actions
 
 There are no constructs for semantic actions in **Grako** grammars. This is on purpose, as we believe that semantic actions obscure the declarative nature of grammars and provide for poor modularization from the parser execution perspective.
 
-The overridable, per-rule methods in the generated abstract parser provide enough opportunity to do semantics as a rule post-processing operation, like verifications (like for inadequate use of keywords), or AST_ transformation.
+The per-rule methods in classes implementing the semantics provide enough opportunity to do rule post-processing operations, like verifications (for inadequate use of keywords as identifiers), or AST_ transformation.
 
 For finer-grained control it is enough to declare more rules, as the impact on the parsing times will be minimal.
 
@@ -316,7 +316,6 @@ If pre-processing is required at some point, it is enough to place invocations o
 The abstract parser will honor as a semantic action a method declared as::
 
     def preproc(self, ast):
-        return ast
 
 
 Templates and Translation
