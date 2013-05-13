@@ -790,5 +790,4 @@ class Grammar(Renderer):
                         print(program, ' <filename> <startrule>')
                         print(program, ' -l') # list rules
                         print(program, ' -h')
-
                 '''
