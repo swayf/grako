@@ -41,6 +41,14 @@ def urepr(obj):
     return repr(obj).lstrip('u')
 
 
+def decode(s):
+    return s.decode('string-escape')
+
+
+def udecode(s):
+    return urepr(decode(s))
+
+
 class ModelContext(ParseContext):
     def __init__(self, rules, buffer=None, semantics=None, trace=False, **kwargs):
         super(ModelContext, self).__init__(buffer=buffer,
@@ -200,7 +208,8 @@ class Token(_Model):
         return "'%s'" % self.token
 
     def render_fields(self, fields):
-        fields.update(token=urepr(self.token))
+        #fields.update(token=urepr(self.token))
+        fields.update(token=udecode(self.token))
 
     template = "self._token({token})"
 
@@ -329,7 +338,7 @@ class Choice(_Model):
         template = trim(self.option_template)
         options = [template.format(option=indent(render(o))) for o in self.options]
         options = '\n'.join(o for o in options)
-        firstset = ' '.join(str(urepr(f[0])) for f in self.firstset if f)
+        firstset = ' '.join(decode(f[0]) for f in self.firstset if f)
         if firstset:
             error = 'expecting one of: ' + firstset
         else:

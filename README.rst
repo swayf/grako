@@ -459,6 +459,7 @@ Changes
 
 - **2.0.0-rc.1**
     * *Incompatible change!* No longer assume that parsers implement the semantics (so underscores were dropped from the names of methods implementing grammar rules).
+    * *BUG!* Tokens didn't recognize Python_ escape sequences.
     * A ``last_node`` protocol allowed the removal of all mentions of variable ``_e`` from generated parsers.
     * Refactored *closures* to be more pythonic. There are **no** anonymous blocks in Python_!
     * Create a basic diagram of a grammar if pygraphviz_ is available.  Added the ``--draw`` option to the command-line tool.
