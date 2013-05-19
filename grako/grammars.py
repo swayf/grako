@@ -42,10 +42,10 @@ def urepr(obj):
 
 
 def decode(s):
-    return s.decode('string-escape')
+    return s.encode().decode('unicode-escape')
 
 
-def udecode(s):
+def udrepr(s):
     return urepr(decode(s))
 
 
@@ -209,7 +209,7 @@ class Token(_Model):
 
     def render_fields(self, fields):
         #fields.update(token=urepr(self.token))
-        fields.update(token=udecode(self.token))
+        fields.update(token=udrepr(self.token))
 
     template = "self._token({token})"
 
