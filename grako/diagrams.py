@@ -2,13 +2,13 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 import itertools
 import pygraphviz as pgv
-from .visitors import GrammarVisitor
+from .rendering import NodeVisitor
 
 
 __all__ = ['draw']
 
 
-class GraphvizVisitor(GrammarVisitor):
+class GraphvizVisitor(NodeVisitor):
     def __init__(self):
         super(GraphvizVisitor, self).__init__()
         self.top_graph = pgv.AGraph(directed=True,

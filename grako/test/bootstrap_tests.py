@@ -130,8 +130,9 @@ def main():
         from grako.diagrams import draw
     except:
         print('PyGraphViz not found!')
+        raise
     else:
-        draw('tmp/13.jpg', g11)
+        draw('tmp/13.png', g11)
 
 
 if __name__ == '__main__':
