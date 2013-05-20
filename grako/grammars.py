@@ -234,7 +234,8 @@ class Pattern(_Model):
         return '?/%s/?' % self.pattern
 
     def render_fields(self, fields):
-        fields.update(pattern=urepr(self.pattern))
+        raw_repr = 'r' + repr(self.pattern).replace("\\\\", '\\')
+        fields.update(pattern=raw_repr)
 
     template = 'self._pattern({pattern})'
 
