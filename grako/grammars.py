@@ -168,8 +168,7 @@ class Group(_Decorator):
 
     template = '''\
                 with self._group():
-                {exp:1::}
-                    self.cst
+                {exp:1::}\
                 '''
 
     str_template = '''
