@@ -460,17 +460,18 @@ Changes
 - **2.0.0**
     * **Grako** no longer assumes that parsers implement the semantics. A separate semantics implementation must be provided. This allows for less poluted namespaces and smaller classes.
     * A ``last_node`` protocol allowed the removal of all mentions of variable ``_e`` from generated parsers, which are thus more readable.
-    * Refactored *closures* to be more pythonic. There are **no** anonymous blocks in Python_!
+    * Refactored *closures* to be more pythonic (there are **no** anonymous blocks in Python_!).
     * Fixes to the *antlr2grako* example to let it convert over 6000 lines of an ANTLR_ gramar to **Grako**.
     * Improved rendering of grammars by grammar models.
     * Now *tokens* accept Python_ escape sequences.
     * Added a simple `Visitor Pattern`_ for ``Renderer`` nodes. Used it to implement diagramming.
     * Create a basic diagram of a grammar if pygraphviz_ is available.  Added the ``--draw`` option to the command-line tool.
 
-For the complete history, consult Bitbucket or PyPi_
+For the complete history, consult Bitbucket_ or PyPi_
 
 .. _`Visitor Pattern`: http://en.wikipedia.org/wiki/Visitor_pattern
 .. _pygraphviz: https://pypi.python.org/pypi/pygraphviz/
 .. _`Vim spell`:  http://vimdoc.sourceforge.net/htmldoc/spell.html
 .. _flake8: https://pypi.python.org/pypi/flake8
+.. _Bitbucket: https://bitbucket.org/apalala/grako
 .. _PyPi: https://pypi.python.org/pypi/grako
