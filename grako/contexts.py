@@ -185,7 +185,7 @@ class ParseContext(object):
         if self.semantics is None:
             return None
         result = getattr(self.semantics, name, None)
-        if result is None or not isinstance(result, type(self._find_semantic_rule)):
+        if result is None or not callable(result):
             return None
         return result
 
